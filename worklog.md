@@ -605,3 +605,19 @@ Work Log:
 Stage Summary:
 - 0 new bugs, 1 unreproduced observation. 9/9 pass. No page errors. L7-A COMPLETE — Loop 7 clean so far.
 - Evidence: checks/deep-audit-loops/loop-7/L7A-editor-result.json
+
+---
+Task ID: 7-b
+Agent: main
+Task: Loop 7 batch L7-B — review surfaces final uncovered paths (session l7a)
+
+Work Log:
+- Footnote path verified fresh: sup.np3-fnref[data-fn] marker + footnote body block.
+- F42 Reject all (last uncovered review-edits path): both pending blocks reverted, pendingLeft=0, tracking preserved.
+- F43 Markdown-source compare: np3 base64 block annotations; appended line -> '1 changed groups · 12 aligned lines'.
+- F44 find scope: 'Entire document' / 'Selection' both present.
+- Version compare dialog renders snapshot-vs-current diff cleanly (opened via ambiguous text click; not a bug).
+
+Stage Summary:
+- 0 new bugs. 6/6 pass. No page errors. L7-B COMPLETE — Loop 7 clean so far (L7-A + L7-B).
+- Evidence: checks/deep-audit-loops/loop-7/L7B-review-result.json

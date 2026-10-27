@@ -1,0 +1,23 @@
+{
+  "taskId": "L7-B",
+  "loop": 7,
+  "date": "2026-10-28",
+  "executor": "main agent (session l7a)",
+  "family": "Review surfaces clean sweep — final uncovered paths (footnote, Reject all, markdown compare, find scope, version compare)",
+  "predicates": { "pass": 6, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "Footnote: Insert footnote at caret -> sup.np3-fnref[data-fn=1] marker in paragraph + footnote body block ('[^1]:' visible in markdown dump) — first footnote-path verification since L1H carried",
+    "F42 DELTA: Reject all (last uncovered review-edits path; per-block Accept/Reject + Accept-all verified in earlier loops) -> both pending tracked blocks reverted in one action, pendingLeft=0, tracking state preserved",
+    "F43 DELTA: Markdown-source compare mode -> left side shows np3 block annotations (base64-encoded block metadata in HTML comments); appended EXTRA LINE MARKER -> '1 changed groups · 12 aligned lines' (plain-text compare paths verified L5-B/L6-B; markdown pipeline now covered)",
+    "F44 DELTA: find scope combobox offers 'Entire document' / 'Selection' — both documented scopes present",
+    "Version compare dialog (opened incidentally via ambiguous text click): renders snapshot-vs-current diff cleanly ('+0 inserted −0 deleted', 'All 1 document tabs', 'Text is identical in all tabs') — no errors in stacked-dialog state",
+    "No page errors"
+  ],
+  "harnessNotes": [
+    "Text-matching a 'Compare' button is AMBIGUOUS when two dialogs stack (Version compare + Compare side by side both expose Compare controls) — first match hit the Version dialog; scoped clicks (dialog.querySelector) or refs required.",
+    "Version-compare Close was covered by select#diffSelect1 in the stacked state (abnormal, self-inflicted); Escape resolved cleanly — not reproducible in normal flow, not a bug.",
+    "Checkbox a11y names come from <label> wrappers, not aria-label — DOM aria-label reads return null while a11y tree exposes proper names."
+  ],
+  "noPageErrors": true
+}
