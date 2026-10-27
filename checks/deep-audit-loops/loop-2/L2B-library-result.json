@@ -1,0 +1,64 @@
+{
+  "taskId": "L2-B",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2b, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F01 create/open/rename/duplicate/delete, F02 nested tabs, F03 folders/tags/star, F04 collections, F65 notebook search",
+  "predicates": { "pass": 24, "fail": 1, "candidates": 1, "rediscoveries": ["B289"] },
+  "confirmedNewBugs": [
+    {
+      "title": "Pending editor content typed immediately before a collection switch is flushed into the wrong file: switching to an (empty) collection auto-creates/activates a new 'Untitled' file and the pre-switch typing lands in that file instead of the file it was typed in",
+      "feature": "F04 collection switching x F07 flush window; class-adjacent to B221 (async boundary crossing) but new trigger surface (pending text flush x collection switch x file creation)",
+      "repro": [
+        "1. Default 'My collection' contains file 'Beta' (open, editor focused). Create a second, EMPTY collection 'Projects' (Collections... > name > Create).",
+        "2. In Beta, type real keys: 'Pending'. Within the autosave flush window (~<2-3s), click the 'Projects' collection tab.",
+        "3. Observed: app activates a NEW 'Untitled' file in Projects; __np3.doc().markdown === 'Pending\\n', richHtml '<p>Pending</p>' — the typed content is now in the NEW file.",
+        "4. Switch back to 'My collection': Beta.markdown === '' (content LOST from Beta), richHtml '<p><br></p><p><br></p>'."
+      ],
+      "expected": "Pending edits belong to the (file, tab) they were typed in; the collection switch must commit them to Beta BEFORE activating any other file.",
+      "observed": "Flush writes to the post-switch active file; user's text silently migrates to a different file in a different collection; original file left empty.",
+      "controls": [
+        "Timing control: type 'AfterSave' in Beta, WAIT 3s (autosave commits; Beta.markdown==='AfterSave\\n'), then switch to Projects and back — Beta keeps 'AfterSave', Untitled keeps only 'Pending'. Proves the leak is exactly the unflushed pending window.",
+        "Plain collection switch without typing: no anomaly."
+      ],
+      "sourceMechanism": "Collection switch handler flush path (Store.activate/flushCommit chain, app-js extract ~L1250s area; final overrides govern) — flush of editor content executes after the switch already re-pointed the active file / created the empty-collection placeholder; content written to the new doc instead of the source doc. (Mechanism statement to be pinned to exact symbol during adjudication.)",
+      "classification": "CONFIRMED",
+      "impact": "Silent data misattribution/data loss from the user's perspective: text disappears from the document being edited and appears in an unrelated new file in another collection. Real-world reachable by typing then quickly switching collections.",
+      "fixDirection": "Commit pending editor content to the CURRENT (file, tab) synchronously at the start of the collection-switch handler, before any activeFile/collection re-pointing or placeholder creation."
+    }
+  ],
+  "candidatesNotPromoted": [
+    {
+      "title": "Renaming a file to an existing file's name is allowed, producing two indistinguishable sidebar rows (no dedup, no warning); Duplicate uses 'X copy' implying name-uniqueness intent",
+      "why": "Contract uncertain: files are ID-addressed; duplicate display names may be tolerated by design. Recorded per brief rule 7."
+    }
+  ],
+  "rediscoveries": [
+    "B289: title-field rename leaves sidebar row aria-label stale (verified: visible 'Renamed Doc...', aria 'Untitled'). File-menu rename dialog path updates aria correctly — confirms B289's documented scope (title-field path only). NOT counted as new."
+  ],
+  "verifiedClean": [
+    "File-menu rename dialog: name updates doc + sidebar + aria (pass)",
+    "Empty rename rejected silently, dialog closes, name kept (pass)",
+    "Duplicate creates '<name> copy' and activates it (pass)",
+    "Add document tab; per-tab content isolation typed in Tab 2, switch away/back content intact (pass)",
+    "Nest under previous tab -> aria-level 2 (pass)",
+    "Delete nested tab via options menu with confirm dialog; remaining tab + content intact (pass)",
+    "New folder dialog creates folder 'Work' (pass)",
+    "Move to folder via dialog native select + Apply: library.folder set, sidebar reflects membership (pass)",
+    "Collections: create 'Projects', switch tabs, per-collection file lists (pass)",
+    "Notebook search: content match across collections with path + match count; result click navigates to the file (pass)",
+    "Search input '.*', '[', '\\\\' treated literally, no page errors (pass)",
+    "Tags/star: NO UI exists (data-model fields only) — carried from loop-1 adjudication as enhancement absence, not a bug (pass-by-source)"
+  ],
+  "harnessDisclosures": [
+    "One eval cleared editor.innerText before a typing sequence (own synthetic doc, L1G-style disclosure; state otherwise driven by real UI).",
+    "Native <select> interaction in Move-to-folder dialog requires keyboard (ArrowDown) in headless; mouse click on native option is a headless-Chromium limitation, not an app defect."
+  ],
+  "notCovered": [
+    "B281 deferred-rename 80ms race variants (timing-based, out of budget)",
+    "Sidebar drag-and-drop file reordering / drag between folders (mouse-move fidelity in headless)",
+    "Tag/star UI absence re-verification beyond source (no runtime surface exists)",
+    "Import-scoped collection switch (F15/F61 territory, L2-F)"
+  ]
+}

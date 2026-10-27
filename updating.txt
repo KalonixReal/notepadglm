@@ -1,29 +1,39 @@
-==========================================================
- NOTEPAD v9 DEEP-AUDIT BUG HUNT — LIVE STATUS
-==========================================================
-STATUS: STILL WORKING (environment hiccup being recovered)
-UPDATED: 2026-10-27 23:16 NZDT (Pacific/Auckland)
+╔══════════════════════════════════════════════════════════════╗
+║  NOTEPAD v9 BUG HUNT — LIVE STATUS                            ║
+║  (this file auto-refreshes every 15 minutes until done)      ║
+╚══════════════════════════════════════════════════════════════╝
+
+STATUS:   ✅ STILL WORKING — Loop 2 batch execution in progress
+Updated:  2026-10-28 02:45 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-- GitHub upload DONE: entire workspace pushed to KalonixReal/notepadglm
-  commit f0bc39b, author "GLM <GLM@users.noreply.github.com>" (forced update).
-- Starting dev server for Loop 2 -> hit OS-level "fork: Resource
-  temporarily unavailable" (container resource exhaustion).
-- Recovering: waiting for resource pressure to clear, then restarting
-  the app on :3000 and launching Loop 2 batches L2-A..L2-I.
+  Executing Loop 2 myself, batch by batch (subagent infra was unstable,
+  so the main agent runs every batch with a real browser session).
+  DONE: L2-A maps (1 new bug: unguarded mind-map edges — self-loops +
+  duplicates), L2-B library (1 new bug: pending edit flushed into the
+  WRONG file when switching collections), L2-C layout (phantom-paragraph
+  candidate REJECTED — not reproducible in 4 variants).
+  NEXT: L2-D images/tables, then L2-E..L2-I.
 
 BUG TRACKER:
-- Total confirmed bugs: 89 (highest id B297)
-- New this loop (loop 2 so far): 0
-- Open candidates: 2 (phantom-leading-paragraph-reload, symbol-absorbed-into-citation-link)
+  Bugs found (total confirmed):  91   (89 from Loop 1 + 2 new in Loop 2)
+  New in Loop 2 so far:          2    (mind-map edge guards; collection-
+                                       switch content misattribution)
+  Open candidates:               1    (phantom paragraph REJECTED this
+                                       loop; citation-link candidate still
+                                       open for L2-I)
 
 LOOP PROGRESS:
-- Clean loops: 0/2  (need 2 consecutive clean loops to stop)
-- Current loop: Loop 2 (full fresh sweep, 70 features x 4 stages)
-- Loop 2 progress: [##--------] ~5%  (env setup; batches pending launch)
-- Loop 1: COMPLETE - not clean (9 new confirmed B289-B297, 4 extensions)
+  Clean loops: 0 / 2   ← need 2 CONSECUTIVE clean loops to stop
+  Loop 1: 100% — NOT CLEAN (9 new bugs)
+  Loop 2:  33% — 3 of 9 batches done (A,B,C)
+          [█████████████.........................] 33%
+  Loop 3:   — (only runs if Loop 2 is clean)
 
-NEXT CHECKPOINT:
-- Next 15-min timer: server restart status + Loop 2 batch launches.
-- If environment stays blocked, status here will say so explicitly.
-==========================================================
+NEXT CHECKPOINT: L2-D images/tables → L2-E persistence → ... → loop-2
+  close → GitHub re-upload of the entire workspace.
+
+─ Background ─────────────────────────────────────────────────────
+  App under audit: Notepad v9 (single 15MB HTML Word-like editor) at
+  the root route. READ-ONLY audit: bugs documented, never fixed.
+  Stopping rule: two consecutive complete clean full-loop sweeps.

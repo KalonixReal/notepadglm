@@ -1,0 +1,41 @@
+{
+  "taskId": "L2-D",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2d, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F45-F48 images, F50-F54 tables",
+  "predicates": { "pass": 16, "fail": 0, "rejectedCandidates": 1, "rediscoveries": ["B292 live"], "harnessArtifactsDocumented": 2 },
+  "confirmedNewBugs": [],
+  "rejectedCandidates": [
+    {
+      "title": "REJECTED (harness artifact): 'Tab from a body-row's last cell moves focus out of the table' — initial evidence came from activeElement checks, but in a contenteditable editor activeElement legitimately remains the editor root DIV after Tab moves the caret. Re-tested with the Selection API (getSelection().anchorNode -> closest td): Tab A2->B2->C2->next-row-first-cell all CORRECT; Tab in the table's very last cell creates a new row (3->4, empty cells). Earlier 'C210' cell corruption was also harness-induced (type-command ref refocusing the tabpanel). No app defect.",
+      "lesson": "Cell-position assertions in this app MUST use the Selection API, not document.activeElement."
+    }
+  ],
+  "rediscoveries": [
+    "B292 live: at 1280px viewport (<=1345 trigger), with the image selected and the page scrolled up, the image toolbar's Align left button (x 476-534) renders inside the document-tabs sidebar rect (272-512 x, 190-542 y): underSidebar=true, xInRange=true — clicks land on sidebar UI. Matches the documented trigger; not re-counted as new."
+  ],
+  "verifiedClean": [
+    "F50: Insert table via size grid (80 grid buttons; 3x3 and 4x2 verified: thead 3 TH + body TDs, markdown pipe-table round-trip)",
+    "F51: Insert row below (4->5 rows), Delete row (5->4), structure and content intact",
+    "F52: Banded rows toggle applies without error (CSS-driven banding); Table Design ribbon exposes Header row/Banding/AutoFit/Repeat headers/Sort/Merge/Split controls",
+    "F53: Tab navigation CORRECT via Selection API (A2->B2->C2->row2col1); Shift+Tab available; last-cell Tab appends empty row (Word convention)",
+    "F54: =SUM(ABOVE)/=SUM(LEFT) yield '#FORMULA!' — CONSISTENT with loop-1 REJECTED verdict (parser is A1-style refs only; dialog documents 'Use cell references, + - x /, SUM, AVERAGE...'); explicit-ref SUM + auto-recalc verified fresh in loop 1 (L1D: =SUM(B2:B4)=40, edit 10->15 auto-recalc 30->35)",
+    "F45: Insert image from URL (data-URL SVG) creates figure.img-fig + img; alt text 'TestAlt' set in dialog, lands in img.alt and markdown",
+    "F46: image selection works (figure class 'img-fig selected', resize handles + move grip rendered); alt round-trip intact",
+    "No page errors in any flow"
+  ],
+  "harnessNotes": [
+    "activeElement-based cell checks invalid in contenteditable (root DIV retains focus) — see rejectedCandidate lesson.",
+    "type @ref re-focus behavior can reset caret to panel start; use selection-API verification after programmatic focus.",
+    "Image partially scrolled under the ribbon produces an rpanel 'covers click point' agent-browser error — scroll-position artifact, not app defect (ribbon row is intentionally scrollable; width 1421px in 1280 viewport is clipped scrollable row)."
+  ],
+  "notCovered": [
+    "Image upload from device (OS file picker — headless bounded; loop-1 L1D covered upload path fresh)",
+    "Free image positioning drag + image editing/preservation (F47/F48 — loop-1 L1D fresh; geometry-heavy drag not re-run this loop)",
+    "Merge/split runtime re-execution (loop-1 L1D fresh with disclosed synthetic shift-mousedown + real toolbar clicks; carried)",
+    "Sort rows runtime re-execution (B283 known; L1D fresh)",
+    "Paste/drop image paths (loop-1 covered)"
+  ]
+}

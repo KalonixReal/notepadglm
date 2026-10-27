@@ -1,0 +1,52 @@
+{
+  "taskId": "L2-C",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2c, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F34 page setup, F35 pages/breaks/cover, F36 zoom/views, F37 headers/footers/tokens, F38 paper/watermark, F39 print, F59 mobile, F60 dark + phantom-candidate adjudication",
+  "predicates": { "pass": 19, "fail": 0, "candidatesRejected": 1, "rediscoveries": ["B290 x2"], "envLimited": 1 },
+  "candidateAdjudication": {
+    "candidate": "phantom leading paragraph after reload with a leading page break (loop-1 L1C, render-only)",
+    "verdict": "REJECTED — NOT REPRODUCED",
+    "variantsTested": [
+      "break inserted at doc start, text typed before marker; saved md 'After\\n\\n<!-- np3:pb -->\\n'; reload byte-identical, DOM P/DIV/P matches pre-reload",
+      "text on both sides of break; saved md 'TailAfter\\n\\n<!-- np3:pb -->\\n\\nTail\\n'; reload byte-identical, 3 kids preserved",
+      "L1C's literal trigger: md starting '<<!-- np3:pb -->\\n' (comment-only leading block, no other content); pre/post DOM both P''+DIV+P'' (3 kids), no extra paragraph",
+      "leading break + heading after break (md 'Head\\n\\n<!-- np3:pb -->\\n\\n#\\n'); reload byte-identical, first child non-empty, no phantom"
+    ],
+    "evidence": "markdown byte-identical pre/post in ALL 4 variants; editor children count and order identical pre/post; firstElementChild never a new empty paragraph"
+  },
+  "confirmedNewBugs": [],
+  "rediscoveries": [
+    "B290 x2 (live): first keystrokes typed right after inserting a page break land at the pre-insert caret (before the marker) — observed in both break-test flows; known, documented, not re-counted"
+  ],
+  "verifiedClean": [
+    "Margins: Narrow applied — content width 695.688px = A4 794 - 2x~49px (exact math); persists across reload",
+    "Orientation: Landscape toggle — content 695.688 -> 1024.52px (A4 landscape math exact)",
+    "Paper size: A3 — content 1489.39px; popup lists A4/Letter/A3/A2/A1/A0",
+    "Columns: Two columns — columnCount 2, per-column width 724.688px",
+    "ALL F34 settings persist across reload together (cols=2 + width after reload)",
+    "Cover page: inserts H1 title + date paragraph + np3-pb break exactly as advertised",
+    "Watermark 'DRAFT': rendered inside .page, rotated (matrix ~-32deg), visible; persists across reload",
+    "Dark mode: body[data-theme=dark]; persists across reload",
+    "Zoom: slider steps (100->115 via 3 Zoom-in clicks); floor 50% reached with 23 zoom-outs, clamped, no errors",
+    "Mobile 390x844: no horizontal overflow (immediate + 1.5s later), editor focusable and typable",
+    "No page errors in any flow"
+  ],
+  "observationsNotPromoted": [
+    "Cover-page date is inserted as static text ('October 27, 2026', no token attribute) — 'date' on the button may be intended literal; Word-parity live field would be an enhancement. Contract uncertain.",
+    "No dedicated header/footer editing UI found in Insert/Layout/References ribbons; page-number surface is the status-bar indicator + cover page. F37's loop-1 fresh coverage (8/8 predicates) carried forward; loop-2 adds cover-page + token-structure check only."
+  ],
+  "harnessNotes": [
+    "offsetParent-based visibility filtering FALSE-ALARMED 'disappearing ribbon buttons' (fixed-position ribbon makes offsetParent null); a11y snapshot is ground truth — all buttons present. No app defect.",
+    "JS el.click() loops do not drive the app (zoom clicks no-op); only agent-browser real clicks register.",
+    "Native <select> and OS print dialogs remain headless-bounded."
+  ],
+  "notCovered": [
+    "Native print dialog / actual printing (F39 env-limited; print-honoring CSS + body classes verified present)",
+    "Ruler guides drag, navigation pane interactions (F36 source-covered; L1C fresh runtime carried)",
+    "Paper color exhaustive matrix (dialog mechanism shared with watermark, spot-checked only)",
+    "RTL direction rendering (F38 direction control source-present; not runtime-exercised this loop)"
+  ]
+}

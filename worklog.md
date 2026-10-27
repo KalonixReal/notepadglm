@@ -183,3 +183,64 @@ Stage Summary:
 - 2 new findings (1 CONFIRMED minor, 1 CANDIDATE), 0 rediscoveries; all other families clean with controls (53 predicates pass / 2 fail).
 - Not covered: OS file drops (F61), Lasso ink tool, Eraser drag-vs-tap nuance, mobile image toolbar (B211 variant), context-menu Paste paths (B241 variant), Proofing-Off autocorrect interaction (UR-26 requested design), Harper worker release.
 - Evidence: /home/z/my-project/checks/deep-audit-loops/loop-1/L1H-misc-result.json (+ l1h-mobile.png, l1h-dark.png, l1h-ink2.png).
+
+---
+Task ID: 2-a
+Agent: main (L2-A batch; subagent dispatch unavailable)
+Task: Loop 2 batch L2-A — F05/F06 mind map & graph deep audit
+
+Work Log:
+- Quarantined empty skeleton L2 result files left by timed-out subagent dispatches (abandoned/); kept their IO fixtures.
+- Source review: inline edit lifecycle (extract L1269), UI.doUndo override (L1275), clipboard packets (L1268), connectFileMapNodes guards (L1308), renderMap signature-skip predicate (L1257), mindMapVisibleGraph projection.
+- Runtime (session l2main): drag-create node, inline edit commit/cancel, undo-during-edit, cross-view clipboard paste, duplicate/self-loop edges (both CONFIRMED via writer.map data read), map undo, comment add/delete, arrow nudge+undo, collapse/expand, unicode persistence, file-map copy/paste.
+- B291 rediscovered twice (exact documented trigger). Cross-view silent paste recorded as observation (contract uncertain).
+
+Stage Summary:
+- 1 NEW CONFIRMED bug: mind-map connect-drag lacks same-node + same-direction duplicate guards (self-loops + parallel edges persist across reload); file-map sibling layer has both guards (contrast).
+- 21 predicates pass / 2 fail (the confirmed finding) / 1 observation. Evidence: checks/deep-audit-loops/loop-2/L2A-map-result.json
+
+---
+Task ID: 2-b
+Agent: main (L2-B batch)
+Task: Loop 2 batch L2-B — F01/F02/F03/F04/F65 library & organization deep audit
+
+Work Log:
+- Fresh session l2b. Rename paths (title field/File menu), duplicate, same-name rename, empty rename, nested tabs (add/type-isolate/nest/delete+confirm), folder create + move-to-folder, collections create/switch, pending-edit-during-switch, notebook search incl. regex-ish inputs, B289 rediscovery check.
+- Source cross-checks: sbQuery/starsOnly sidebar override; tags/star UI absence carried from loop-1 adjudication.
+
+Stage Summary:
+- 1 NEW CONFIRMED bug: pending editor content typed immediately before a collection switch is flushed into the newly created/activated 'Untitled' file of the target collection; source file left empty. Flush-window dependent (3s-wait control passes). New surface vs B221/B284.
+- 1 CANDIDATE: rename-to-existing-name allowed (indistinguishable rows; contract uncertain).
+- B289 rediscovered (title-field path; File-menu path clean).
+- 24 pass / 1 fail / 1 candidate. Evidence: checks/deep-audit-loops/loop-2/L2B-library-result.json
+
+---
+Task ID: 2-c
+Agent: main (L2-C batch)
+Task: Loop 2 batch L2-C — F34-F39/F59/F60 layout deep audit + phantom-candidate adjudication
+
+Work Log:
+- F34: margins/orientation/paper/columns applied via real UI; widths match exact page math (695.7/1024.5/1489.4px); all persist across reload.
+- F35: break insertion flows; B290 rediscovered twice; cover page verified.
+- PHANTOM CANDIDATE adjudicated: 4 variants incl. L1C's literal leading-comment trigger — markdown byte-identical, DOM preserved in all; REJECTED (not reproduced).
+- F36 zoom slider + floor; F38 watermark (rotated, persists); F59 mobile 390x844 clean; F60 dark persists; S17 not observed; F39 env-limited.
+
+Stage Summary:
+- 0 new bugs this batch. Phantom candidate REJECTED. B290 x2 rediscovered. 19 pass / 0 fail / 1 env-limited.
+- Harness lesson recorded: offsetParent filter artifact (fixed-position ribbon); JS .click() no-ops vs real clicks.
+- Evidence: checks/deep-audit-loops/loop-2/L2C-layout-result.json
+
+---
+Task ID: 2-d
+Agent: main (L2-D batch)
+Task: Loop 2 batch L2-D — F45-F48 images + F50-F54 tables deep audit
+
+Work Log:
+- Tables: insert (size grid), fill via Tab navigation, insert/delete row, banded rows, formula dialog (=SUM(ABOVE/LEFT) -> '#FORMULA!' = documented A1-only parser boundary per L1D verdict).
+- F53 Tab-escape candidate investigated and REJECTED: activeElement checks invalid in contenteditable; Selection API re-test shows Tab navigation fully correct (A2->B2->C2->next-row-first-cell; last-cell Tab creates empty row). Documented as harness-artifact lesson.
+- Images: URL insert with alt (figure/img/md round-trip), selection + resize handles; B292 rediscovered live at 1280px (align button underSidebar=true after scroll).
+- Key lesson recorded: cell-position assertions must use getSelection(), not activeElement.
+
+Stage Summary:
+- 0 new bugs (F53 candidate rejected as harness artifact). B292 rediscovered. 16 pass / 0 fail / 1 rejected candidate.
+- Evidence: checks/deep-audit-loops/loop-2/L2D-imgtable-result.json (+ 2 screenshots)

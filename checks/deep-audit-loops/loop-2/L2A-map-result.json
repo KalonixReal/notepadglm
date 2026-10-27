@@ -1,0 +1,69 @@
+{
+  "taskId": "L2-A",
+  "loop": 2,
+  "date": "2026-10-27",
+  "executor": "main agent (session l2main; subagent dispatch unavailable — backend timeouts, main executed batch directly)",
+  "url": "http://localhost:3000/",
+  "family": "F05 file map / mind maps + F06 graph ops (copy/paste, inline text, edges, collapsed branches)",
+  "predicates": { "pass": 21, "fail": 2, "candidateObservations": 1, "rediscoveries": ["B291 x2 flows"] },
+  "confirmedNewBugs": [
+    {
+      "title": "Mind-map connect-drag lacks the same-node and same-direction guards that the file-map connect path has: dropping a connect-drag back on the same node creates a self-loop edge, and repeating a connect-drag between two already-connected nodes creates additional parallel duplicate edges (same direction) that persist across save/reload",
+      "feature": "F06 edges/connections (authored mind map); contrast: F05 file-map connect is guarded",
+      "repro": [
+        "1. Create/open a Mind map document (sidebar New > Mind map). Select central node, ribbon '+ Comment' not needed; use node's right 'Connect node <name>' port.",
+        "2. Drag from the port and drop on ANOTHER node that is already connected to the source (or drag and drop back onto the SAME node).",
+        "3. Observed: a NEW edge is pushed every time. Verified via __np3.doc().writer.map: two edges Central->Kid (fromSide left, toSide right AND toSide left) after one repeat; and one self-loop Central->Central after same-node drop.",
+        "4. Edges persist across save/reload (data-level, read from writer.map after reload of earlier state)."
+      ],
+      "expected": "Connecting two already-connected nodes (same direction) is a no-op, and a node cannot connect to itself — exactly the behavior implemented one layer away in connectFileMapNodes.",
+      "observed": "Unconditional edges.push in the mind-map drag end handler; N repeats create N parallel edges; self-loops allowed.",
+      "controls": [
+        "File-map connect (connectFileMapNodes override, app-js extract L1308): guards from.id===to.id AND same-direction duplicate (library.map.links.some(from,to) -> return). Sibling layer proves the intended contract.",
+        "Map undo (Ctrl+Z x2): cleanly removed both test edges (3->1, selfLoops 0) — undo integration intact (predicate pass)."
+      ],
+      "sourceMechanism": "mapSurface pointerdown 'end' handler (app-js.txt extract L1269, original ~L4837): mapChanged(()=>{...mapData().edges.push({id:uid('edge'),from:id,to:target.id,fromSide,toSide})}) — no from===to check, no existing-edge check. Contrast: connectFileMapNodes (extract L1308) has both guards for the file-map layer.",
+      "classification": "CONFIRMED",
+      "impact": "Visual clutter + ambiguous graph data; duplicates accumulate silently with repeated drags; deletion/undo ambiguity (which parallel edge is removed); self-loops render as degenerate curves. Data-integrity hygiene issue in the authored graph.",
+      "fixDirection": "In the drag end handler, early-return when target.id===id and when an edge with same from&&to (either direction, or same direction to match file-map semantics) already exists."
+    }
+  ],
+  "observationsNotPromoted": [
+    {
+      "title": "Cross-view clipboard paste is silently swallowed: copy node(s) in a document mind map (no fileCopies in packet), switch to File map, Ctrl+V — paste event is consumed (preventDefault) but nothing is pasted and no feedback is shown",
+      "why": "Both pasteFileMapPacket layers guard (packet.fileCopies||[]) and the base falls through to a silent return; marker match means the app intentionally treats it as a file-paste context. Contract uncertain (graceful degradation vs missing feedback). Recorded per brief rule 7 — not promoted without an established contract."
+    }
+  ],
+  "rediscoveries": [
+    "B291 exact trigger reproduced twice (unchanged-text commit orphan; cancel-after-typing orphan when committed text equals last-rendered signature). Same documented mechanism (renderMap signature-skip). NOT counted as new."
+  ],
+  "verifiedClean": [
+    "Drag-create node + auto inline editor opens (pass)",
+    "Map undo integration: self-loop + duplicate removed by 2x Ctrl+Z (pass)",
+    "Arrow-key nudge +5px and Ctrl+Z restores exact x 330->335->330 (pass)",
+    "Comment sticky add/delete, no node/edge side effects, free-floating model confirmed in data (pass)",
+    "Collapse branch: 2 nodes/1 edge -> 1 node/0 edges; expand restores; projection logic mindMapVisibleGraph filters nodes+comments+edges (pass)",
+    "Unicode/emoji node text 'Kid 🚀 ünïcode' persists across reload, renders, aria-label correct (pass)",
+    "File-map copy/paste duplicates the file ('Untitled' -> 'Untitled copy') (pass)",
+    "Undo during inline edit (Ctrl+Z in textarea): native+app value sync prevents stale-finish corruption; card rebuilt, text restored (pass — defended)",
+    "No page errors during any flow (pass)"
+  ],
+  "sourceOnlyCoverage": [
+    "mindMapVisibleGraph projection + mindMapBranches hidden set (38 'collapsed' refs reviewed)",
+    "revealMindMapBranch auto-reveal on connect-from-collapsed (source, extract L1269)",
+    "copyMapSelection/paste packet structure + marker matching + cut semantics (extract L1268)",
+    "UI.doUndo override -> undoLibraryMap in file-map view (extract L1275)",
+    "Shell.setView finishes inline edit on view change (extract L1269)",
+    "PAPER_SIZES integration point (extract L1305)"
+  ],
+  "notCovered": [
+    "Real dblclick inline-edit entry (Edit-text button used; dblclick handler source-reviewed)",
+    "Emoji input via real key events (persistence + rendering verified via reload instead)",
+    "Map zoom extremes at runtime (zoomMap override source-reviewed only)",
+    "Dark-mode map rendering (L1A covered; no dark-specific data path found in source)",
+    "File-map spatial folder hierarchy updates (updateSpatialFileHierarchy source-reviewed only)",
+    "Readmode map interactions",
+    "Mobile viewport map interactions (F59 covered by L2-C)"
+  ],
+  "environmentNotes": "Subagent infra unstable (Task tool backend timeouts); main agent executed batch directly with serial browser session l2main. All state via real UI input except read-only evals and __np3.doc() reads."
+}
