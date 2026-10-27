@@ -1,0 +1,26 @@
+{
+  "taskId": "L7-CD",
+  "loop": 7,
+  "date": "2026-10-28",
+  "executor": "main agent (session l7a)",
+  "family": "Images float/column ops, rename persistence, Everything notebook export, baseline re-verify",
+  "predicates": { "pass": 9, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F68 baseline: SHA-256 re-verified UNCHANGED on BOTH copies (public/notepad.html == upload/notepad-bare.html == 278122b384986687...) at loop-7 close",
+    "F46 DELTA: Float left (wrap text) via imgToolbar -> data-align=float-left + auto width 45% — wrap-text mode auto-sizes (L6-CD covered align/width/alt)",
+    "F51 DELTA: Delete column via table context menu -> 2x2 becomes [1,1] both rows; Ctrl+Z restores [2,2] (row ops L5-CD, merge L6-CD, column ops now covered)",
+    "F54: AutoFit columns -> table data-fit=1 toggled via context menu",
+    "F01/F07 DELTA: document rename (docTitle 'L7 Persistence Doc') SURVIVES full page reload together with content — rename persistence verified fresh",
+    "B289 REDISCOVERY (documented, not new): sidebar item aria-label remains 'Untitled' after rename — matches known trigger exactly",
+    "F17 DELTA: export scope 'Everything' -> format auto-switches to 'Files and source backups (.zip)' (scope drives format — sensible contract); artifact l7-export-notebook.zip (8 entries): _notepad/notebook-backup.json + per-doc .docx + .notepad.json + File map canvas/svg",
+    "Embedded docx content verified: 'Seventh loop' + 'Alpha beta gamma delta' present in word/document.xml; packed .notepad.json layer verified lossless in L6",
+    "No page errors across float/column/rename/export flows"
+  ],
+  "harnessNotes": [
+    "Unquoted spaces in aria attribute selectors break (recurring) — quote them: [aria-label*=\"Insert table\"]",
+    "Custom listbox options may lack box model after scope change re-renders — keyboard ArrowDown xN + Enter selects reliably",
+    "Sidebar aria-label staleness after rename = B289 known trigger, do not re-litigate"
+  ],
+  "noPageErrors": true
+}

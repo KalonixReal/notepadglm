@@ -1,6 +1,50 @@
 # Document Editor Bug Hunt
 
 
+<!-- AUDIT_COMPLETE_20261028_START -->
+## AUDIT COMPLETE — 28 October 2026 (stopping rule met: two consecutive clean loops)
+
+**The deep-audit stopping rule is SATISFIED: Loop 6 and Loop 7 are both complete and clean — two consecutive full-loop sweeps over all 70 feature groups with zero new confirmed bugs, zero material new failure variants, and zero page errors. Final confirmed total: 94 current bugs (highest ID B302). Baseline SHA-256 `278122b3…` verified unchanged at every loop close (read-only audit intact).**
+
+### Loop ledger (this environment, reconstructed 27 Oct)
+
+| Loop | Result | New bugs | Evidence |
+|------|--------|----------|----------|
+| 1 | COMPLETE, not clean | B289–B297 (9) | `checks/deep-audit-loops/loop-1/` |
+| 2 | COMPLETE, not clean | B298–B300 (3) | `checks/deep-audit-loops/loop-2/` (9 batches L2-A..L2-I) |
+| 3 | COMPLETE, **CLEAN** | 0 | `checks/deep-audit-loops/loop-3/` |
+| 4 | COMPLETE, not clean | B301 (1) | `checks/deep-audit-loops/loop-4/` |
+| 5 | COMPLETE, not clean | B302 (1) | `checks/deep-audit-loops/loop-5/` |
+| 6 | COMPLETE, **CLEAN** | 0 | `checks/deep-audit-loops/loop-6/` (L6-A 10/10, L6-B 6/6, L6-CD 10/10) |
+| 7 | COMPLETE, **CLEAN** | 0 | `checks/deep-audit-loops/loop-7/` (L7-A 9/9, L7-B 6/6, L7-CD 9/9) |
+
+Clean streak: Loop 6 + Loop 7 = 2 consecutive clean complete loops → **STOP**. (Loop 3's single clean loop was followed by Loop 4/5 findings, so it did not satisfy the two-consecutive rule on its own.)
+
+### Loops 3–7 completion summary (28 October 2026)
+
+- **Loop 3 (clean):** delta-runtime sweep in 4 batches (L3-A editor core, L3-B review surfaces, L3-C images/export/persistence, L3-D probe matrix + baseline). Export artifact captured headlessly (.json backup, schemaVersion 1, checksum present). B300 mitigation documented from source (recovery-copy fingerprint guard).
+- **Loop 4 (not clean — B301):** L4A/L4B passes plus L4C tables detail confirmed B301 (2 reproductions incl. clean real-input re-run). Both then-open candidates resolved. Baseline re-verified at close.
+- **Loop 5 (not clean — B302):** L5-A editor core in 2 parts (15 passes) confirmed B302; L5-B review surfaces 13/13; L5-CD images/tables/export/persistence 14/14 with .docx artifact validated (valid OOXML, all seeded paragraphs verbatim).
+- **Loop 6 (clean):** L6-A 10/10 (font-size apply-at-caret vs selection semantics discriminated; synthetic-click caret artifact re-confirmed as harness issue), L6-B 6/6 (heading-anchor comments, per-block Accept, identical compare, whole-word find, heading context menu), L6-CD 10/10 (float/align/width/alt deltas; **table merge verified correct** after a full false-alarm post-mortem — section-structured tables (thead/tbody) had made section-relative row indexing misread a successful merge as damage; .json packed export lossless; dark theme survives reload).
+- **Loop 7 (clean):** L7-A 9/9 (strikethrough, highlight, clear-formatting per-range semantics, justify, mixed undo chain; one unreproduced word-count observation recorded — OBS-L7A-1 — which failed the 2-reproduction confirmation standard and is NOT counted as a bug), L7-B 6/6 (footnote path, Reject all, markdown-source compare pipeline, find scope, version compare), L7-CD 9/9 (float-left wrap, Delete column + undo, AutoFit, rename persistence, "Everything" notebook .zip export with embedded per-doc artifacts).
+- **Rediscoveries during Loops 5–7 (exact, not re-counted):** B272 (Ctrl+Alt+K opens Insert link, Loop 5), B289 (rename stale sidebar aria-label, Loop 7). No drift in any documented trigger.
+
+### B301 — Sorting table rows relocates an aggregate formula and re-evaluates it at the new position against its absolute range: a correct =SUM result becomes #CYCLE!
+
+Repro: table with an absolute-range aggregate (e.g. `=SUM(A1:A2)` in a totals row) → sort by a column → the formula cell is relocated with its row and re-evaluated at the new position, where its absolute range now intersects itself → result becomes `#CYCLE!`. Confirmed in Loop 4 tables detail with two reproductions including a clean real-input re-run. Fix: exclude the formula's own absolute range from self-intersection when re-evaluating after relocation, or freeze range targets during sort.
+
+### B302 — Applying a bulleted/numbered list to a Heading paragraph nests the list inside the `<h2>`–`<h6>` element, and the Markdown source view then serializes the block as an empty heading marker
+
+Repro: place the caret in a Heading 2 paragraph → apply Bulleted list or Numbered list → the DOM becomes `<h2><ol><li>…</li></ol></h2>` (invalid HTML: list nested inside heading). Open View → Markdown source: the block serializes as an EMPTY heading marker `## ` — the heading text AND the list are omitted from the source; a source commit/export would lose the content. Controls: sibling h2 without a list serializes `## T1HDR` correctly; plain-paragraph lists serialize fine; rich view remains intact; Ctrl+Z unwraps the nesting; ul variant identical. Distinct from B269 (source-mode trigger) and B135 (slash insertion position). Confirmed Loop 5 L5-A part 2. Fix: when the target block is a heading, unwrap the heading (Word applies the list to the paragraph and demotes heading formatting) or serialize `<hX><list>` as heading followed by list.
+
+### Final state
+
+- 94 confirmed current bugs (B207–B302 ID space with documented closures/extensions), 4 material extensions (B135/B226/B280/B285), 0 open candidates, historical leads S10/S13/S17/S28 unchanged (S28 requires a legacy-format storage fixture that this environment cannot produce).
+- Environment-limited closures stand as documented: F08/F09 native download completion, F16 Google relay runtime, F61 OS file-drop, F70 website-source behavior (site source absent this session).
+- Evidence tree: `checks/deep-audit-loops/loop-1/ … loop-7/` (per-batch result JSONs + export artifacts), state machine `checks/deep-audit-loops/loop-state.json`, canonical work log `worklog.md` (Task IDs 1-a … 7-c).
+- All deliverables pushed to GitHub (`KalonixReal/notepadglm`, branch main, commit identity GLM) at every loop checkpoint.
+<!-- AUDIT_COMPLETE_20261028_END -->
+
 <!-- LOOP2_20261028_START -->
 ## Loop 2 completion — 28 October 2026 (fresh full-loop execution, main-agent batches)
 

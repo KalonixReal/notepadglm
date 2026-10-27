@@ -1,3 +1,15 @@
+<!-- AUDIT_COMPLETE_TODO_20261028_START -->
+## AUDIT COMPLETE — 28 October 2026 (stopping rule met)
+
+**Status: AUDIT COMPLETE. Loop 6 + Loop 7 both COMPLETE and CLEAN — two consecutive clean full loops over all 70 feature groups. Stopping rule satisfied. Confirmed total: 94 (B207–B302 ID space + 4 material extensions). No open candidates.**
+
+- **Loops 3–7:** Loop 3 CLEAN → Loop 4 not clean (B301) → Loop 5 not clean (B302) → Loop 6 CLEAN → Loop 7 CLEAN. Loop 6 + Loop 7 = the required two consecutive clean loops; the audit stops here.
+- **Remaining fix backlog (for the app owner, not audit tasks):** all 94 confirmed IDs in BUG-HUNT-REPORT.md remain open as reported defects (read-only audit — nothing was fixed). Highest-value recent additions: B301 (sort relocates aggregate formula → #CYCLE!), B302 (list-on-heading nests `<ol>` inside `<h2>` and the markdown source view serializes it as an empty heading — source commit/export loses content).
+- **Unreproduced observation (not a bug, carried for awareness):** OBS-L7A-1 — one-off stale word-count read ('3 words' vs 8-word doc) after a mixed undo chain in Loop 7 L7-A; all focused reproductions clean; failed the 2-reproduction confirmation standard.
+- **B298–B300 fix directions (from Loop 2 TODO, unchanged):** mind-map connect-drag duplicate guards; commit pending content at collection-switch start; serialize richHtml→markdown when entering source mode on empty markdown.
+- **Evidence:** `checks/deep-audit-loops/loop-1/ … loop-7/`, `checks/deep-audit-loops/loop-state.json` (stoppingRuleMet: true), `worklog.md` (Task IDs 1-a … 7-c). Canonical report: BUG-HUNT-REPORT.md ("AUDIT COMPLETE — 28 October 2026" section).
+<!-- AUDIT_COMPLETE_TODO_20261028_END -->
+
 <!-- LOOP2_TODO_20261028_START -->
 ## Loop 2 TODO delta — 28 October 2026
 

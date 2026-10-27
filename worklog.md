@@ -621,3 +621,21 @@ Work Log:
 Stage Summary:
 - 0 new bugs. 6/6 pass. No page errors. L7-B COMPLETE — Loop 7 clean so far (L7-A + L7-B).
 - Evidence: checks/deep-audit-loops/loop-7/L7B-review-result.json
+
+---
+Task ID: 7-c
+Agent: main
+Task: Loop 7 batch L7-CD — images float, column ops, rename persistence, Everything notebook export + baseline re-verify (session l7a)
+
+Work Log:
+- Baseline SHA-256 re-verified UNCHANGED on both copies at loop-7 close.
+- F46 float-left wrap mode (data-align=float-left, auto 45% width); F51 Delete column [2x2 -> 1,1] + undo restore; AutoFit data-fit=1.
+- F07 rename persistence: docTitle rename survives full reload with content; B289 sidebar aria-label staleness rediscovered (documented, not new).
+- F17 'Everything' scope: format auto-switches to .zip; artifact l7-export-notebook.zip valid (notebook-backup.json + per-doc docx + packed sources + file map canvas/svg); embedded docx text verified.
+- No page errors.
+
+Stage Summary:
+- 0 new bugs. 9/9 pass. L7-CD COMPLETE.
+- >>> LOOP 7 CLOSED — FULLY CLEAN (L7-A 9/9 + L7-B 6/6 + L7-CD 9/9). <<<
+- >>> STOPPING RULE REACHED: Loop 6 clean + Loop 7 clean = 2 consecutive clean complete loops. <<<
+- 94 confirmed bugs total (unchanged through Loops 6-7). Evidence: checks/deep-audit-loops/loop-7/L7CD-persist-export-result.json + l7-export-notebook.zip
