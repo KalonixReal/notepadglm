@@ -1,0 +1,40 @@
+{
+  "taskId": "L4-B",
+  "loop": 4,
+  "date": "2026-10-28",
+  "executor": "main agent (session l4a2)",
+  "url": "http://localhost:3000/",
+  "family": "Review surfaces fresh verification (F40-F43, F55-F58)",
+  "predicates": { "pass": 16, "fail": 0, "rediscoveries": 1, "candidatesRejected": 1 },
+  "confirmedNewBugs": [],
+  "candidatesRejected": [
+    {
+      "proposedAs": "B301 (not issued)",
+      "claim": "Ctrl+Alt+K (advertised Add-comment accelerator) also triggers the Ctrl+K Insert-link handler; one press opens the Insert link dialog in addition to (or instead of) anchoring a comment",
+      "mechanism": "document-level link branch (mod && key==='k', byte ~14319744) lacks the !e.altKey guard that sibling branches have (find/format: mod && !e.altKey && !e.shiftKey); the comment accelerator lives in a second document keydown listener, so one keydown activates both handlers (stopPropagation does not stop same-node listeners)",
+      "runtimeEvidence": "single Ctrl+Alt+K press opened Insert link dialog (controlled repro); first natural run also anchored a comment (both actions); controlled run variant: dialog took selection, comment did not fire",
+      "verdict": "EXACT REDISCOVERY of B272 'The documented New comment shortcut opens Insert link when the editor has focus' (audit/known-bug-titles.txt line 63). Comment-suppression variant is impact detail of the same trigger/handler pair, not a new mechanism. Not counted; does not reset the clean streak (rediscovery of a documented trigger does not reset per stopping rule)."
+    }
+  ],
+  "verifiedClean": [
+    "F40.1 TOC: Contents button inserts DIV.np3-toc with 'Contents' + entry for existing h1",
+    "F40.2 Bookmarks: Add bookmark dialog (name input + Add) -> mark1 listed as clickable entry in Bookmarks/Go-to dialog",
+    "F40.3 Footnote: inserts <sup class='np3-fnref' data-fn='1'>1</sup> at caret",
+    "F40.4 Citation: dialog (Author/Title/Year/Source URL, label-bound ids); valid insert -> anchored link '(Doe, 2026)' href='#np3-ref-*' + auto-created h2[data-bibliography] 'References' + bibliography paragraph 'Doe. Audit Evidence. 2026'; VALIDATION verified: non-URL source URL rejected with warn toast, insert aborted",
+    "F40.5 Symbols: Insert symbol pop (40 items) -> picked '±' inserted (+1 char at caret)",
+    "F41 Comments FULL LIFECYCLE: Add-comment button anchors comment (np3-cmt overlay on selected text) AND auto-opens #cmtPane with thread; reply posted ('Reply (1)'); Resolve -> 'cmt resolved' state. Resolves L1H carry: composer WAS always working — prior 'not surfaced' was a harness selector artifact (pane is #cmtPane, not [class*=comment])",
+    "F42 Track edits: toggle stamps one block-level revision id (rv-mvqr7) on all top-level blocks; Review edits panel documents the contract ('Compare ... with the baseline. Accept keeps the current block; reject restores its original content'), lists revisions, Reject/Accept per item + all; Accept-all empties list, content preserved",
+    "F43 Compare side by side: dialog with diffSelect0/diffSelect1/diffSource + Compare/Previous change/Next change; opens and closes cleanly",
+    "F55 Spell toggle: flips editor spellcheck attribute (on->false->on) per click with toast",
+    "F56 Autocorrect runtime: typed 'teh quik brown' -> 'The quik brown' (spelling autocorrect + sentence-start capitalization); ambiguous 'quik' correctly left alone per 'common and unambiguous' contract; correction chip present (chip-specific defects B296/B297 known, not re-tested)",
+    "F56/F57 settings: 'Autocorrect and spelling' dialog exposes 4 documented checkboxes (autocorrect, capitalize starts, right-click suggestions, grammar) + Keep current document language + Save settings",
+    "F58 Ink runtime: Start inking -> #inkCanvas 792x1123 visible, aria-pressed=true; synthetic pointer stroke renders 634 non-transparent px; Erase all ink -> 0 px",
+    "F41/F42 cross-note: comment anchors (data-cid) and revision stamps coexist on same paragraph without interference"
+  ],
+  "harnessNotes": [
+    "#writerDialog is a REUSED generic dialog shell: panel content swaps (Paragraph/List options/Review edits/Bookmarks/Citation/Compare) and it has BOTH an internal panel Cancel and a footer Cancel/Apply — click the footer one to close the shell",
+    "Ribbon churn between evals: use snapshot refs (role+name matched) or re-query in the SAME eval that clicks",
+    "Dialog coverage errors from agent-browser are real signal: #linkDialog blocking @e117 click led to B272 rediscovery evidence"
+  ],
+  "evidence": "agent-browser session l4a2; source offsets: link branch ~14319744, comment accelerator ~14331631, newComment def 14436495, getRange 14213843"
+}

@@ -1,0 +1,35 @@
+{
+  "taskId": "L4-A",
+  "loop": 4,
+  "date": "2026-10-28",
+  "executor": "main agent (session l4a, then l4a2 after daemon wedge)",
+  "url": "http://localhost:3000/",
+  "family": "Editor core fresh verification (F20-F31, F33 + F66 partial)",
+  "predicates": { "pass": 14, "fail": 0, "upgradedEvidence": 2, "observations": 2 },
+  "confirmedNewBugs": [],
+  "candidates": [],
+  "verifiedClean": [
+    "F20/F22: real-keystroke typing reaches contenteditable; Ctrl+Z removes all typed text (leaves '\\n'), Ctrl+Y restores byte-exact 'Alpha beta gamma'",
+    "F23: ribbon Bold on selection -> <strong> in DOM",
+    "F25: Clear formatting strips <strong>, text 'Alpha beta gamma' preserved intact",
+    "F24 UPGRADED (supersedes L3 harness carry): Font-color icon button DIRECTLY APPLIES current color (spans with inline color appear; source: icon.onclick=UI[property](value)); arrow button opens #popFontColor palette (162x124, 11 [data-fc] swatches incl #c00000); swatch click closes palette; source-reviewed as working as designed (icon=apply, arrow=choose)",
+    "F26: ribbon Center -> computed textAlign=center on <p>",
+    "F27: Paragraph dialog (role=dialog aria-label=Paragraph, 5 selects pdAlign/pdIndent/pdLs/pdSb/pdSa) LIVE-SYNCS current paragraph state (pdAlign=center); setting line-spacing 1.5 + OK -> data-ls='1.5' annotation on paragraph",
+    "F28: Styles gallery opens 10 style items (Normal, Heading 1-4, Title, ...); Heading 1 click -> paragraph becomes <h1>Delta echo foxtrot</h1>, gallery closes",
+    "F29: Bulleted list on selected paragraph -> <ul><li>; Enter at li end creates continuation li; unselected sibling paragraph correctly stays plain <p>",
+    "F30: Numbered-list button with caret in ul -> converts to <ol> (2 lis); List options (#writerDialog) sets numbering style lower-alpha + start=3 -> ol start=3 + list-style-type:lower-alpha; dialog closes on Apply",
+    "F31 UPGRADED (supersedes L3 'menu not observable'): typing '/' opens slash-menu (role=menu aria-label='Insert into document') with 14 correctly-named items; picking Divider inserts <hr>, menu closes, '/' consumed (no residue line)",
+    "F21: View -> Toggle markdown view shows #sourceText with faithful serialization (# heading, np3 base64 block annotation carrying OL attrs incl list-style-type:lower-alpha, '3. <span…>Item one</span>', '- Item two continued'); editing source (typed 'Plain line from source edit') then toggling back commits it as a rich <p> — native-doc commit path clean (B300 gap is .txt-import-specific, unchanged)",
+    "F33/F66: status bar 'Page 1 of 1 | 15 words | 79 | English | Ln 1, Col 1 | Page view' — 15 words and 79 chars EXACTLY match manual count of document content"
+  ],
+  "observations": [
+    "Heading-1 gallery button exposes name-from-content 'Heading 1AaBbCc' (aria-label=null) — preview text is visible design element, standard acc-name composition; not a defect. #writerDialog IS properly labeled (aria-labelledby=writerDialogTitle).",
+    "Status bar Ln/Col read 1,1 after rich-view return from source mode (caret restore semantics; not probed as defect — caret position after mode toggle was not part of the verified contract this loop)"
+  ],
+  "harnessNotes": [
+    "VISIBILITY TEST FIX: offsetParent is always null for position:fixed elements — earlier loops' 'popup not observable' readings were partially test artifacts; use getBoundingClientRect + getComputedStyle.display instead. Both carried popup notes (F24 palette, F31 menu) now verified observable.",
+    "DAEMON WEDGE: session l4a wedged after an eval that touched window.NP3 deep internals (page stopped responding even to 1+1); root cause of prior wedges likely memory pressure (4GB box, 1.1GB free at wedge; 2.9GB free after restart). Remedy: pkill agent-browser+chrome, restart session. Killing chrome discards its storage profile (fresh localStorage) — persistence must be verified in-session (done: type -> localStorage 1 key -> reload -> text restored).",
+    "First l4a snapshot (full-page) timed out at 120s — always use snapshot -i -c -d N on this app."
+  ],
+  "evidenceCommands": "agent-browser sessions l4a/l4a2; refs e26/e32/e33/e34/e35/e36/e38/e42/e43/e48/e83; srcctx 'Choose text color' at byte 14632086"
+}

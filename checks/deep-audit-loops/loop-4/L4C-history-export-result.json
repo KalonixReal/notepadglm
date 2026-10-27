@@ -1,0 +1,22 @@
+{
+  "taskId": "L4-C (part 2 of 2: history/export)",
+  "loop": 4,
+  "date": "2026-10-28",
+  "executor": "main agent (session l4a2)",
+  "url": "http://localhost:3000/",
+  "family": "Version history + portable export (F12, F43-adjacent compare, F09/F17)",
+  "predicates": { "pass": 4, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F12 version history: File backstage > Info shows .hist-list with timestamped snapshot rows (46->76 words progressing with edits, per-row word/char stats + Compare buttons); snapshot timestamps render in browser-locale UTC (environment TZ, not a defect)",
+    "F12 compare-with-snapshot: Compare on a history row opens the 'Version compare' panel (diff vs snapshot, Close works)",
+    "F09/F17 portable export: backstage Export & restore > Export downloads a full self-contained notepad HTML (15,323,067 bytes); embedded <script id=notebookData> = {version,id,packed:{format:'notepad-packed-v1',codec:'zip',data:b64(zip(content.json))}}; decoded content.json (44,756 bytes, sha256[:16] 2b6445da6cd2488a) contains ALL session content probes: 'Delta echo foxtrot', 'trackedword', 'Audit Evidence', 'Doe', '2026', 'quik brown'",
+    "F17 artifact archived: checks/deep-audit-loops/loop-4/l4-portable-export-artifact.html (sha256 full file 429acc0ddfc40227...)"
+  ],
+  "notes": [
+    "Bibliography text in serialized form is 'Doe. Audit Evidence . 2026' (space before period) — plain-probe 'Doe. Audit Evidence' misses it; spaced probes pass",
+    "Downloads land in /home/z/Downloads (chrome default, cwd=my-project); .agent-browser/downloads is a different (cleaned) location — prior loops' artifact paths used their own capture method",
+    "Runtime blob-hook (URL.createObjectURL override) does NOT intercept the export — the app captures the reference at load; artifact verification done by decoding the downloaded file instead"
+  ],
+  "evidence": "agent-browser session l4a2; artifact file + decoded probes as above"
+}

@@ -1,28 +1,33 @@
 ╔══════════════════════════════════════════════════════════════╗
 ║  NOTEPAD v9 BUG HUNT — LIVE STATUS                            ║
-║  (this file auto-refreshes every 15 minutes until done)      ║
+║  (this file auto-refreshes every 15 minutes until done)       ║
 ╚══════════════════════════════════════════════════════════════╝
 
-STATUS:   ✅ STILL WORKING — Loop 3 CLEAN (streak 1/2); Loop 4 starting
-Updated:  2026-10-28 04:35 NZDT
+STATUS:   ✅ STILL WORKING — Loop 4 in progress (batch 3/4 mostly done)
+Updated:  2026-10-28 04:10 NZDT (Pacific/Auckland)
 
-WHAT JUST HAPPENED:
-  Loop 3 is COMPLETE and CLEAN — the first clean loop of the streak!
-  Zero new confirmed bugs. Highlights: device-image upload verified
-  end-to-end, a REAL export artifact captured headlessly (valid 3086-byte
-  backup JSON, archived as evidence), and a mitigation discovered for
-  B300 (source-mode edits keep a "Before editing Markdown source"
-  recovery copy — the destroyed content is recoverable). Baseline
-  SHA-256 re-verified unchanged. Loop-3 checkpoint uploading to GitHub.
+WHAT I'M DOING RIGHT NOW:
+  Loop 4 progress: L4-A editor core (14 predicates, clean) ✅,
+  L4-B review surfaces (16 predicates, clean; comment lifecycle +
+  references suite + ink verified; Ctrl+Alt+K collision adjudicated
+  as B272 rediscovery, not counted) ✅, L4-C files/history/export —
+  part 1 done (full CRUD, password cycle; 'silent <8-char rejection'
+  open candidate REJECTED — role=alert feedback exists) and part 2
+  done (version history + portable export artifact: 15.3MB HTML,
+  packed notebook decoded, all content probes pass). Remaining:
+  F03/F04 org, F15 imports, images F45-F48, tables F50-F54, then
+  L4-D layout/IO/cross-cutting + same-name-rename candidate + final
+  baseline verify.
 
 BUG TRACKER:
-  Total confirmed bugs:  92  (no change in Loop 3)
-  Clean loops:           1 / 2   ← streak started!
-  Loop 1: NOT CLEAN (9 new) | Loop 2: NOT CLEAN (3 new)
-  Loop 3: 100% — CLEAN ✅
-  Loop 4:   0% — starting now; must ALSO be clean to stop
-          [........................................] 0%
+  Total confirmed bugs:  92  (highest ID B300)
+  New this loop (Loop 4): 0  (2 candidates rejected: B272 rediscovery,
+                           protect-dialog feedback exists)
+  Loop 1: NOT CLEAN (+9) | Loop 2: NOT CLEAN (+3) | Loop 3: CLEAN ✅
+  Loop 4:  75% — streak 1/2 intact, must finish clean
+          [################################........] 75%
 
-NEXT CHECKPOINT: Loop 4 full verification sweep (all 70 groups +
-  candidate re-adjudication) → if clean → DONE: 2 consecutive clean
-  loops → final GitHub upload of todo + bug report + entire workspace.
+NEXT CHECKPOINT: finish L4-C remainder + L4-D → adjudication →
+  baseline SHA-256 verify. If clean → 2 consecutive clean loops →
+  final GitHub upload of todo + bug report + workspace → delete cron
+  → DONE.

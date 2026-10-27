@@ -1,0 +1,31 @@
+{
+  "taskId": "L4-C (part 1 of 2: files/organization/persistence)",
+  "loop": 4,
+  "date": "2026-10-28",
+  "executor": "main agent (session l4a2)",
+  "url": "http://localhost:3000/",
+  "family": "Document CRUD + passwords + deletion (F01, F11, F14; F03/F04/F12/F15/F17/F19 pending part 2)",
+  "predicates": { "pass": 9, "fail": 0, "candidatesRejected": 1, "harnessArtifactsResolved": 2 },
+  "confirmedNewBugs": [],
+  "candidatesRejected": [
+    {
+      "candidate": "Loop-3 open candidate: 'Protect-file dialog rejects passwords shorter than 8 characters silently (no error, no aria-invalid, validity.valid===true)'",
+      "freshRepro": "File menu > Protect with password... > 'short' x2 > Protect files: dialog stays open, input retained, validity.valid=true, aria-invalid absent (all as claimed)",
+      "verdict": "REJECTED — the rejection IS surfaced: #writerDialogFeedback paragraph present, visible, textContent='Use at least 8 characters.', role='alert' (accessible announcement). Source: writerFormFeedback at byte ~14763308 called by the Protect handler ('Use at least 8 characters.' branch). The loop-3 probe checked toasts and aria-invalid but not the dialog feedback element. Contract honored with accessible, visible error. Minor aria-invalid nit not defect-grade (role=alert covers announcement)."
+    }
+  ],
+  "verifiedClean": [
+    "F01 create: New > Document -> 'Untitled 2' appears in sidebar alongside 'Untitled'",
+    "F01 rename (File-menu route): Rename... -> appPrompt card (app-dialog-card, input prefilled) -> Apply -> row text AND aria-label updated to 'L4C Throwaway' (matches B289's contract that this path updates aria)",
+    "F01 duplicate: Duplicate -> 'L4C Throwaway copy' created and activated",
+    "F01 delete: Delete -> confirm app-dialog-card 'Delete \"...\"? This cannot be undone.' (Cancel/Delete) -> row removed; second throwaway deleted same way; sidebar back to [Untitled]",
+    "F11 protect: Protect with password... dialog (#fileNewPassword/#fileRepeatPassword, type=password) -> 8+ char pw accepted -> row shows lock glyph + aria suffix '· unlocked'",
+    "F11 remove: Remove file password... -> confirm dialog -> lock glyph gone, aria restored to plain name",
+    "F14 deletion cleanup: deleted docs leave sidebar and do not reappear after subsequent operations (notebook-version-snapshot interaction is B293's known contract, not re-tested as new)"
+  ],
+  "harnessArtifactsResolved": [
+    "appPrompt uses .app-dialog-overlay + .app-dialog-card stacks (NOT #writerDialog). An eval that clicks Rename... while an earlier prompt card is still open stacks a second overlay — UNREACHABLE by real pointer input (each overlay covers the screen, z=99999, pointer-events auto); eval clicks bypass hit-testing. Not a defect.",
+    "Protected files change their sidebar aria-label to 'name · unlocked' — exact-match queries on the plain name throw; use prefix matching."
+  ],
+  "evidence": "agent-browser session l4a2; renameActive source ~14280619; data-fm dispatcher ~14327052; protect handler ~14890300; writerFormFeedback ~14763308"
+}

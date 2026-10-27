@@ -355,3 +355,64 @@ Work Log:
 
 Stage Summary:
 - Loop 3 CLEAN. Loop 4 required for stopping. Evidence: checks/deep-audit-loops/loop-3/
+
+---
+Task ID: 4-a
+Agent: main
+Task: Loop 4 batch L4-A — editor core fresh verification (F20-F31, F33, F66 partial)
+
+Work Log:
+- Fresh browser session l4a (restarted as l4a2 after daemon wedge — memory pressure identified as root cause; remedy documented).
+- 14 predicates run with real UI routes: typing/undo/redo round-trip, bold, clear-formatting, font color (icon apply + arrow palette 11 swatches), center align, paragraph dialog (5 selects, live sync, data-ls=1.5), styles gallery (10 styles, H1), bullets (ul/li + Enter continuation), numbered (ul→ol, lower-alpha start=3), slash menu (14 items, Divider→hr, '/' consumed), markdown source view + source→rich commit, status bar stats (15 words/79 chars exact).
+- UPGRADED 2 evidence items previously harness-limited in Loop 3: F24 palette and F31 slash menu ARE observable — root cause was offsetParent===null for fixed elements (test artifact). Method fix documented.
+- Environment notes: full-page snapshot times out (use -i -c -d); killing wedged chrome spawns fresh storage profile (localStorage empty = env artifact, not app bug); in-session reload persistence re-verified instead.
+
+Stage Summary:
+- 0 new bugs, 0 candidates. 14 pass / 0 fail. Loop 4 batch 1/4 complete.
+- Evidence: checks/deep-audit-loops/loop-4/L4A-editor-result.json
+
+---
+Task ID: 4-b
+Agent: main
+Task: Loop 4 batch L4-B — review surfaces fresh verification (F40-F43, F55-F58)
+
+Work Log:
+- F40 references suite end-to-end fresh: TOC inserted (np3-toc block, h1 indexed); bookmark mark1 added + listed in Go-to dialog; footnote <sup class=np3-fnref data-fn=1>; citation (Doe, 2026) anchored link + auto References bibliography ("Doe. Audit Evidence. 2026"); citation URL-validation path verified (non-URL rejected with warn toast — my initial field mis-mapping, dialog behaved correctly); symbol picker (40 items) inserted +1 char.
+- F41 comments FULL LIFECYCLE verified: button click anchors comment + auto-opens pane (2 threads), reply posted ("Reply (1)"), Resolve applied (cmt resolved class). L1H "composer not surfaced" carry RESOLVED as harness selector artifact (pane is #cmtPane; earlier hunts used wrong selectors).
+- F42 track edits: toggle stamps block-level revision rv-mvqr7 on all blocks (documented block-baseline contract per panel text); Review edits panel lists revisions, Accept-all empties list, typed text preserved.
+- F43 compare: dialog with 2 doc pickers + Compare/Previous/Next change actions; note #writerDialog is a reused shell (internal panel + footer Cancel both present).
+- F55/F56/F57: spell toggle flips spellcheck attr; Autocorrect dialog 4 checkboxes (all documented); runtime "teh quik brown" -> "The quik brown" (spelling + sentence-capitalize), chip present.
+- F58 ink: Start inking -> canvas 792x1123 live; synthetic pointer stroke -> 634 px rendered; Erase all -> 0 px.
+- REDISCOVERY ADJUDICATION: candidate "Ctrl+Alt+K also opens Insert link" (source: link branch mod+k at byte ~14319744 lacks !e.altKey guard; runtime reproduced both variants — double-action and comment-suppressed) is an EXACT rediscovery of B272 ("The documented New comment shortcut opens Insert link when the editor has focus"). NOT counted as new; comment-suppression is impact detail of the same trigger, not a new mechanism. No B301 issued.
+
+Stage Summary:
+- 0 new bugs (1 candidate adjudicated as B272 rediscovery). Loop 4 remains clean. Batch 2/4 complete.
+- Evidence: checks/deep-audit-loops/loop-4/L4B-review-result.json
+
+---
+Task ID: 4-c
+Agent: main
+Task: Loop 4 batch L4-C part 1 — document CRUD + passwords (F01, F11, F14)
+
+Work Log:
+- F01 full CRUD fresh: create (New>Document), rename via File-menu/appPrompt card (row text + aria updated), duplicate, delete with "cannot be undone" confirm card x2.
+- F11 full cycle: protect (password+repeat fields) -> lock glyph + '· unlocked' aria suffix -> remove password -> restored. Open candidate 'protect-dialog silent <8-char rejection' REJECTED: #writerDialogFeedback role=alert 'Use at least 8 characters.' is visible + accessible; loop-3 probe missed the dialog feedback element. Open candidates now 1/2 (same-name rename).
+- Harness artifacts documented: appPrompt = .app-dialog-overlay/card stacks (double-stack unreachable by real input); protected rows change aria (use prefix match).
+
+Stage Summary:
+- 0 new bugs, 1 open candidate rejected. Batch L4-C part 1 done; part 2 (F03/F04/F12/F15/F17/F19 + images/tables) next.
+- Evidence: checks/deep-audit-loops/loop-4/L4C-files-result.json
+
+---
+Task ID: 4-d
+Agent: main
+Task: Loop 4 batch L4-C part 2 — version history + portable export (F12, F09/F17)
+
+Work Log:
+- F12: backstage Info shows populated .hist-list (46->76 word snapshots with stats + Compare); version-compare panel opens/closes cleanly.
+- F09/F17: backstage Export downloads full self-contained notepad HTML (15,323,067 B); notebookData = notepad-packed-v1 zip; decoded content.json (44,756 B) contains ALL session content probes; artifact archived as loop-4/l4-portable-export-artifact.html.
+- Notes: chrome downloads to /home/z/Downloads (not .agent-browser/downloads); blob-hook does not intercept (app captures reference at load); citation anchor + symbol inserted into footnote area = correct caret semantics after footnote insertion (not a defect).
+
+Stage Summary:
+- 0 new bugs. L4-C COMPLETE (parts 1+2): F01/F11/F14/F12/F09/F17 verified; open candidate #1 rejected. Remaining Loop 4 work: F03/F04, F15, images (F45-F48), tables (F50-F54), then L4-D (layout/IO/cross-cutting + same-name-rename candidate + final baseline verify).
+- Evidence: checks/deep-audit-loops/loop-4/L4C-history-export-result.json
