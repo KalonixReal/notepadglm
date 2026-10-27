@@ -571,3 +571,23 @@ Work Log:
 Stage Summary:
 - 0 new bugs. 6/6 pass. No page errors. L6-B COMPLETE — Loop 6 clean so far (L6-A + L6-B).
 - Evidence: checks/deep-audit-loops/loop-6/L6B-review-result.json
+
+---
+Task ID: 6-c
+Agent: main
+Task: Loop 6 batch L6-CD — images/table merge deltas, .json packed export, dark-theme persistence + baseline re-verify (session l6a)
+
+Work Log:
+- Baseline SHA-256 re-verified UNCHANGED (278122b384986687...) at loop-6 close.
+- F45/F46/F47 image deltas: align left + 50% width via imgToolbar persisted to data attributes + inline style; Edit alt text dialog saves custom alt into markdown.
+- F50/F54 MERGE VERIFIED CORRECT (clean repro): Escape clears cellSel; 2 tbody cells selected survive menu open; Merge -> tbody single cell colSpan=2, thead untouched, no toast. Cross-section selection correctly refused with 'Select cells within one table section' toast.
+- FALSE-ALARM POSTMORTEM (no bug): inserted tables are THEAD+TBODY structured; my selectors matched tbody while instrumentation labeled rows section-relatively — first 'failed' merge had actually merged the selected cells correctly; 'rows [2,1]' was thead 2 + merged tbody 1; undo restored correctly; stale th classes from stacked synthetic sequences caused the legitimate section-guard toast. App behavior correct at every step.
+- F17 .json export artifact (l6-export.json): outer notepad-packed-v1 (zip/base64), inner content.json has format/schemaVersion/scope/createdAt/checksum/notebook; all session edits lossless inside.
+- F19 dark mode: html[data-theme=dark] + dark bg survives full reload with content intact.
+- Harness: unquoted spaces in aria selectors break; listbox options may lack box model (use keyboard ArrowDown+Enter).
+
+Stage Summary:
+- 0 new bugs. 10/10 pass. No page errors. L6-CD COMPLETE.
+- LOOP 6 CLOSED — FULLY CLEAN (L6-A 10/10 + L6-B 6/6 + L6-CD 10/10, 0 new bugs, 0 rediscoveries).
+- Clean streak now 1/2 (Loop 6; Loop 3's streak was broken by Loop 4 B301). LOOP 7 REQUIRED (must be clean to stop).
+- Evidence: checks/deep-audit-loops/loop-6/L6CD-imgtable-export-result.json + l6-export.json

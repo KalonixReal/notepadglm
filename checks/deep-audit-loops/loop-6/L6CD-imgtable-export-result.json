@@ -1,0 +1,28 @@
+{
+  "taskId": "L6-CD",
+  "loop": 6,
+  "date": "2026-10-28",
+  "executor": "main agent (session l6a)",
+  "family": "Images/table merge deltas, .json packed export, dark-theme persistence, baseline re-verify",
+  "predicates": { "pass": 10, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F68 baseline: SHA-256 re-verified UNCHANGED 278122b384986687... at loop-6 close (read-only audit intact)",
+    "F45: image insert via real upload; figure has data-align/data-w + data-rid; imgToolbar (20 controls incl. Float/Wrap/Studio/Restore/Download) appears on selection",
+    "F46 DELTA: Align left + 50% width via toolbar -> data-align=left, data-w=50%, inline width 50% (L3CD verified align right; left + width now covered)",
+    "F47 DELTA: Edit alt text dialog -> img alt='custom alt text v6' saved into markdown, dialog closes",
+    "F50: 2x2 table via size picker; structure = THEAD(1 row of th) + TBODY(1 row of td) — section-aware table model",
+    "F54 DELTA — MERGE VERIFIED CORRECT with clean repro: Escape clears cellSel (0 stale classes); real-path selection of exactly 2 tbody cells (2 td.cell-sel, 0 th.cell-sel) SURVIVES menu open; Merge -> thead untouched [1,1], tbody row becomes single cell colSpan=2, no toast. Merge of same-row same-section cells works exactly per contract",
+    "Cross-section guard verified: a selection state spanning thead th + tbody td (from stacked synthetic sequences) correctly refused with toast 'Select cells within one table section'",
+    "F17 DELTA: Lossless source backup (.json) export artifact captured (l6-export.json) — outer format notepad-packed-v1 (zip codec, base64); inner content.json = format/schemaVersion/scope/createdAt/checksum/notebook; ALL session edits present losslessly (text, table, image data-URL, custom alt, 50% width, align left)",
+    "F19 DELTA: dark mode (html[data-theme=dark], body bg rgb(16,23,34)) SURVIVES full page reload together with document content — theme + content persistence verified fresh this loop",
+    "No page errors across image, table, export, and reload flows"
+  ],
+  "harnessLessons": [
+    "CRITICAL selector lesson: inserted tables are section-structured (thead th / tbody td) — '#editor table tr:first-child td:first-child' matches the TBODY row (thead has no td); 'td.cell-sel' misses th.cell-sel. Row indexes computed as indexOf within parentElement are SECTION-RELATIVE and mislabel thead rows as row 0.",
+    "This caused a false alarm chain: (1) first merge actually CORRECTLY merged the selected tbody cells — misread as 'merged wrong row'; (2) 'rows [2,1]' was thead 2 + merged tbody 1 = SUCCESS not damage; (3) undo restored 2x2 correctly; (4) stale th.cell-sel classes from stacked synthetic sequences produced a legitimate cross-section toast. All app behavior verified correct.",
+    "Format listbox options can be detached from box model (CDP getBoxModel error) — keyboard path (focus combobox, ArrowDown, Enter) selects reliably.",
+    "aria attribute selectors containing spaces MUST be quoted: [aria-label*=\"dark mode\"]"
+  ],
+  "noPageErrors": true
+}
