@@ -1,0 +1,80 @@
+B207 — Shift+Enter makes proofing combine valid words across a soft line break
+B208 — Proofing underlines stay at old positions after document zoom
+B209 — Backspace reversal of first-letter capitalization leaves the caret before the restored text
+B210 — Free-image movement leaves a second selection outline at the original anchor
+B211 — Mobile image toolbar is positioned partly outside the viewport
+B212 — Reopening a nested list omits proofing for the parent item's own text
+B213 — Sentence capitalization duplicates the first letter when typing with inline formatting
+B214 — Text occupies page gaps while typing after cross-page replacement and Undo/Redo
+B215 — Table-cell selection is ignored by Delete, Copy and Cut
+B216 — Ignore for this session leaves existing spelling underlines visible
+B217 — Partial clipboard operations lose associated metadata
+B218 — Checking an already-saved checklist task loses completion on navigation or Save
+B219 — Copying a bookmarked heading makes Contents jump to the original
+B220 — Long-sentence warning hides spelling errors inside the sentence
+B221 — An image started in one inner tab is inserted into another tab if loading finishes after switching
+B222 — A selected free image intercepts arrow keys while the document-tab tree has focus
+B223 — Inserting a link consumes a selected trailing space
+B226 — Rich-path imports leave Markdown source empty after Save and reopen
+B227 — Free-image selection frame returns to the old anchor after a drag at 150% zoom
+B229 — Quick Access Save is offered as active but is hidden
+B230 — Customized Quick Access controls are covered by search at 800 px
+B231 — Normal-text shortcut splits ordered lists and restarts numbering
+B232 — Update Contents retains a dangling entry after the last heading becomes Normal text
+B233 — Block quote loses direct paragraph text from Markdown
+B234 — Completed connected saves can leave a misleading Save HTML fallback status after working-copy quota exhaustion
+B238 — Aborted write can claim HTML copy downloaded when no download occurred
+B239 — Ordinary external HTML mentioning data-notepad-packet is blocked as a drawing packet
+B240 — Typing with Find open scrolls away from the caret to an earlier match
+B241 — Context-menu Paste ignores valid plain text when HTML sanitizes to empty
+B242 — Inserting a slash divider strips alignment from the remaining paragraph
+B135 — Reopened: slash Table inserts after the whole list or quote instead of at the caret
+B243 — Multiline code paste restores the wrong caret after Redo and Backspace deletes existing text
+B244 — Pasting an image-only clipboard over selected code silently deletes the selection
+B146 — Reopened: syntax highlighting pollutes history and blocks Undo of a code-language change
+B18 — Reopened: source-mode Undo/Redo loses the caret and subsequent typing is ignored
+B245 — Shift+Tab out of a table can trap the caret inside the preceding image
+B246 — Background code decoration reverses backward selections and changes the next deletion
+B247 — An older feedback poll can roll back the UI after a successful save
+B248 — Restoring an identical feedback draft leaves a false Loading status
+B249 — Rich image paste inserts the picture but fails to replace selected text
+B250 — Indents & spacing silently does nothing for a parent list item's own text
+B251 — Partial Clear Formatting makes one comment thread appear as three cards after reload
+B252 — Typing while protected-file locking waits for persistence is lost after reload
+B253 — Typing a space after commented text silently joins the next word
+B254 — Continue previous numbered list ignores explicit item numbers
+B255 — Sentence case treats formatting boundaries as sentence starts
+B256 — Connected-file reconciliation replaces typing accepted during its asynchronous work
+B257 — Change case resets the selection to paragraph start and misdirects the next edit
+B258 — Editing a fully selected hyperlink's URL removes its rich label formatting
+B259 — Home line spacing cannot override precise paragraph spacing
+B260 — Home alignment affects the entire table or list instead of the targeted cell or item
+B261 — A delayed initial gallery response hides a successfully shared screenshot
+B262 — Style gallery Body Text does not clear the current custom style identity
+B263 — Grow/Shrink Font changes mixed-size text in the opposite direction
+B264 — Clear Notepad browser data retains app-owned history and saved-file handle records
+B265 — Split Cell moves the caret to the row's first cell and misdirects typing
+B266 — Deleting a document tab omits typing accepted during history capture from retained versions
+B267 — Global document shortcuts steal independent field input and can delete the document
+B268 — Applying font size reverses a backward selection and changes the next deletion
+B269 — Source-mode Tab edits leave stale rich content visible after switching mode and reloading
+B270 — Multi-tab DOCX export disables later tabs' odd/even headers when the first tab disables them
+B271 — Copy/Cut in a comment targets a previously selected image and Cut deletes it
+B272 — The documented New comment shortcut opens Insert link when the editor has focus
+B274 — Selected-image Ctrl+Shift+X is intercepted as Cut instead of Strikethrough
+B273 — Editor Redo does not recover a native Undo initiated from the untouched title field
+B275 — Format brush does not copy or clear Layout indentation
+B276 — Format brush omits alignment for ordinary bare-text table cells
+B277 — Acknowledged screenshot deletion can leave quota occupied after a transient cleanup failure
+B278 — Choosing shared feedback during a pending overwrite removes protection for the chosen text
+B279 — External Paste replaces all selected prose but leaves selected drawings behind
+B280 — Sidebar Rename leaves title placeholders in page headers and footers stale
+B281 — Deferred sidebar Rename can rename a different document selected before the prompt opens
+B282 — Copy All includes generated code controls and line numbers in plain-text clipboard content
+B176 — Reopened: Page Break ignores a selection spanning paragraphs
+B283 — Sorting table rows reverses aggregate formula ranges and changes a correct result to #REF!
+B284 — Switching collections during local import overrides the explicitly chosen destination
+B285 — Undo of Insert citation leaves an orphaned citation link
+B286 — Rapid Find-a-tool invocation loses the selected text and redirects the next edit
+B287 — Source-mode status word count collapses fenced code while the statistics dialog includes it
+B288 — A delayed obsolete spelling check can discard the replacement scan until another edit

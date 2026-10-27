@@ -1,0 +1,33 @@
+ent[i]))if(!visited.has(next)){visited.add(next);component.push(next)}if(component.length<2||changedIds&&!component.some(id=>changedIds.has("folder:"+id)))continue;component.sort((a,b)=>nodes.get("folder:"+a).x-nodes.get("folder:"+b).x||a.localeCompare(b));
+const rank=new Map(component.map((id,i)=>[id,i])),root=component[0];for(
+const id of component){
+const left=adj.get(id).filter(other=>rank.get(other)<rank.get(id)).sort((a,b)=>rank.get(b)-rank.get(a));folderRecords.get(id).parent=id===root?null:left[0]||root}}
+const fileRecords=new Map(collectionFiles().map(file=>[file.id,file])),anchors=new Map((library.map.spatialAnchors||[]).filter(anchor=>fileRecords.has(anchor.file)&&folderRecords.has(anchor.folder)).map(anchor=>[anchor.file,anchor.folder])),groups=new Map(collectionFiles().map(file=>[file.id,[]]));for(
+const file of collectionFiles()){
+const parent=noteMeta(file).folder;if(parent&&folderRecords.has(parent))anchors.set(file.id,parent)}for(
+const link of library.map.links||[])if(link.groupFolder){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file;if(a&&b){groups.get(a).push(b);groups.get(b).push(a)}}
+const linksByFile=new Map(collectionFiles().map(file=>[file.id,[]]));for(
+const link of library.map.links||[])if(link.groupFolder){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file;if(a&&b){linksByFile.get(a).push(link);linksByFile.get(b).push(link)}}
+const checked=new Set;for(
+const file of collectionFiles()){if(checked.has(file.id))continue;
+const component=[file.id];checked.add(file.id);for(
+let i=0;i<component.length;i++)for(
+const next of groups.get(component[i]))if(!checked.has(next)){checked.add(next);component.push(next)}
+const groupLinks=new Set(component.flatMap(id=>linksByFile.get(id))),candidates=new Set([...component.map(id=>anchors.get(id)),...[...groupLinks].map(link=>link.groupFolder)].filter(folder=>folderRecords.has(folder)));if(!candidates.size||changedIds&&!component.some(id=>changedIds.has("file:"+id))&&![...candidates].some(id=>changedIds.has("folder:"+id)))continue;for(
+const id of component){
+const node=nodes.get("file:"+id);if(!node)continue;
+let parent=null,x=-Infinity;for(
+const folder of candidates){
+const point=nodes.get("folder:"+folder);if(point&&point.x<node.x&&point.x>x){parent=folder;x=point.x}}noteMeta(fileRecords.get(id)).folder=parent;if(parent){anchors.set(id,parent);expandLibraryDestination(parent)}}
+// Keep a single folder anchor for the group; the remaining collectionFiles() form a chain.
+
+const ordered=component.filter(id=>noteMeta(fileRecords.get(id)).folder).sort((a,b)=>nodes.get("file:"+a).x-nodes.get("file:"+b).x||a.localeCompare(b)),rank=new Map(ordered.map((id,i)=>[id,i]));for(
+const link of groupLinks){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file,parent=a&&noteMeta(fileRecords.get(a)).folder;if(!rank.has(a)||!rank.has(b)||!parent||noteMeta(fileRecords.get(b)).folder!==parent)continue;link.groupFolder=parent;link.groupMember="file:"+(rank.get(a)>rank.get(b)?a:b)}}library.map.spatialAnchors=[...(library.map.spatialAnchors||[]).filter(anchor=>!collectionFiles().some(file=>file.id===anchor.file)),...[...anchors].map(([file,folder])=>({file:file,folder:folder}))]}
+const unlinkSpatialConnection=unlinkFileMapEdge;unlinkFileMapEdge=function(id){
+const edge=displayedMap?.edges.find(edge=>edge.id===id);if(edge?.kind==="spatiallink"){mapChanged(()=>{
+const file=displayedMap.nodes.find(node=>node.id===edge.to)?.file,folder=displayedMap.nodes.find(node=>node.id===edge.from)?.folder;library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(anchor=>anchor.file!==file||anchor.folder!==folder);delete library.map.bends?.[id];mapEdgeSelected=null});return}if(edge?.id.startsWith("folderlink:")){mapChanged(()=>{
+const file=files.find(file=>"file:"+file.id===edge.to);if(file){noteMeta(file).folder=null;library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(anchor=>anchor.file!==file.id)}mapEdgeSelected=null});return}return unlinkSpatialConnection(id)};
+mapActions.

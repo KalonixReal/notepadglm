@@ -1,0 +1,7 @@
+Drop=$("#libraryList");rootDrop.dataset.tip="Files · Drop files or folders here to move to the top level";sbList.setAttribute("aria-multiselectable","true");sbSearch.placeholder="Search files…";
+let starsOnly=false;
+const resizeBar=document.createElement("div");resizeBar.id="sidebarResize";resizeBar.tabIndex=0;resizeBar.setAttribute("role","separator");resizeBar.setAttribute("aria-label","Resize file
+  sidebar");resizeBar.setAttribute("aria-orientation","vertical");sidebar.appendChild(resizeBar);
+function resizeSidebar(width,save=false){width=clamp(width,210,Math.min(520,innerWidth*.65));sidebar.style.width=width+"px";sidebar.style.setProperty("--sidebar-width",width+"px");resizeBar.setAttribute("aria-valuenow",Math.round(width));if
+ (save){library.width=width;saveLibrary()}Images.sync()}if(library.width)resizeSidebar(library.width);resizeBar.onpointerdown=e=>{e.preventDefault();resizeBar.setPointerCapture(e.pointerId);resizeBar.onpointermove=e=>resizeSidebar(e.clientX
+ -sidebar.getBoundingClie

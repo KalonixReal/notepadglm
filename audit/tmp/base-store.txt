@@ -1,0 +1,35 @@
+ck",e=>{e.stopPropagation();showFileMenu(f,more)});sbList.appendChild(it)});renderSidebarFoot()}
+function closeMenus(){ctxMenu.classList.remove("on");fileMenu.classList.remove("on")}
+let fileMenuFor=null;
+function showFileMenu(f,anchor){ctxMenu.classList.remove("on");fileMenuFor=f.id;fileMenu.classList.add("on");
+const r=anchor.getBoundingClientRect();
+const mw=fileMenu.offsetWidth||160,mh=fileMenu.offsetHeight||150;
+let x=Math.min(r.left,window.innerWidth-mw-8);
+let y=r.bottom+4;if(y+mh>window.innerHeight-8)y=r.top-mh-4;fileMenu.style.left=Math.max(8,x)+"px";fileMenu.style.top=Math.max(8,y)+"px"}
+function nextUntitledName(){
+const names=new Set(files.map(f=>f.name));
+let i=1;while(names.has("Untitled"+(i>1?" "+i:"")))i++;return"Untitled"+(i>1?" "+i:"")}
+function activate(f){lastEditorRange=null;pendingInline={};clearTimeout(commitTimer);clearTimeout(saveTimer);clearCellSel();closeMenus();FindRep.close();if(Ink.live)Ink.startLive(false);activeId=f.id;doc=f;titleInput.value=doc.name;renderFr
+ omMd();Undo.init(doc.markdown);if(mode==="source"){srcArea.value=doc.markdown;renderGutter()}Store.save();if(!sbOrder.includes(f.id))sbOrderDirty=true;// R8: only genuinely NEW docs surface once — switching to an existing doc must NEVER
+  reorder the list
+renderSidebar();updateStatus();savePrefs();placeCaretStart(editor);editor.focus()}
+function openFile(id){if(id===activeId){return}flushCommit();Store.save();
+const f=files.find(x=>x.id===id);if(!f)return;activate(f)}
+function createFile(){flushCommit();Store.save();
+const f=Store.newFileObj(nextUntitledName(),"");files.unshift(f);activate(f);toast("New document created")}async 
+function deleteFile(id){
+const f=files.find(x=>x.id===id);if(!f)return;if(!await appConfirm('Delete "'+(f.name||"Untitled")+'"? This cannot be undone.'))return;try{await auditGuardedMutation("Before deleting "+f.name,()=>{
+const wasActive=f.id===activeId;files=files.filter(x=>x.id!==id);try{cache.removeItem(PFX+id);cache.removeItem("notepadV3:rmrec:"+id)}catch(e){}// R7 critic P3-12: also drop the Read-Mode recommendation
+Hist.remove(id);Undo.forget(id);if(!files.length)files=[Store.newFileObj(nextUntitledName(),"")];if(wasActive)activate(collectionFileFallback());else{Store.save();sbOrderDirty=true;renderSidebar()}toast("Document deleted")});await
+  scrubDeletedFileBrowserCopies([id])}catch(error){toast("Could not delete: "+error.message,"warn")}}
+function duplicateFile(id){
+const f=files.find(x=>x.id===id);if(!f)return;flushCommit();Store.save();if(f.protectedFile){toast("Unlock this file before duplicating it.","warn");return}
+const nf=Store.newFileObj((f.name||"Untitled")+" copy",f.markdown);if(NotepadFileVault.isProtected(f.id)){NotepadFileVault.inherit(f.id,nf.id);nf.fileProtection=f.fileProtection}nf.richHtml=f.richHtml;nf.writer=JSON.parse(JSON.stringify(f.w
+ riter||{}));
+const i=files.indexOf(f);files.splice(i+1,0,nf);activate(nf);toast('Duplicated as "'+nf.name+'"')}async 
+function renameActive(){
+const n=await appPrompt("Rename document:",doc.name||"");if(n===null)return;doc.name=n.trim()||doc.name||"Untitled";titleInput.value=doc.name;Store.save();sbOrderDirty=true;// R7-5a: rename re-sorts once
+renderSidebar();updateStatus()}
+function exportById(id){if(id===activeId)flushCommit();
+const f=files.find(x=>x.id===id);if(!f)return;
+const blob=new Blob([f.

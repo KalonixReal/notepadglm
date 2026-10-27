@@ -1,0 +1,12 @@
+{
+  "taskId": "L2-B",
+  "date": "2026-10-27",
+  "url": "http://localhost:3005/",
+  "features": {
+    "F05": {"name": "File map / mind maps (create, edit nodes, inline rename, collapse/expand, zoom/pan)", "stages": [], "findings": []},
+    "F06": {"name": "Graph copy/paste, inline text, edges, collapsed branches", "stages": [], "findings": []}
+  },
+  "predicates": {"pass": 0, "fail": 0, "observations": []},
+  "harnessDisclosures": [],
+  "notCovered": []
+}

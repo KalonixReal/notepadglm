@@ -1,0 +1,16 @@
+)editMapNode(n)}else if(e.key==="Escape"){mapSelected.clear();mapEdgeSelected=null;mapTool="select";mapLinkFrom=null;renderMap()}else mapActions.remove()}else
+  if(/^Arrow/.test(e.key)&&mapSelected.size&&libraryView!=="map"){e.preventDefault();mapChanged(()=>{for(
+const n of[...mapData().nodes,...mapData().comments])if(mapSelected.has(n.id)){
+const delta=e.shiftKey?20:5;if(e.key==="ArrowLeft")n.x-=delta;if(e.key==="ArrowRight")n.x+=delta;if(e.key==="ArrowUp")n.y-=delta;if(e.key==="ArrowDown")n.y+=delta}})}},true);$("#libraryGraph").onclick=()=>{flushCommit();Store.save();library
+ View="map";mapSelected.clear();mapEdgeSelected=null;showWorkspace(true);fitMap()};$("#libraryList").onclick=()=>{libraryView="list";showWorkspace(!!doc.writer?.map);renderSidebar()};
+/* Wiki patterns: stable links, tags, favorites, backlinks, history and excerpts. */
+function uniqueLegacyTarget(name){
+const candidates=files.filter(file=>file.name.toLowerCase()===name.toLowerCase());return candidates.length===1?candidates[0]:null}
+function wikiTargets(f){
+const ids=new Set,html=f.richHtml||"",re=/#notepad-doc-([a-zA-Z0-9_%.-]+)/g;
+let m;while(m=re.exec(html)){try{
+const id=decodeURIComponent(m[1]);if(files.some(f=>f.id===id))ids.add(id)}catch{}}for(
+const match of(f.markdown||"").matchAll(/\[\[([^\]]+)\]\]/g)){
+const title=match[1].split("|").at(-1),target=uniqueLegacyTarget(title);if(target)ids.add(target.id)}return ids}
+let visits=[],visitIndex=-1,navigatingVisit=false;
+function recordVisit(id){if(navigatingVisit)r

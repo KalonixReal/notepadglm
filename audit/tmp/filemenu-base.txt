@@ -1,0 +1,12 @@
+tion closeMenus(){ctxMenu.classList.remove("on");fileMenu.classList.remove("on")}
+let fileMenuFor=null;
+function showFileMenu(f,anchor){ctxMenu.classList.remove("on");fileMenuFor=f.id;fileMenu.classList.add("on");
+const r=anchor.getBoundingClientRect();
+const mw=fileMenu.offsetWidth||160,mh=fileMenu.offsetHeight||150;
+let x=Math.min(r.left,window.innerWidth-mw-8);
+let y=r.bottom+4;if(y+mh>window.innerHeight-8)y=r.top-mh-4;fileMenu.style.left=Math.max(8,x)+"px";fileMenu.style.top=Math.max(8,y)+"px"}
+function nextUntitledName(){
+const names=new Set(files.map(f=>f.name));
+let i=1;while(names.has("Untitled"+(i>1?" "+i:"")))i++;return"Untitled"+(i>1?" "+i:"")}
+function activate(f){lastEditorRange=null;pendingInline={};clearTimeout(commitTimer);clearTimeout(saveTimer);clearCellSel();closeMenus();FindRep.close();if(Ink.live)Ink.startLive(false);activeId=f.id;doc=f;titleInput.value=doc.name;renderFr
+ omMd();Undo.init(doc.markdown);if(mode==="source"){srcArea.value=doc.markdown;renderGutter()}Store.save();

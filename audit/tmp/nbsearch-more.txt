@@ -1,0 +1,24 @@
+t83(file,tab){let cache=notebookTextCache83.get(file);if(!cache){cache=new Map;notebookTextCache83.set(file,cache)}let
+  entry=cache.get(tab.id);if(!entry||entry.markdown!==tab.markdown||entry.richHtml!==tab.richHtml){entry={markdown:tab.markdown,richHtml:tab.richHtml,text:diffDocumentText(tab,false)};cache.set(tab.id,entry)}return entry.text}async 
+function openNotebookLocation83(entry){
+const file=files.find(f=>f.id===entry.fileId);if(!file||fileIsLocked(file))return false;closeWriterDialog();if(recordCollectionId(file)!==activeCollectionId())switchCollection(recordCollectionId(file));if(doc.id!
+@@@
+otebookLocation83(file)});for(
+const node of[...file.writer.map.nodes,...file.writer.map.comments])entries.push({fileId:file.id,nodeId:node.id,name:file.name,tabName:node.text||"Node",text:node.text||"",location:notebookLocation83(file)})}else for(
+const tab of documentContentTabs(file))entries.push({fileId:file.id,tabId:tab.id,name:file.name,tabName:tab.name,text:indexedNotebookText83(file,tab),location:notebookLocation83(file,tab.name)});if(performance.now()-stamp>8){await new
+  Promise(r=>setTimeout(r,0));stamp=performance.now()}}for(
+const comment of library.map.comments||[])entries.push({libraryCommentId:comment.id,collectionId:recordCollectionId(comment),name:"File map
+  comment",text:comment.text||"",location:(library.collections.find(c=>c.id===recordCollectionId(comment))?.name||"")+" / File map"});ready=true;show()})().catch(error=>{if(status.isConnected)status.textContent="Search could not finish:
+  "+error.message});input.focus()}notebookToolButton83("view","Search notebook","searchNotebook",()=>openNotebookSearch83());
+// Notebook-wide search remains in View and Find a tool; no duplicate sidebar row.
+
+function taskLabel83(input){
+const container=input.closest("li,p,div")||input.parentElement,copy=container.cloneNode(true);copy.querySelectorAll("ul,ol,[data-code-ui],input").forEach(n=>n.remove());return copy.textContent.replace(/\s+/g," ").trim()||"Untitled task"}
+function notebookTasks83(){
+const tasks=[];for(
+const file of files){if(fileIsLocked(file)||file.writer?.map)continue;for(
+const tab of documentContentTabs(file)){
+const root=notebookTabRoot83(tab);[...root.content.querySelectorAll("input[data-task]")].forEach((input,index)=>tasks.push({fileId:file.id,tabId:tab.id,label:taskLabel83(input),index:index,markdown:tab.markdown,done:input.hasAttribute("chec
+ ked"),location:notebookLocation83(file,tab.name)}))}}return tasks}async 
+function setNotebookTask83(task,done){if(!await openNotebookLocation83(task))return false;
+const input=editor.querySelectorAll("input[data-task]")[task.index];if(!input||doc.markdown!==task.markdown||taskLabel83(input)!==task.label){toast("Thi

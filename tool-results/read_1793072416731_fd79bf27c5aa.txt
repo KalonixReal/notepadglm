@@ -1,0 +1,172 @@
+     1→
+     2→####################################################################################################
+     3→LINE 1142 (len 978)
+     4→####################################################################################################
+     5→/* patch renderFromMd + serialize through wrappers (defined here, used by both modes) */const _origRenderFromMd=renderFromMd;renderFromMd=function(){const parsed=parseDocSettings(doc.markdown);Object.
+     6→assign(DOC_SETTINGS,parsed.s);const strippedDoc={...doc,markdown:parsed.stripped};const keepDoc=doc;doc=strippedDoc;try{_origRenderFromMd()}finally{doc=keepDoc}applyDocSettings()};const _origSerialize
+     7→=MD.serialize;MD.serialize=function(root){const md=_origSerialize(root);return docSettingsMd()+md};UI.setDocSetting=function(k,v){if(k==="m"&&doc.writer)delete doc.writer.googleMargins;DOC_SETTINGS[k]
+     8→=v;applyDocSettings();flushCommit();Store.save();updateStatus();syncLayoutButtons();const msg=k==="m"?"Margins: "+v:k==="o"?"Orientation: "+v:k==="s"?"Paper size: "+String(v).toUpperCase():"Columns: "
+     9→+v;toast(msg)};function syncLayoutButtons(){document.querySelectorAll("[data-layout]").forEach(b=>b.classList.toggle("on",b.dataset.layout===DOC_SETTINGS.o))}syncLayoutButtons();
+    10→
+    11→####################################################################################################
+    12→LINE 1143 (len 1313)
+    13→####################################################################################################
+    14→/* popups for margins/size/cols */$("#marginsBtn").addEventListener("click",e=>{e.stopPropagation();syncChecks("#popMargins [data-m]",DOC_SETTINGS.m);openPop("margins",e.currentTarget)});$("#sizeBtn")
+    15→.addEventListener("click",e=>{e.stopPropagation();syncChecks("#popSize [data-s]",DOC_SETTINGS.s);openPop("size",e.currentTarget)});$("#colsBtn").addEventListener("click",e=>{e.stopPropagation();syncCh
+    16→ecks("#popCols [data-cols]",String(DOC_SETTINGS.cols));openPop("cols",e.currentTarget)});function syncChecks(sel,val){document.querySelectorAll(sel).forEach(b=>{const c=b.querySelector(".check");if(c)
+    17→c.textContent=b.dataset.m===val||b.dataset.s===val||b.dataset.cols===val?"✓":""})}pops.margins=$("#popMargins");pops.size=$("#popSize");pops.cols=$("#popCols");document.querySelectorAll("#popMargins .
+    18→popitem").forEach(b=>b.addEventListener("click",()=>{UI.setDocSetting("m",b.dataset.m);closePops()}));document.querySelectorAll("#popSize .popitem").forEach(b=>b.addEventListener("click",()=>{UI.setDo
+    19→cSetting("s",b.dataset.s);closePops()}));document.querySelectorAll("#popCols .popitem").forEach(b=>b.addEventListener("click",()=>{UI.setDocSetting("cols",+b.dataset.cols);closePops()}));document.quer
+    20→ySelectorAll("[data-layout]").forEach(b=>b.addEventListener("click",()=>UI.setDocSetting("o",b.dataset.layout)));
+    21→
+    22→####################################################################################################
+    23→LINE 1006 (len 854)
+    24→####################################################################################################
+    25→if(c==="grow"){UI.growShrink(1);return}if(c==="shrink"){UI.growShrink(-1);return}if(c==="clearfmt"){UI.clearFormatting();return}if(c==="sort"){UI.sortLines(b);return}if(c==="selectall"){editor.focus()
+    26→;document.execCommand("selectAll");updateRibbonState();return}if(c==="image"){imgInput.value="";imgInput.click();return}if(c==="imgurl"){openUrlDialog();return}if(c==="pagebreak"){UI.pageBreak();retur
+    27→n}if(c==="coverpage"){UI.coverPage();return}if(c==="linkdlg"){UI.openLinkDialog();return}if(c==="newcmt"){if(mode!=="wysiwyg"){toast("Switch to page view to comment","warn");return}UI.newComment();ret
+    28→urn}if(c==="wordcount"){UI.wordCount();return}if(c==="link"){UI.openLinkDialog();return}if(c==="icode"){UI.inlineCode();return}if(c==="quote"){UI.toggleQuote();return}if(c==="hr"){UI.insertHr();return
+    29→}if(c==="table"){UI.insertTable();return}UI.exec(c)});
+    30→
+    31→####################################################################################################
+    32→LINE 1136 (len 425)
+    33→####################################################################################################
+    34→/* page break */UI.pageBreak=function(){withMutation(()=>{const pb=document.createElement("div");pb.className="np3-pb";pb.setAttribute("contenteditable","false");const r=getRange();let block=r?closest
+    35→TopBlock(r.startContainer):null;if(block)block.insertAdjacentElement("afterend",pb);else editor.insertBefore(pb,editor.lastElementChild);ensureTrailingP();editor.focus()});toast("Page break inserted —
+    36→ pages now split here")};
+    37→
+    38→####################################################################################################
+    39→LINE 1137 (len 726)
+    40→####################################################################################################
+    41→/* cover page */UI.coverPage=function(){withMutation(()=>{const title=document.createElement("h1");title.setAttribute("data-a","center");title.textContent=doc.name||"Untitled";const sub=document.creat
+    42→eElement("p");sub.setAttribute("data-a","center");sub.textContent=(new Date).toLocaleDateString(undefined,{year:"numeric",month:"long",day:"numeric"});const pb=document.createElement("div");pb.classNa
+    43→me="np3-pb";pb.setAttribute("contenteditable","false");const first=editor.firstElementChild;editor.insertBefore(pb,first);editor.insertBefore(sub,pb);editor.insertBefore(title,sub);if(first&&!first.te
+    44→xtContent.trim()&&!first.querySelector("img"))first.remove();ensureTrailingP();editor.focus()});toast("Cover page inserted")};
+    45→
+    46→####################################################################################################
+    47→LINE 1264 (len 1052)
+    48→####################################################################################################
+    49→/* Split explicit breaks at the caret instead of after the whole paragraph. */UI.pageBreak=function(){let bookmark=selectionBookmark();if(!bookmark){const active=activateWritingCaret();if(!active)retu
+    50→rn;bookmark=selectionBookmark()}withMutation(()=>{const r=rangeFromBookmark(bookmark)||getRange();if(!r)return;const block=closestTopBlock(r.startContainer),pb=document.createElement("div");pb.classNa
+    51→me="np3-pb";pb.contentEditable="false";if(block&&/^(P|H[1-6])$/.test(block.tagName)&&block.contains(r.endContainer)){r.deleteContents();const tail=r.cloneRange();tail.setEnd(block,block.childNodes.len
+    52→gth);const next=block.cloneNode(false);next.removeAttribute("data-rid");next.appendChild(tail.extractContents());if(!next.childNodes.length)next.innerHTML="<br>";block.after(pb,next);placeCaretStart(n
+    53→ext);lastEditorRange=getRange()?.cloneRange()}else if(block){block.after(pb);const p=document.createElement("p");p.innerHTML="<br>";pb.after(p);placeCaretStart(p)}else editor.append(pb);ensureTrailing
+    54→P()});schedulePages();toast("Page break inserted")};
+    55→
+    56→####################################################################################################
+    57→LINE 1295 (len 14889)
+    58→####################################################################################################
+    59→/* Shared snapshot validation, durable recovery and a single guarded mutation boundary. */const NotebookLimits=Object.freeze({files:2e4,mapItems:1e4,html:50*1024*1024,image:25*1024*1024,imageBatch:60*
+    60→1024*1024,backup:150*1024*1024,expanded:250*1024*1024});let auditWritePaused=false,auditRecoveryBusy=false,auditDurableTimer=0,auditDurableContent=null,auditDurableSaved=false,auditDurableFailed=false
+    61→,auditDurableGeneration=0;function auditClone(value){return JSON.parse(JSON.stringify(value))}function assertRecordTree(value,depth=0,budget={nodes:0}){if(depth>48||++budget.nodes>5e5)throw Error("Not
+    62→ebook metadata is too large or deeply nested");if(value===undefined||value===null||typeof value==="boolean"||typeof value==="string")return;if(typeof value==="number"){if(!Number.isFinite(value))throw
+    63→ Error("Notebook metadata contains a non-finite number");return}if(typeof value!=="object")throw Error("Notebook metadata has an unsupported value");for(const[key,child]of Object.entries(value)){if(["
+    64→__proto__","constructor","prototype"].includes(key))throw Error("Notebook metadata contains an unsafe property");assertRecordTree(child,depth+1,budget)}}function validateWriterRecord(file){const write
+    65→r=file.writer;if(writer===undefined){validateWriterRecord({...file,writer:{}});return}if(!writer||typeof writer!=="object"||Array.isArray(writer))throw Error("Invalid document settings");for(const key
+    66→ of["header","footer","headerFirst","footerFirst","headerEven","footerEven"])if(writer[key]!==undefined&&(typeof writer[key]!=="string"||writer[key].length>2e4))throw Error("Invalid header or footer")
+    67→;if(writer.library!==undefined&&(!writer.library||typeof writer.library!=="object"||writer.library.folder!==undefined&&writer.library.folder!==null&&typeof writer.library.folder!=="string"))throw Erro
+    68→r("Invalid document folder");if(writer.review!==undefined){const review=writer.review;if(!review||typeof review!=="object"||review.baseline!==undefined&&!Array.isArray(review.baseline))throw Error("In
+    69→valid review baseline");for(const block of review.baseline||[]){if(!block||typeof block.id!=="string"||typeof block.html!=="string"||block.html.length>NotebookLimits.html)throw Error("Invalid review b
+    70→lock");validateExportRich(block.html)}}if(writer.map){const map=writer.map;if(!Array.isArray(map.nodes)||!Array.isArray(map.edges)||!Array.isArray(map.comments)||map.nodes.length+map.comments.length>N
+    71→otebookLimits.mapItems||map.edges.length>NotebookLimits.mapItems*4)throw Error("Invalid or oversized mind map");if(map.view&&(!Number.isFinite(map.view.x)||!Number.isFinite(map.view.y)||!Number.isFini
+    72→te(map.view.z)||map.view.z<=0))throw Error("Invalid mind-map viewport");for(const node of[...map.nodes,...map.comments]){if(!node||typeof node.id!=="string"||typeof node.text!=="string"||node.text.len
+    73→gth>1e5||!Number.isFinite(node.x)||!Number.isFinite(node.y)||Math.abs(node.x)>1e7||Math.abs(node.y)>1e7||node.kind!==undefined&&(typeof node.kind!=="string"||node.kind.length>80||/[\x00-\x1f<>]/.test(
+    74→node.kind))||node.color!==undefined&&(typeof node.color!=="string"||!/^#[a-f0-9]{3,8}$/i.test(node.color)))throw Error("Invalid mind-map node metadata")}for(const edge of map.edges)if(!edge||typeof ed
+    75→ge.id!=="string"||edge.bend!==undefined&&!Number.isFinite(edge.bend))throw Error("Invalid mind-map connection")}for(const merge of Object.values(writer.tableMerges||{})){if(!merge||!Array.isArray(merg
+    76→e.cells)||merge.cells.length>1e4)throw Error("Invalid saved table merge");for(const cell of merge.cells){if(!Number.isInteger(cell.r)||!Number.isInteger(cell.c)||cell.r<0||cell.c<0||typeof cell.html!=
+    77→="string")throw Error("Invalid saved table cell");validateExportRich(cell.html);for(const key of Object.keys(cell.attrs||{}))if(/^on/i.test(key))throw Error("Unsafe saved table attribute")}}const ink=
+    78→exportMetadata(file.markdown,"ink",[]);if(!Array.isArray(ink)||ink.length>2e4)throw Error("Invalid or oversized drawing");for(const stroke of ink)if(!stroke||!Array.isArray(stroke.pts)||stroke.pts.len
+    79→gth>1e5||stroke.pts.some(point=>!Array.isArray(point)||point.length<2||!Number.isFinite(point[0])||!Number.isFinite(point[1])))throw Error("Invalid drawing points")}function assertWorkspaceSchema(snap
+    80→shot){if(!snapshot||snapshot.version!==1||typeof snapshot.id!=="string"||!snapshot.id.trim()||!Array.isArray(snapshot.files)||!snapshot.files.length||snapshot.files.length>NotebookLimits.files||!snaps
+    81→hot.extra||typeof snapshot.extra!=="object"||Array.isArray(snapshot.extra))throw Error("Invalid notebook schema");assertRecordTree(snapshot);const seenIds=new Set;for(const file of snapshot.files){if(
+    82→!file||typeof file.id!=="string"||!file.id.trim()||file.id.length>256||seenIds.has(file.id))throw Error("Invalid or duplicate document ID");seenIds.add(file.id);if(!startupRecordValid(file))throw Erro
+    83→r("Invalid nested document data");if(typeof file.name!=="string"||file.name.length>2e3||typeof file.markdown!=="string"||file.markdown.length>NotebookLimits.html||file.richHtml!==undefined&&file.richH
+    84→tml!==null&&(typeof file.richHtml!=="string"||file.richHtml.length>NotebookLimits.html))throw Error("Invalid or oversized document");validateWriterRecord(file)}if(snapshot.activeId!==undefined&&snapsh
+    85→ot.activeId!==null&&!seenIds.has(snapshot.activeId))throw Error("Invalid active document ID");const rawLibrary=snapshot.extra[LIBRARY_KEY];if(rawLibrary!==undefined){let lib;try{lib=typeof rawLibrary=
+    86→=="string"?JSON.parse(rawLibrary):rawLibrary}catch{throw Error("Invalid library metadata")}if(!lib||typeof lib!=="object"||Array.isArray(lib))throw Error("Invalid library metadata");const folders=lib.
+    87→folders||[],map=lib.map||{},comments=map.comments||[],links=map.links||[];if(!Array.isArray(folders)||!Array.isArray(comments)||!Array.isArray(links))throw Error("Invalid library graph");const nodes=n
+    88→ew Set([...seenIds].map(id=>"file:"+id));for(const folder of folders){if(!folder||typeof folder.id!=="string"||nodes.has("folder:"+folder.id))throw Error("Duplicate or invalid folder");nodes.add("fold
+    89→er:"+folder.id)}for(const comment of comments){if(!comment||typeof comment.id!=="string"||nodes.has(comment.id))throw Error("Duplicate or invalid map comment");nodes.add(comment.id)}const edgeIds=new 
+    90→Set;for(const edge of links){if(!edge||typeof edge.id!=="string"||edgeIds.has(edge.id)||!nodes.has(edge.from)||!nodes.has(edge.to))throw Error("Orphaned or duplicate map edge");edgeIds.add(edge.id)}}i
+    91→f(snapshot.prefs?.theme!==undefined&&!["light","dark"].includes(snapshot.prefs.theme))throw Error("Invalid notebook theme");if(snapshot.prefs?.zoom!==undefined&&!Number.isFinite(Number(snapshot.prefs.
+    92→zoom)))throw Error("Invalid notebook zoom")}function auditDatabase(action,key,value){return new Promise((resolve,reject)=>{const request=indexedDB.open("NotepadRecovery",2);request.onupgradeneeded=()=
+    93→>{const store=request.result.objectStoreNames.contains("records")?request.transaction.objectStore("records"):request.result.createObjectStore("records");if(!store.indexNames.contains("owner"))store.cr
+    94→eateIndex("owner","owner")};request.onerror=()=>reject(request.error||Error("Browser recovery storage is unavailable"));request.onsuccess=()=>{const db=request.result;try{const tx=db.transaction("reco
+    95→rds",action==="get"||action==="list"?"readonly":"readwrite"),store=tx.objectStore("records"),op=action==="get"?store.get(key):action==="list"?store.index("owner").getAll(WORKSPACE_KEY):action==="delet
+    96→e"?store.delete(key):store.put(value,key);let result;op.onsuccess=()=>result=op.result;tx.oncomplete=()=>{db.close();resolve(result)};tx.onabort=tx.onerror=()=>{db.close();reject(tx.error||Error("Brow
+    97→ser recovery transaction failed"))}}catch(error){db.close();reject(error)}}})}async function auditRecoveryCapture(reason,snapshot=exportSnapshot()){assertWorkspaceSchema(snapshot);const entry={key:"re
+    98→covery:"+WORKSPACE_KEY+":"+uid("point"),owner:WORKSPACE_KEY,reason:reason,at:Date.now(),snapshot:auditClone(snapshot)};if(new Blob([JSON.stringify(entry)]).size>NotebookLimits.backup)throw Error("Reco
+    99→very copy exceeds 150 MB; export a source backup before changing this notebook");const previous=(await auditDatabase("list")).filter(item=>item.owner===WORKSPACE_KEY&&item.reason).sort((a,b)=>b.at-a.a
+   100→t);let used=0;for(const[i,record]of previous.entries()){const size=new Blob([JSON.stringify(record)]).size;if(i>=18||used+size>80*1024*1024)await auditDatabase("delete",record.key);else used+=size}awa
+   101→it auditDatabase("put",entry.key,entry);const own=(await auditDatabase("list")).filter(item=>item.owner===WORKSPACE_KEY&&item.reason).sort((a,b)=>b.at-a.at);let retainedBytes=0;for(let index=0;index<o
+   102→wn.length;index++){retainedBytes+=new Blob([JSON.stringify(own[index])]).size;if(index>=20||index>0&&retainedBytes>100*1024*1024)await auditDatabase("delete",own[index].key)}return entry}function audi
+   103→tScheduleDurableCopy(){clearTimeout(auditDurableTimer);const generation=++auditDurableGeneration;auditDurableSaved=false;auditDurableFailed=false;updateSaveState();if(isBooting||auditWritePaused)retur
+   104→n;auditDurableTimer=setTimeout(async()=>{try{const snapshot=exportSnapshot(),content=notebookDurableContent(snapshot);if(content===auditDurableContent){if(generation===auditDurableGeneration)auditDura
+   105→bleSaved=true;updateSaveState();return}const workingKey="working:"+WORKSPACE_KEY+(storageConflict?":conflict:"+sessionId:"");await auditDatabase("put",workingKey,{key:workingKey,owner:WORKSPACE_KEY,at
+   106→:Date.now(),snapshot:snapshot});auditDurableContent=content;if(generation===auditDurableGeneration)auditDurableSaved=true;updateSaveState()}catch(error){if(generation===auditDurableGeneration){auditDu
+   107→rableSaved=false;auditDurableFailed=true}updateSaveState()}},500)}function auditRuntimeState(){return{snapshot:exportSnapshot(),mode:mode,source:srcArea.value,undo:{past:Undo.past.slice(),future:Undo.
+   108→future.slice(),last:Undo.last,currentId:Undo.currentId,states:new Map(Undo.states)},past:libraryMapPast.slice(),future:libraryMapFuture.slice(),recovery:exportRestoreRecovery,view:libraryView}}functio
+   109→n auditRollback(before){const snapshot=before.snapshot;mode=before.mode;srcArea.value=before.source;files=auditClone(snapshot.files);for(const key of Object.keys(extra))delete extra[key];Object.assign
+   110→(extra,auditClone(snapshot.extra));library=exportLibraryData(snapshot);applyTheme(snapshot.prefs.theme,false);zoom=snapshot.prefs.zoom;sidebar.classList.toggle("hidden",snapshot.prefs.sbHidden);activa
+   111→te(files.find(file=>file.id===snapshot.activeId)||files[0]);Object.assign(Undo,before.undo);libraryMapPast.splice(0,libraryMapPast.length,...before.past);libraryMapFuture.splice(0,libraryMapFuture.len
+   112→gth,...before.future);exportRestoreRecovery=before.recovery;libraryView=before.view;showWorkspace(libraryView==="map"||!!doc.writer?.map);renderSidebar()}async function auditGuardedMutation(reason,run
+   113→,validateCurrent=null){if(auditRecoveryBusy)throw Error("Another recovery operation is still running");auditRecoveryBusy=true;auditWritePaused=true;clearTimeout(fileWriteTimer);clearTimeout(auditDurab
+   114→leTimer);const priorBoot=isBooting;let before,started=false;try{before=auditRuntimeState();const fingerprint=auditWorkingFingerprint();await auditRecoveryCapture(reason,before.snapshot);const current=
+   115→exportSnapshot();if(validateCurrent?!validateCurrent():auditWorkingFingerprint()!==fingerprint)throw Error("Notebook changed while the recovery copy was saved. Try again; your newer edits are kept.");
+   116→started=true;isBooting=true;const result=await run();isBooting=priorBoot;if(result!==false){Store.save();saveLibrary()}return result}catch(error){if(started){isBooting=true;try{auditRollback(before)}f
+   117→inally{isBooting=priorBoot}}throw error}finally{isBooting=priorBoot;auditRecoveryBusy=false;auditWritePaused=false;auditScheduleDurableCopy();scheduleFileWrite()}}async function restoreNotebookTransac
+   118→tion(backup,method,options={}){await validateExportBackup(backup);return auditGuardedMutation("Before restoring "+notebookFileCount(backup.notebook.files.length),()=>applyExportRestore(backup,method,o
+   119→ptions))}async function openNotebookRecovery(){try{const records=(await auditDatabase("list")).filter(item=>item.owner===WORKSPACE_KEY&&(item.reason||item.key?.startsWith("working:"))).map(item=>({...
+   120→item,reason:item.reason||"Browser working copy (includes unsaved changes)"})).sort((a,b)=>b.at-a.at);for(let i=0;i<NotepadVault.storage.length;i++){const key=NotepadVault.storage.key(i);if(key.startsW
+   121→ith(WORKSPACE_KEY+":conflict:")||key==="notepad:workspace:"+embeddedSourceData.id){try{const snapshot=JSON.parse(NotepadVault.storage.getItem(key));if(snapshot?.files)records.push({key:key,reason:key.
+   122→includes(":conflict:")?"Conflicting tab copy":"Older browser copy (choose explicitly)",at:snapshot.savedAt||0,snapshot:snapshot})}catch{}}}showWriterDialog("Recovery copies","<p>Automatic copies befor
+   123→e deletion, reset, source editing and restore. Up to 20 recent copies stay in this browser. Export a backup for long-term recovery.</p>"+(records.length?records.map((entry,i)=>'<div class="recovery-ro
+   124→w"><div><strong>'+escHtml(entry.reason)+"</strong><small>"+escHtml(new Date(entry.at).toLocaleString())+" · "+notebookFileCount(entry.snapshot.files.length)+'</small></div><button class="btn" data-rec
+   125→overy-add="'+i+'">Recover files</button><button class="btn" data-recovery-download="'+i+'">Download backup</button></div>').join(""):"<p>No recovery copies yet.</p>"),null);$("#writerDialogBody").oncl
+   126→ick=async event=>{const add=event.target.closest("[data-recovery-add]"),download=event.target.closest("[data-recovery-download]");try{if(download){const entry=records[Number(download.dataset.recoveryD
+   127→ownload)];exportDownload(exportJson(await exportBackup(entry.snapshot)),"Recovery.notepad.json")}if(add){const entry=records[Number(add.dataset.recoveryAdd)],backup=await exportBackup(entry.snapshot);
+   128→await restoreNotebookTransaction(backup,"add");closeWriterDialog()}}catch(error){toast("Recovery failed: "+error.message,"warn")}}}catch(error){toast("Could not open recovery storage: "+error.message,
+   129→"warn")}}function auditWorkingFingerprint(){const snapshot=workspaceSnapshot(0);return JSON.stringify({files:snapshot.files,extra:snapshot.extra,prefs:snapshot.prefs,library:library})}async function a
+   130→uditRecoverDurableWorkingCopy(){try{const loaded=workspace.savedAt||0,before=auditWorkingFingerprint(),working=await auditDatabase("get","working:"+WORKSPACE_KEY);if(working?.snapshot?.savedAt>loaded&
+   131→&auditWorkingFingerprint()===before){await validateExportBackup(await exportBackup(working.snapshot));if(auditWorkingFingerprint()!==before)return;const boot=isBooting;isBooting=true;try{applyExportRe
+   132→store({notebook:working.snapshot,scope:"all",recoveryPending:true},"replace")}finally{isBooting=boot}auditDurableSaved=true;Store.save();toast("Recovered newer edits from this browser’s database.","wa
+   133→rn")}}catch(error){toast("Browser recovery could not be loaded: "+error.message,"warn")}}
+   134→
+   135→####################################################################################################
+   136→LINE 1298 (len 12740)
+   137→####################################################################################################
+   138→/* Integration: explicit recovery controls, portable clipboard, truthful status and accessibility. */async function downloadPortableNotebook(name="notepad.html"){const snapshot=workspaceSnapshot();ver
+   139→ifyPortable(snapshot);downloadBlob(new Blob([await notebookHtml(snapshot)],{type:"text/html"}),name);downloadedAt=Date.now();updateSaveState();return true}function encodeClipboardPacket(packet){return
+   140→ btoa(unescape(encodeURIComponent(JSON.stringify({version:1,...packet}))))}function drawingClipboardPreview(strokes,height){if(!strokes?.length)return"";const canvas=document.createElement("canvas");c
+   141→anvas.width=794;canvas.height=Math.min(4096,Math.max(1,height||1122));const context=canvas.getContext("2d");for(const stroke of strokes){context.strokeStyle=/^#[0-9a-f]{3,8}$/i.test(stroke.c||"")?stro
+   142→ke.c:"#24324a";context.lineWidth=Ink.WIDTHS[stroke.t]?.[stroke.w]||2;context.lineCap=context.lineJoin="round";context.globalAlpha=stroke.t==="hl"?.32:1;context.beginPath();(stroke.pts||[]).forEach((po
+   143→int,i)=>{const x=point[0]*canvas.width,y=point[1]*(height||1122);if(i)context.lineTo(x,y);else context.moveTo(x,y)});context.stroke()}const uri=canvas.toDataURL("image/png");canvas.width=canvas.height
+   144→=1;return'<img alt="Drawing" src="'+uri+'">'}window.addEventListener("paste",event=>{if(activeDialog||mapMode||event.target.closest("input,textarea,select")||!event.target.closest("#editor"))return;co
+   145→nst html=event.clipboardData?.getData("text/html")||"";if(!html.includes("data-notepad-packet"))return;try{const template=document.createElement("template");template.innerHTML=html;const encoded=templ
+   146→ate.content.querySelector("[data-notepad-packet]")?.dataset.notepadPacket;if(!encoded||encoded.length>NotebookLimits.html*2)throw Error("Clipboard packet is too large");const packet=JSON.parse(decodeU
+   147→RIComponent(escape(atob(encoded))));if(packet.version!==1||!["document","ink","image"].includes(packet.kind))return;validateWriterRecord({writer:{},markdown:"\x3c!-- np3:ink "+JSON.stringify(packet.st
+   148→rokes||[])+" --\x3e"});if(["document","ink"].includes(packet.kind)&&(typeof packet.height!=="number"||!Number.isFinite(packet.height)||packet.height<=0||packet.height>1e7))throw Error("Invalid drawing
+   149→ clipboard height");const pasteHeight=Ink.pageBox().h,scaledStrokes=auditClone(packet.strokes||[]);if(packet.kind==="document"){if(!Number.isFinite(pasteHeight)||pasteHeight<=0)throw Error("The page i
+   150→s not ready for drawing paste");for(const stroke of scaledStrokes){for(const point of stroke.pts)point[1]*=packet.height/pasteHeight;stroke.bh=pasteHeight}validateWriterRecord({writer:{},markdown:"\x3
+   151→c!-- np3:ink "+JSON.stringify(scaledStrokes)+" --\x3e"})}event.preventDefault();event.stopImmediatePropagation();if(packet.kind==="document"){withMutation(()=>{if(allObjectsSelected){editor.innerHTML=
+   152→"<p><br></p>";Ink.strokes=[];placeCaretStart(editor.firstElementChild);lastEditorRange=getRange()?.cloneRange()}activateWritingCaret();document.execCommand("insertHTML",false,sanitizeRichHtml(packet.h
+   153→tml||""));mergeImageOriginals83(packet);Ink.strokes.push(...scaledStrokes);Ink.resize()});allObjectsSelected=false;page.classList.remove("all-selected")}else{objectClipboard={...packet,html:sanitizeRi
+   154→chHtml(packet.html||"")};pasteObject()}}catch(error){event.preventDefault();event.stopImmediatePropagation();toast("Could not paste drawing: "+error.message,"warn")}},true);function visibleDocumentTex
+   155→t(){let root=editor;if(mode==="source"){const template=document.createElement("template");template.innerHTML=MD.render(srcArea.value);root=template.content}const walker=document.createTreeWalker(root,
+   156→NodeFilter.SHOW_TEXT|NodeFilter.SHOW_ELEMENT);let node,last=null,text="";while(node=walker.nextNode()){if(node.parentElement?.closest("[data-code-ui],[data-inline-code-tail]"))continue;if(node.nodeTyp
+   157→e===1){if(node.tagName==="BR"&&!node.hasAttribute("data-inline-code-tail"))text+="\n";continue}const block=node.parentElement?.closest("p,h1,h2,h3,h4,h5,h6,li,td,th,pre,blockquote");if(last&&block!==l
+   158→ast)text+="\n";text+=node.nodeValue;last=block}return text}const recoveryRow=document.createElement("div");recoveryRow.className="setting-row";recoveryRow.innerHTML='<div><strong>Recovery copies</stro
+   159→ng><p>Recover notes from before deletion, reset, source editing or restore.</p></div><button class="btn" id="notebookRecovery">Open recovery…</button>';document.querySelector("[data-bspane=settings] .
+   160→settings-card").appendChild(recoveryRow);$("#notebookRecovery").onclick=openNotebookRecovery;const sourceNotice=document.createElement("p");sourceNotice.className="source-notice";sourceNotice.textCont
+   161→ent="Markdown edits can simplify rich formatting. A recovery copy is kept in Settings → Recovery copies.";srcPane.prepend(sourceNotice);let sourceModeRequest=0;const sourceMode=setMode;setMode=async f
+   162→unction(next){const request=++sourceModeRequest,file=activeId;if(next==="source"&&mode!==next){try{flushCommit();const fingerprint=auditWorkingFingerprint();await auditRecoveryCapture("Before editing 
+   163→Markdown source");if(auditWorkingFingerprint()!==fingerprint){toast("Newer edits were kept. Open source again when ready.","warn");return}}catch(error){toast("Could not keep the rich original: "+error
+   164→.message,"warn");return}if(request!==sourceModeRequest||activeId!==file)return}return sourceMode(next)};const auditedSaveState=updateSaveState;updateSaveState=function(){auditedSaveState();if(storageF
+   165→ailed){autoIndicator.textContent=auditDurableSaved?"Saved in browser database · Save HTML":"Not saved · Save HTML";autoIndicator.dataset.state=auditDurableSaved?"local":"warning"}else if(!notebookHand
+   166→le&&!auditDurableSaved){autoIndicator.textContent=auditDurableFailed?"Browser recovery unavailable":"Saving to browser…";autoIndicator.dataset.state=auditDurableFailed?"warning":"saving"}else if(!note
+   167→bookHandle&&downloadedAt){autoIndicator.textContent="Browser saved · HTML copy downloaded"}savedEl.textContent=autoIndicator.textContent;autoIndicator.dataset.tip="Browser copies stay on this device. 
+   168→Connected HTML writes update the chosen file. Downloads and exports are separate copies."};const recoveryBootstrap=setTimeout(async()=>{if(startupError){showWriterDialog("Notebook data could not be re
+   169→ad","<p>"+escHtml(startupError)+'. The original embedded data has not been overwritten. Download it for recovery or choose a valid source backup.</p><button class="btn" id="downloadDamagedData">Downlo
+   170→ad original data</button><button class="btn" id="openDamagedRecovery">Open browser recovery</button>',null);$("#downloadDamagedData").onclick=()=>downloadBlob(new Blob([originalNotebookJSON],{type:"ap
+
+[showing lines 1-170 of 657; use offset=171 with limit to continue reading]

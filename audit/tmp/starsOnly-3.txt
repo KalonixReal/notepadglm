@@ -1,0 +1,10 @@
+lt.storage.length-1;i>=0;i--){
+const key=NotepadVault.storage.key(i);if(key.startsWith(WORKSPACE_KEY+":conflict:"))NotepadVault.storage.removeItem(key)}}catch{}library={folders:[],map:{positions:{},comments:[],view:{x:40,y:40,z:1}}};currentFolder=null;clearFileSelection(
+ );starsOnly=false;files=[Store.newFileObj("Untitled","")];initialFiles=[];sbQuery="";sbSearch.value="";sidebar.style.width="";sidebar.style.removeProperty("--sidebar-width");libraryView="list";activate(files[0]);applyMotion();Store.save();
+ saveLibrary();Backstage.close();toast("Notebook cleared")},"Remove everything");
+const resetApplySource=$("#resetNotebook").onclick;$("#resetNotebook").onclick=()=>{resetApplySource();
+const apply=writerApply;writerApply=()=>{if($("#resetConfirm").value!=="DELETE")return apply();libraryMapPast.length=0;libraryMapFuture.length=0;mapClipboard=null;combinedClipboard=null;objectClipboard=null;visits=[];visitIndex=-1;return
+  apply()}};
+/* New-file dropdown replaces the flat create button. */sbNew.removeEventListener("click",createFile);sbNew.innerHTML='<svg class="ic"><use href="#i-plus"/></svg><span>New</span><svg class="ic new-chevron" aria-hidden="true"><use
+  href="#i-chev-d"/></svg>';sbNew.setAttribute("aria-haspopup","menu");sbNew.setAttribute("aria-expanded","false");
+const newMenu=document.createElement("div");newMenu.className="pop new-menu";newMenu.id="newFileMenu";newMenu.setAtt

@@ -1,0 +1,12 @@
+e+";base64,"+data)}
+function render(node,depth=1){if(node.nodeType===3)return escHtml(node.data);if(node.nodeType!==1)return"";
+const name=node.localName,inner=()=>[...node.childNodes].map(child=>render(child,name==="section"?depth+1:depth)).join("");if(name==="image"){
+const id=(node.getAttributeNS("http://www.w3.org/1999/xlink","href")||node.getAttribute("href")||"").replace(/^#/,"");return images.has(id)?'<img src="'+images.get(id)+'" alt="">':""}
+const tags={p:"p",emphasis:"em",strong:"strong",strikethrough:"s",sub:"sub",sup:"sup",code:"code",cite:"blockquote",poem:"blockquote",v:"p","empty-line":"br",table:"table",tr:"tr",td:"td",th:"th"};if(name==="title")return"<h"+Math.min(6,dep
+ th)+">"+inner()+"</h"+Math.min(6,depth)+">";if(name==="a"){
+const href=node.getAttributeNS("http://www.w3.org/1999/xlink","href")||node.getAttribute("href")||"";return'<a href="'+escAttr(href)+'">'+inner()+"</a>"}
+const tag=tags[name];return tag?"<"+tag+">"+inner()+(tag==="br"?"":"</"+tag+">"):inner()}return[...xml.getElementsByTagNameNS("*","body")].map(node=>render(node)).join("")}async 
+function pdfImport(file){
+const PDF=await offlineModule("pdfModule");if(!PDF.GlobalWorkerOptions.workerSrc){
+const code=await embeddedLibrarySource("pdfWorker"),url=URL.createObjectURL(new Blob([code],{type:"text/javascript"}));importModuleUrls.push(url);PDF.GlobalWorkerOptions.workerSrc=url}
+const task=PDF.getDocument({

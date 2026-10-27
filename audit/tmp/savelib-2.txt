@@ -1,0 +1,10 @@
+);if(lib.fileSort!==undefined&&!["manual","recent","name"].includes(lib.fileSort))throw Error("Invalid saved file sort")};
+const orderingSaveLibrary=saveLibrary;saveLibrary=function(){if(Array.isArray(library.fileOrder))library.fileOrder=canonicalFileOrder();orderingSaveLibrary()};
+/* Internal document sections. Only inactive tabs own stored content payloads. */
+function documentTabWriter(file){const{documentTabs:documentTabs,library:library,googleSource:googleSource,googleImportWarnings:googleImportWarnings,googleBookmarkTabs:googleBookmarkTabs,...content}=file.writer||{};return content}
+function documentTabRestoredWriter(snapshot,file=doc){
+const tabs=file.writer?.documentTabs,metadata=file.writer?.library;return{...auditClone(documentTabWriter({writer:snapshot})),...documentTabSharedMetadata(file),...metadata?{library:metadata}:{},...tabs?{documentTabs:tabs}:{}}}
+function documentTabSharedMetadata(file){
+const writers=[file.writer,...(file.writer?.documentTabs?.items||[]).map(t=>t.content?.writer)];
+const shared={};for(
+const key of["googleSource","googleImportWarnings","googleBookmarkTab

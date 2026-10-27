@@ -1,0 +1,23 @@
+e,true),true);document.addEventListener("paste",e=>{if(!mapMode||activeDialog||e.target.closest("input,textarea,select,#sidebar,#backstage"))return;
+const t=document.createElement("template");t.innerHTML=e.clipboardData?.getData("text/html")||"";
+const marker=t.content.querySelector("[data-notepad-map]")?.dataset.notepadMap;if(!mapClipboard||marker!==mapClipboard.marker){mapClipboard=null;for(
+const card of mapNodes.children)card.classList.remove("map-cut");return}e.preventDefault();e.stopImmediatePropagation();if(libraryView==="map"){pasteFileMapPacket(mapClipboard);return}
+const d=mapData(),ids=new Map,packet=mapClipboard;mapChanged(()=>{for(
+const key of["nodes","comments"])for(
+const n of packet[key]){
+const id=uid("node");ids.set(n.id,id);d[key].push({...n,id:id,x:n.x+35,y:n.y+35})}for(
+const edge of packet.edges)d.edges.push({...edge,id:uid("edge"),from:ids.get(edge.from),to:ids.get(edge.to)});mapSelected=new Set(ids.values())})},true);
+/* Edit directly on the canvas, with no dialog between the user and their nodes. */
+let inlineMapEdit=null,inlineMapTimer=0;
+function persistInlineMapDraft(){clearTimeout(inlineMapTimer);if(!inlineMapEdit)return;if(libraryView==="map")saveLibrary();else{flushCommit();Store.save()}}
+function finishInlineMapEdit(cancel=false){
+const edit=inlineMapEdit;if(!edit)return;clearTimeout(inlineMapTimer);inlineMapEdit=null;
+const value=cancel?edit.original:edit.input.value.trim()||"Untitled",n=[...mapData()?.nodes||[],...mapData()?.comments||[]].find(n=>n.id===edit.id);edit.input.onblur=null;if(n){n.text=value;if(libraryView==="map"){if(!cancel&&value!==edit.o
+ riginal)rememberLibraryMap(edit.before);saveLibrary()}else{flushCommit();if(!cancel&&value!==edit.original)Undo.commit(doc.markdown);Store.save()}}renderMap();mapSurface.focus()}
+function startInlineMapEdit(n){if(inlineMapEdit?.id===n.id){finishInlineMapEdit();return}if(inlineMapEdit)finishInlineMapEdit();flushCommit();
+const card=[...mapNodes.children].find(card=>card.dataset.nodeId===n.id);if(!card)return;mapEdgeSelected=null;mapSelected=new Set([n.id]);for(
+const node of mapNodes.children)node.classList.toggle("selected",node===card);
+const text=card.querySelector(".map-node-text"),input=document.createElement("textarea");input.id="mapInlineEditor";input.className="map-inline-editor";input.value=n.text;input.maxLength=4e3;input.setAttribute("aria-label","Edit
+  "+(card.classList.contains("map-comment")?"comment":"node"));text.replaceWith(input);inlineMapEdit={id:n.id,input:input,original:n.text,before:libraryMapSnapshot()};input.oninput=()=>{n.text=input.value;htmlDirty=true;updateSaveState();cl
+ earTimeout(inlineMapTimer);inlineMapTimer=setTimeout(persistInlineMapDraft,350);input.style.height="auto";input.style.height=Math.max(48,input.scrollHeight)+"px";renderMapEdges()};input.onkeydown=e=>{if(e.key==="Escape"){e.preventDefault()
+ ;e.stopPropagation();finishInlineMapEdit(true)}else if(e.key==="Enter"&&!e.shiftKey){e.preventDefault();e.stopPropagation();finishInlineMapEdit()}};input

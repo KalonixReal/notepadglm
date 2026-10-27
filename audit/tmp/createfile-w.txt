@@ -1,0 +1,7 @@
+ndChild(newMenu);pops.newfile=newMenu;sbNew.onclick=e=>{e.stopPropagation();openPop("newfile",sbNew);sbNew.setAttribute("aria-expanded",String(newMenu.classList.contains("on")))};
+const oldCreateFile=createFile;createFile=function(kind="document",name=null){flushCommit();Store.save();
+const f=Store.newFileObj(name||nextUntitledName(),"");noteMeta(f).folder=currentFolder;if(kind==="mindmap"){f.writer.map={nodes:[{id:uid("node"),x:330,y:220,text:"Central
+  node",color:"#dbeafe"}],edges:[],comments:[],view:{x:0,y:0,z:1}}}files.unshift(f);libraryView="list";closePops();activate(f);toast(kind==="mindmap"?"Mind map created":"Document created")};newMenu.onclick=e=>{
+const b=e.target.closest("[data-new-kind]");if(b)createFile(b.dataset.newKind)};
+/* One SVG/DOM map surface for both ideas and the file graph. */
+const mapSurface=document.createElement("section");mapSurface.id="mapSurface";mapSurface.tabIndex=0;mapSurface.setAttribute("aria-label","Mind map canvas");mapSurface.innerHTML='<div id="mapHi

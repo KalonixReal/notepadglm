@@ -1,0 +1,35 @@
+ecordCollectionId(file)!==activeCollectionId())switchCollection(recordCollectionId(file));if(doc.id!==file.id)await
+  openFile(file.id);if(entry.tabId&&doc.writer?.documentTabs&&doc.writer.documentTabs.activeId!==entry.tabId)selectDocumentTab(entry.tabId);if(mode==="source")await setMode("wysiwyg");closeMobilePanels();return doc.id===file.id}
+let notebookSearchGeneration83=0;
+function openNotebookSearch83(initial=""){flushCommit();FindRep.close();
+const generation=++notebookSearchGeneration83;showWriterDialog("Find all",'<label for="notebookSearchQuery">Find file names and text in all collections, document tabs and mind maps</label><input id="notebookSearchQuery" type="search"
+  placeholder="Search files and text…" spellcheck="false"><p id="notebookSearchStatus" class="dialog-note" role="status">Building search index…</p><div id="notebookSearchResults" class="notebook-tool-results"></div>',null);
+const input=$("#notebookSearchQuery"),status=$("#notebookSearchStatus"),list=$("#notebookSearchResults"),entries=[];input.value=initial;
+let ready=false,timer;
+function show(){if(!list.isConnected||generation!==notebookSearchGeneration83)return;
+const query=input.value.trim(),needle=query.toLowerCase();list.replaceChildren();if(!ready){status.textContent="Building search index…";return}if(!needle){status.textContent="Type to search "+entries.length+" sections. Locked files are
+  excluded until unlocked.";return}
+let total=0,sections=0;
+const matches=[];for(
+const entry of entries){
+const text=entry.lower||(entry.lower=entry.text.toLowerCase());
+let count=0,first=-1,at=0;while((at=text.indexOf(needle,at))!==-1){if(first<0)first=at;count++;at+=Math.max(1,needle.length)}
+const textMatch=count>0;if(!count&&(entry.location||"").toLowerCase().includes(needle)){count=1;first=0}if(count){total+=count;sections++;matches.push({entry:entry,count:count,first:first,textMatch:textMatch})}}status.textContent=total+"
+  matches in "+sections+" sections";
+let shown=0;
+function more(){
+const fragment=document.createDocumentFragment();for(
+const item of matches.slice(shown,shown+80)){const{entry:entry,count:count,first:first,textMatch:textMatch}=item,b=document.createElement("button");b.type="button";b.className="notebook-result";
+const title=document.createElement("strong"),path=document.createElement("small"),snippet=document.createElement("p");title.textContent=entry.name+(entry.tabName?" · "+entry.tabName:"");path.textContent=entry.location+" · "+count+"
+  "+(count===1?"match":"matches");snippet.textContent=(first>65?"…":"")+entry.text.slice(Math.max(0,first-65),first+needle.length+130)+(first+needle.length+130<entry.text.length?"…":"");b.append(title,path,snippet);b.onclick=async()=>{if(en
+ try.libraryCommentId){closeWriterDialog();if(recordCollectionId({collectionId:entry.collectionId})!==activeCollectionId())switchCollection(entry.collectionId);libraryView="map";mapSelected=new
+  Set([entry.libraryCommentId]);mapEdgeSelected=null;showWorkspace(true);fitMap();return}if(!await openNotebookLocation83(entry))return;if(entry.nodeId){mapSelected=new
+  Set([entry.nodeId]);renderMap();fitMap();return}if(!textMatch||doc.writer?.map)return;FindRep.open(false);findInput.value=query;findCaseBtn.classList.remove("on");findWordBtn.classList.remove("on");FindRep.run();if(FindRep.matches.length)
+ FindRep.goto(0)};fragment.append(b)}shown+=80;list.append(fragment);if(shown<matches.length){
+const moreButton=document.createElement("button");moreButton.className="btn";moreButton.textContent="Show more
+  results";moreButton.onclick=()=>{moreButton.remove();more()};list.append(moreButton)}}more()}input.oninput=()=>{clearTimeout(timer);timer=setTimeout(show,120)};input.onkeydown=e=>{if(e.key==="ArrowDown"){e.preventDefault();list.querySelec
+ tor("button")?.focus()}};(async()=>{
+let stamp=performance.now();for(
+const file of files){if(!list.isConnected||generation!==notebookSearchGeneration83)return;if(fileIsLocked(file)){notebookTextCache83.delete(file);continue}if(file.writer?.map){if(!file.writer.map.nodes.length&&!file.writer.map.comments.leng
+ th)entries.push({fileId:file.id,name:file.name,text:"",location:notebookLocation83(file)});for(
+const node of[...file.writer.map.nodes,...file.writer.map.comments])en

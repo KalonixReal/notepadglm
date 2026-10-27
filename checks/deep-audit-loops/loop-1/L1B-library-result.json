@@ -1,0 +1,100 @@
+{
+  "taskId": "L1-B",
+  "agent": "audit subagent L1-B (library/collections/folders/file-management + notebook search)",
+  "session": "l1lib",
+  "date": "2026-10-27",
+  "salvageNote": "Predecessor session was warm with 4 files / 2 collections and pending-edit test text; state was salvageable but partially unknown, so storage was cleared from the loaded page (beforeunload flush repopulated it once; second clear + reload achieved a clean-enough baseline; predecessor synthetic files were reused and deleted during tests).",
+  "environment": "http://localhost:3000/ , headless agent-browser session l1lib, app exposes window.__np3.",
+  "families": [
+    {
+      "family": "F01 documents create/open/switch/duplicate/rename/delete",
+      "steps": "Created doc via sidebar New>Document and via File backstage>New>Blank document; typed marker text via real UI; switched A->B->A; duplicated via row menu; renamed via row-menu Rename dialog and via top title field; deleted single file, tabbed file (2 inner tabs), folder-member file; checked doc().id, writer.library, localStorage files array after each.",
+      "expected": "commit-on-switch preserves pending text; duplicate copies content+library with new id; renames update doc.name/title/sidebar; deletes remove file+tabs and reassign active file with no dangling ids.",
+      "observed": "All as expected. Renames: row-menu route updates sidebar text AND aria-label; title-field route updates visible text but NOT the row aria-label (finding 1) and leaves {title} footer placeholder stale (finding 2 = B280 extension). Footer staleness cleared by any content re-render (control: editor undo refreshed footer).",
+      "controls": "row-menu rename vs title-field rename on same doc (route control); switch-away-and-back re-render control for footer freshness; localStorage diff after each delete.",
+      "predicates": {"pass": 11, "fail": 2, "failDetail": "aria-label stale after title-field rename; footer {title} stale after title-field rename (B280 extension)"}
+    },
+    {
+      "family": "F03 folders",
+      "steps": "New folder Fld-A; moved Untitled 3 into it (row menu Move to folder, native select driven by keyboard); expanded/collapsed; renamed folder to Fld-A-Renamed via edit dialog; created Fld-B and nested it under Fld-A-Renamed (Parent folder select); moved Untitled 2 into nested Fld-B; removed Fld-A-Renamed with files (confirm dialog); verified library.folders + every file's writer.library.folder before/after.",
+      "expected": "folder ids consistent; nested path in search location; removal promotes child folder to root and moves direct files to root per dialog contract; no dangling folder ids.",
+      "observed": "Exactly per contract. Search location for file in nested folder: 'My collection / Fld-A-Renamed / Fld-B / Untitled 2 / Tab 1'. After removal: folders=[Fld-B(parent:null)], direct child file folder=null, nested file kept folder=Fld-B.",
+      "controls": "localStorage library diff pre/post each mutation; nested-vs-root file membership comparison.",
+      "predicates": {"pass": 9, "fail": 0}
+    },
+    {
+      "family": "F03 tags & starred",
+      "steps": "Source survey for tag/star UI (noteMeta init, starsOnly, tagEditor patterns) + sidebar/backstage UI inspection.",
+      "expected": "If UI offers tag/star editing and filters, exercise them.",
+      "observed": "No UI exists: library model has tags[]/star fields but no tag editor, no star toggle, starsOnly is never set true in app-js.txt. Absence = enhancement territory per UR register (not counted).",
+      "predicates": {"pass": 0, "fail": 0, "notApplicable": true}
+    },
+    {
+      "family": "F04 collections",
+      "steps": "Collections manager: created Col-X and Col-Y (each auto-switches context and auto-creates an 'Untitled' file — design); dragged sidebar row 'Untitled 3 copy' onto Col-X tab (moveFilesToCollection); typed pending text in file, switched collection away and back; renamed Col-X->Col-X-Ren via Edit details; deleted Col-Y via typed-name confirm (guarded mutation).",
+      "expected": "pending edits survive collection switches; collectionViews.activeFileId restores per-collection active file; rename syncs tab label; delete removes collection + its files per dialog contract.",
+      "observed": "All as expected: pending text survived round trip; returning to My collection re-activated the remembered file (Untitled 2 at that time); tab label updated after rename; Col-Y and its auto file removed (files array shrank 8->7); drag moved file with collectionId set and folder stripped (folder was already null).",
+      "controls": "activeId/ownership check per collection via doc().writer.library.collectionId; localStorage files count before/after collection delete.",
+      "predicates": {"pass": 7, "fail": 0}
+    },
+    {
+      "family": "F05 sidebar row state + bulk ops",
+      "steps": "Per-row File menu enumerated (Open/Rename/Duplicate/Export/Move to folder/Delete/Protect); checkbox multi-select of 2 files; bulk bar Move... to Fld-B; observed selection highlight vs activeId on switches.",
+      "expected": "bulk move updates both files' folder; selection highlight follows active file.",
+      "observed": "Bulk move set folder=Fld-B for both selected files only. Highlight consistent in all sampled states (S10 intermittency never reproduced — not claimed).",
+      "controls": "third file (in another collection) unchanged after bulk move.",
+      "predicates": {"pass": 4, "fail": 0}
+    },
+    {
+      "family": "F65 notebook-wide search (Find all)",
+      "steps": "Opened via Quick Access 'Find files and text across the notebook'; searched body text ('marker' 5/5 correct sections incl. cross-collection; 'SEEKWORD' 1 section); no-match 'zzzqqq-nothing' -> '0 matches in 0 sections'; clear -> 'Type to search 6 sections'; typed pending text then immediately opened search -> found (flushCommit); searched tab-specific text 'TAB2-UNIQUE-NEEDLE' -> result 'Untitled 3 · Tab 2', click activated file+Tab 2 and opened Find anchored 1/1 (CSS.highlights np3-find size 1); cross-collection result click switched collection + opened file + Find anchored.",
+      "expected": "results navigation activates the right file+tab and anchors; no-match and clear states correct; pending edits searchable.",
+      "observed": "All as expected. Index covers tabs via documentContentTabs (active tab content from outer file, inactive from item.content) with per-tab cache keyed on markdown/richHtml.",
+      "controls": "match counts vs known file contents; find-bar counter '1/1' + CSS highlight range count after navigation.",
+      "predicates": {"pass": 9, "fail": 0}
+    },
+    {
+      "family": "persistence boundary",
+      "steps": "After all library mutations (folder create/rename/nest/move/remove, collection create/rename/delete, file renames/deletes/bulk move, content edits) waited ~2.6s for autosave, captured full localStorage library snapshot, reloaded, captured again, diffed programmatically.",
+      "expected": "identical files (name, markdown length, folder, collectionId), folders (incl. expandedFolders), collections, activeCollectionId, restored active file.",
+      "observed": "ALL_MATCH=True (files/folders/collections/activeColl exact match; active file A-Test restored with mdLen 97; expandedFolders persisted).",
+      "controls": "byte-level JSON diff of pre vs post reload (python equality).",
+      "predicates": {"pass": 6, "fail": 0}
+    }
+  ],
+  "findings": [
+    {
+      "title": "Title-field rename leaves the sidebar row's accessible name (aria-label) stale while its visible label updates",
+      "classification": "CONFIRMED",
+      "repro": "1) Select a document in the sidebar. 2) Rename it by editing the top 'Document name' field (type new name, Enter). 3) Inspect the sidebar row: textContent shows the new name but aria-label keeps the OLD name until a full sidebar re-render (switch file/collection, search, reload).",
+      "expected": "aria-label matches the visible row label after rename.",
+      "observed": "textContent='Renamed-Via-Title', aria-label='Untitled 3' (verified twice via eval; accessibility snapshots kept listing the old name).",
+      "control": "Row-menu Rename… route on the same document updates BOTH textContent and aria-label immediately — same app, different route, proving the title-field path misses the attribute update.",
+      "sourceMechanism": "app-js.txt: final override `refreshSidebarDocument=function(f){if(sbQuery||starsOnly)return renderSidebar();const row=[...sbList.querySelectorAll('[data-document-id]')].find(...);if(!row)return;row.querySelector('.n').textContent=f.name}` updates only the .n label; the earlier `function refreshSidebarDocument(f){...;row.querySelector('.n').textContent=f.name||'Untitled';row.setAttribute('aria-label',f.name||'Untitled')}` (which updates aria-label) is replaced by this later assignment. Reached via titleInput input handler -> debounced Store.save -> persistWorkspace chain `if(changed)refreshSidebarDocument(doc)`.",
+      "impact": "Screen-reader users and accessibility-tree consumers hear/see the old document name indefinitely; automation snapshots misidentify the row. Fix: add row.setAttribute('aria-label',f.name||'Untitled') to the final refreshSidebarDocument."
+    },
+    {
+      "title": "B280 extension: renaming via the top title field also leaves {title} page-footer/header placeholders stale (known trigger was sidebar Rename)",
+      "classification": "CONFIRMED (extension of B280 — materially new trigger route)",
+      "repro": "1) Insert > Header & footer, set Footer to 'FOOTER-T:{title}', Apply (footer renders with current name). 2) Rename the document via the top 'Document name' field. 3) Footer still shows the OLD name.",
+      "expected": "Footer {title} placeholder reflects the current document name.",
+      "observed": "footer='FOOTER-T:Untitled 3' while doc.name='Renamed-Via-Title'; refreshed to the new name only after a content re-render (control: an editor undo/typing triggers renderFromMd->syncWriterPage).",
+      "control": "same document, re-render control after rename (footer became fresh); row-menu rename shows the same staleness (original B280 trigger, rediscovered).",
+      "sourceMechanism": "syncWriterPage() (footer.textContent=...replace(/\\{title\\}/g,doc.name)) is only invoked from renderFromMd wrapper and setWriter; no rename path calls it (app-js.txt).",
+      "impact": "Printed/exported-looking page chrome shows a stale title until arbitrary later re-render. Fix: call syncWriterPage() (or re-render page chrome) on document rename."
+    }
+  ],
+  "knownBugRediscoveries": [
+    "B280 (original sidebar Rename trigger) — reproduced while mapping rename routes",
+    "B281 family — not reproduced this run (no new variant attempted/evidenced)"
+  ],
+  "notCovered": [
+    "Mind-map search result navigation (nodeId path: mapSelected/renderMap/fitMap) — no mind map fixture created",
+    "B281 deferred-rename race variants (80ms window) — timing-based, not attempted",
+    "Bulk Delete dialog runtime path (source-reviewed: flushCommit + guarded mutation; single-file delete covered at runtime)",
+    "Locked/protected files excluded from search index (fileIsLocked branch)",
+    "S10 sidebar selection-highlight intermittency — never reproduced (per UR-19 do not claim)",
+    "Undo affordances for library ops — delete dialogs state 'cannot be undone' by design"
+  ],
+  "predicateTotals": {"pass": 46, "fail": 2}
+}

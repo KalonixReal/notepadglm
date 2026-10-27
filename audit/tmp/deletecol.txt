@@ -1,0 +1,21 @@
+nto the destination collection tab to move between collections.","warn");return}return collectionMapPaste(packet)};
+function deleteCollectionDialog83(id){
+const item=library.collections.find(c=>c.id===id);if(!item)return;
+const count=collectionFiles(id).length;showWriterDialog("Remove collection","<p>Delete <strong>"+escHtml(item.name)+"</strong>, its "+count+" file"+(count===1?"":"s")+', folders and file-map comments? To keep the contents, first drag its
+  files and folders onto another collection tab.</p><p>A recovery copy is required before deletion.</p><label for="deleteCollectionConfirm">Type the collection name to confirm</label><input id="deleteCollectionConfirm"
+  autocomplete="off">',async()=>{if($("#deleteCollectionConfirm").value!==item.name){writerFormFeedback("Type the exact collection name.");return false}try{await auditGuardedMutation("Before deleting collection "+item.name,()=>{
+const deletedFiles=new Set(collectionFiles(id).map(f=>f.id)),deletedFolders=new Set(collectionFolders(id).map(f=>f.id)),deletedComments=new Set((library.map.comments||[]).filter(c=>recordCollectionId(c)===id).map(c=>c.id)),nodes=new
+  Set([...deletedFiles].map(value=>"file:"+value).concat([...deletedFolders].map(value=>"folder:"+value),[...deletedComments]));files=files.filter(f=>!deletedFiles.has(f.id));for(
+const fileId of deletedFiles){Hist.remove(fileId);Undo.forget(fileId);for(
+const key of[PFX+fileId,"notepadV3:hist:"+fileId,"notepadV3:rmrec:"+fileId])delete extra[key]}library.folders=library.folders.filter(f=>!deletedFolders.has(f.id));library.map.comments=(library.map.comments||[]).filter(c=>!deletedComments.ha
+ s(c.id));library.map.links=(library.map.links||[]).filter(e=>!nodes.has(e.from)&&!nodes.has(e.to));for(
+const field of["positions","colors","sizes"])for(
+const node of nodes)dele
+@@@
+if(recordCollectionId(root)===target)return false;folderIds.add(root.id);for(let changed=true;changed;){changed=false;for(
+const f of library.folders)if(folderIds.has(f.parent)&&!folderIds.has(f.id)){folderIds.add(f.id);changed=true}}for(
+const f of files)if(folderIds.has(noteMeta(f).folder))ids.add(f.id)}
+const moving=files.filter(f=>ids.has(f.id)&&recordCollectionId(f)!==target);if(!moving.length&&!folderIds.size)return false;flushCommit();for(
+const id of folderIds){
+const folder=folderById(id);folder.collectionId=target;if(!folderIds.has(folder.parent))folder.parent=null}for(
+const f of moving){

@@ -1,0 +1,213 @@
+ge=>edge.id===id)){mapChanged(()=>{library.map.links=library.map.links.filter(edge=>edge.id!==id);delete library.map.bends?.[id];mapEdgeSelected=null});return}return unlinkFileMapHierarchy(id)};
+const connectionHintRender=renderMap;renderMap=function(){connectionHintRender();if(mapMode&&libraryView==="map"&&mapTool!=="connect")$("#mapHint").textContent=library.map.connectionMode==="link"?"Drag handles to link files · Folders stay
+  unchanged · Right-click a link to delete":"Drag handles to group files in a folder · Right-click a folder connection to move to top level"};
+const fileMapNew=document.createElement("div");fileMapNew.id="fileMapNew";fileMapNew.className="pop new-menu";fileMapNew.setAttribute("role","menu");fileMapNew.innerHTML='<button role="menuitem" data-map-new="document">▤
+  <span>Document</span></button><button role="menuitem" data-map-new="mindmap">◈ <span>Mind map</span></button><button role="menuitem" data-map-new="folder">▰
+  <span>Folder</span></button>';document.body.appendChild(fileMapNew);pops.filemapnew=fileMapNew;
+let fileMapCreatePoint=null,fileMapCreateParent=null;
+function createLinkedFileMapFolder(from,point){
+const before=libraryMapSnapshot(),ids=new Set(library.folders.map(f=>f.id));folderDialog(null,from.folder||(from.file?noteMeta(files.find(f=>f.id===from.file)).folder:null)||null);
+const apply=writerApply;writerApply=()=>{
+const result=apply();if(result===false)return result;
+const folder=library.folders.find(f=>!ids.has(f.id));if(folder){rememberLibraryMap(before);for(
+const n of displayedMap.nodes)if(n.id!=="folder:"+folder.id&&!library.map.positions[n.id])library.map.positions[n.id]={x:n.x,y:n.y};library.map.positions["folder:"+folder.id]={x:point.x-95,y:point.y-45};if(from.file)noteMeta(files.find(f=>f
+ .id===from.file)).folder=folder.id;expandLibraryDestination(folder.id);mapSelected=new Set(["folder:"+folder.id]);commitLibrary()}return result}}
+function openFileMapNew(point=null,connected=false){if(document.body.classList.contains("readmode"))return;
+const selected=displayedMap.nodes.find(n=>mapSelected.has(n.id)),r=mapSurface.getBoundingClientRect(),v=library.map.view;fileMapCreatePoint=point||{x:(r.width/2-v.x)/v.z-95,y:(r.height/2-v.y)/v.z-45};fileMapCreateParent=connected&&selected?
+ .folder?selected.folder:null;openPop("filemapnew",mapRibbon.querySelector("[data-map=add]"))}fileMapNew.onclick=e=>{
+const b=e.target.closest("[data-map-new]");if(!b)return;closePops();if(b.dataset.mapNew==="folder"){
+const oldIds=new Set(library.folders.map(f=>f.id));folderDialog(null,fileMapCreateParent);
+const apply=writerApply;writerApply=()=>{
+const result=apply();if(result===false)return result;
+const created=library.folders.find(f=>!oldIds.has(f.id));if(created){library.map.positions["folder:"+created.id]={...fileMapCreatePoint};expandLibraryDestination(created.parent);mapSelected=new
+  Set(["folder:"+created.id]);saveLibrary();renderSidebar();renderMap()}return result};return}createFile(b.dataset.mapNew);noteMeta(doc).folder=fileMapCreateParent;library.map.positions["file:"+doc.id]={...fileMapCreatePoint};expandLibraryD
+ estination(fileMapCreateParent);libraryView="map";mapSelected=new Set(["file:"+doc.id]);Store.save();saveLibrary();showWorkspace(true);renderSidebar();mapSurface.focus()};
+const mapRename=document.createElement("button");mapRename.className="tool-btn";mapRename.dataset.map="rename";mapRename.textContent="Rename";mapRibbon.querySelector("[data-map=color]").before(mapRename);mapActions.rename=()=>{if(document.b
+ ody.classList.contains("readmode"))return;
+const n=displayedMap.nodes.find(n=>mapSelected.has(n.id));if(!n)return;if(n.folder){folderDialog(folderById(n.folder));return}
+const f=files.find(f=>f.id===n.file);if(!f)return;showWriterDialog("Rename file",'<label for="mapFileName">Name</label><input id="mapFileName" maxlength="200" value="'+escAttr(f.name)+'">',()=>{
+const name=$("#mapFileName").value.trim();if(!name)return false;f.name=name;if(f.id===activeId)titleInput.value=name;commitLibrary()})};
+const graphControls=syncMapControls;syncMapControls=function(){graphControls();
+const graph=libraryView==="map",read=document.body.classList.contains("readmode"),nodes=displayedMap?.nodes.filter(n=>mapSelected.has(n.id))||[],comments=displayedMap?.comments.filter(n=>mapSelected.has(n.id))||[];mapRename.hidden=!graph;ma
+ pRename.disabled=read||nodes.length!==1;if(graph){mapRibbon.querySelector("[data-map=color]").disabled=read||!mapSelected.size;mapRibbon.querySelector("[data-map=duplicate]").disabled=read||!nodes.some(n=>n.file)&&!comments.length;mapRibbo
+ n.querySelector("[data-map=remove]").disabled=read||!mapSelected.size&&!displayedMap.edges.some(edge=>edge.id===mapEdgeSelected);if(mapSelected.size)mapRibbon.querySelector("[data-map=remove]").textContent="Delete"}};
+const graphNodes=mapFiles;mapFiles=function(){
+const graph=graphNodes();for(
+const n of graph.nodes)if(library.map.colors?.[n.id])n.color=library.map.colors[n.id];return graph};
+const nodeColor=mapActions.color;mapActions.color=()=>{if(libraryView!=="map")return nodeColor();
+const colors=["#dbeafe","#dcfce7","#fef3c7","#fce7f3","#e0e7ff"];mapChanged(()=>{library.map.colors=library.map.colors||{};for(
+const n of[...displayedMap.nodes,...displayedMap.comments])if(mapSelected.has(n.id)){
+const color=colors[(colors.indexOf(n.color)+1)%colors.length];if(displayedMap.comments.includes(n))n.color=color;else library.map.colors[n.id]=color}})};
+const nodeArrange=mapActions.arrange;mapActions.arrange=()=>{if(libraryView!=="map")return nodeArrange();mapChanged(()=>{[...displayedMap.nodes,...displayedMap.comments].forEach((n,i)=>{
+const point={x:80+i%3*280,y:80+Math.floor(i/3)*180};if(displayedMap.comments.includes(n))Object.assign(n,point);else library.map.positions[n.id]=point})})};
+function pasteFileMapPacket(packet){if(document.body.classList.contains("readmode"))return;if(packet.cut){moveCutFileMapPacket(packet);return}if(!(packet.fileCopies||[]).length){if((packet.comments||[]).length)mapChanged(()=>{mapSelected.cl
+ ear();for(
+const comment of packet.comments){
+const clone={...comment,collectionId:activeCollectionId(),id:uid("comment"),x:comment.x+35,y:comment.y+35};library.map.comments.push(clone);mapSelected.add(clone.id)}});return}flushCommit();
+const newIds=[];for(
+const source of packet.fileCopies||[]){if(source.protectedFile)continue;
+const f=Store.newFileObj((source.name||"Untitled")+" copy",source.markdown);if(NotepadFileVault.isProtected(source.id)){NotepadFileVault.inherit(source.id,f.id);f.fileProtection=source.fileProtection}f.richHtml=source.richHtml;f.writer=JSON
+ .parse(JSON.stringify(source.writer||{}));noteMeta(f).collectionId=activeCollectionId();
+const parent=noteMeta(f).folder;if(parent&&(!folderById(parent)||recordCollectionId(folderById(parent))!==activeCollectionId()))noteMeta(f).folder=null;files.push(f);
+const node=packet.nodes.find(n=>n.file===source.id);library.map.positions["file:"+f.id]={x:(node?.x||80)+35,y:(node?.y||80)+35};library.map.colors=library.map.colors||{};if(node?.color)library.map.colors["file:"+f.id]=node.color;newIds.push
+ ("file:"+f.id)}for(
+const comment of packet.comments||[]){
+const clone={...comment,collectionId:activeCollectionId(),id:uid("comment"),x:comment.x+35,y:comment.y+35};library.map.comments.push(clone);newIds.push(clone.id)}if(!newIds.length)return;/* File duplication matches library duplication;
+  content deletion/creation is outside diagram Undo. */libraryMapPast.length=0;libraryMapFuture.length=0;mapSelected=new Set(newIds);commitLibrary();toast(newIds.length+" "+(newIds.length===1?"item duplicated":"items duplicated"))}
+const nodeDuplicate=mapActions.duplicate;mapActions.duplicate=()=>{if(libraryView!=="map")return nodeDuplicate();
+const nodes=displayedMap.nodes.filter(n=>mapSelected.has(n.id));pasteFileMapPacket({nodes:nodes,comments:displayedMap.comments.filter(n=>mapSelected.has(n.id)),fileCopies:files.filter(f=>nodes.some(n=>n.file===f.id)).map(f=>JSON.parse(JSON.
+ stringify(f)))})};
+/* Retain direct links when both of their files are copied together. */
+const copyLinkedFilePacket=pasteFileMapPacket;pasteFileMapPacket=function(packet){
+const copying=!packet.cut&&!document.body.classList.contains("readmode"),originals=packet.fileCopies||[],copiedLinks=copying?(packet.edges||library.map.links||[]).filter(edge=>originals.some(f=>"file:"+f.id===edge.from)&&originals.some(f=>"
+ file:"+f.id===edge.to)&&((library.map.links||[]).some(link=>link.id===edge.id)||edge.kind==="filelink")):[];
+const result=copyLinkedFilePacket(packet);if(!copiedLinks.length)return result;
+const copies=[...mapSelected].filter(id=>id.startsWith("file:")),ids=new Map(originals.map((file,index)=>["file:"+file.id,copies[index]]));for(
+const edge of copiedLinks){
+const from=ids.get(edge.from),to=ids.get(edge.to);if(!from||!to)continue;
+const id=uid("filelink");(library.map.links||=[]).push({id:id,from:from,to:to,fromSide:edge.fromSide,toSide:edge.toSide,...edge.controls?{controls:auditClone(edge.controls)}:{},...edge.groupFolder&&ids.has(edge.groupMember)?{groupFolder:edg
+ e.groupFolder,groupMember:ids.get(edge.groupMember)}:{}});
+const bend=library.map.bends?.[edge.id]||edge.bend;if(bend)(library.map.bends||={})[id]=bend}saveLibrary();renderMap();return result};
+function moveCutFileMapPacket(packet){
+const target=displayedMap.nodes.find(n=>mapSelected.has(n.id)&&n.folder),parent=target?.folder||null,newIds=[];mapChanged(()=>{
+let index=0;for(
+const source of packet.fileCopies||[]){
+const f=files.find(f=>f.id===source.id);if(!f)continue;noteMeta(f).folder=parent;
+const n=packet.nodes.find(n=>n.file===f.id);library.map.positions["file:"+f.id]={x:target?target.x+270:(n?.x||80)+35,y:target?target.y+index++*130:(n?.y||80)+35};newIds.push("file:"+f.id)}for(
+const source of packet.comments||[]){
+const n=library.map.comments.find(n=>n.id===source.id);if(!n)continue;n.x+=35;n.y+=35;newIds.push(n.id)}expandLibraryDestination(parent);packet.cut=false;mapSelected=new Set(newIds)})}
+const clipboardGraphRender=renderMap;renderMap=function(){clipboardGraphRender();if(libraryView==="map"&&mapClipboard?.cut)for(
+const card of mapNodes.children)card.classList.toggle("map-cut",mapClipboard.nodes.some(n=>n.id===card.dataset.nodeId)||mapClipboard.comments.some(n=>n.id===card.dataset.nodeId))};
+const nodeRemove=mapActions.remove;mapActions.remove=()=>{if(libraryView!=="map"||!mapSelected.size)return nodeRemove();if(document.body.classList.contains("readmode"))return;
+const selected=displayedMap.nodes.filter(n=>mapSelected.has(n.id)),fileIds=new Set(selected.filter(n=>n.file).map(n=>n.file)),folderIds=new Set(selected.filter(n=>n.folder).map(n=>n.folder)),comments=new
+  Set(displayedMap.comments.filter(n=>mapSelected.has(n.id)).map(n=>n.id));if(!selected.length){mapChanged(()=>{library.map.comments=library.map.comments.filter(n=>!comments.has(n.id));mapSelected.clear()});return}showWriterDialog("Delete
+  selected items?",'<p>Selected files are deleted permanently. Files and subfolders inside removed folders move to the top level.</p><ul
+  class="bulk-delete-list">'+selected.map(n=>"<li>"+escHtml(n.text)+"</li>").join("")+"</ul>",()=>{flushCommit();
+const activeDeleted=fileIds.has(activeId);files=files.filter(f=>!fileIds.has(f.id));for(
+const id of fileIds){Hist.remove(id);Undo.forget(id);try{cache.removeItem(PFX+id);cache.removeItem("notepadV3:rmrec:"+id)}catch{}delete library.map.positions["file:"+id]}library.folders=library.folders.filter(f=>!folderIds.has(f.id));for(
+const folder of library.folders)if(folderIds.has(folder.parent))folder.parent=null;for(
+const f of files)if(folderIds.has(noteMeta(f).folder))noteMeta(f).folder=null;for(
+const id of folderIds)delete library.map.positions["folder:"+id];library.map.comments=library.map.comments.filter(n=>!comments.has(n.id));libraryMapPast.length=0;libraryMapFuture.length=0;mapSelected.clear();mapEdgeSelected=null;clearFileSe
+ lection();if(!files.length)files=[Store.newFileObj("Untitled","")];if(activeDeleted)activate(files[0]);libraryView="map";showWorkspace(true);commitLibrary()},"Delete")};
+/* Double-click blank graph space opens its New menu, like the node canvas. */mapSurface.addEventListener("dblclick",e=>{if(e.target===mapSurface&&libraryView==="map"&&!document.body.classList.contains("readmode"))openFileMapNew(mapPoint(e)
+ )});
+/* The titlebar and keyboard use the same graph history as the ribbon. */
+const fileMapDocumentUndo=UI.doUndo;UI.doUndo=function(kind){if(mapMode&&libraryView==="map")return undoLibraryMap(kind==="redo");return
+  fileMapDocumentUndo.call(this,kind)};window.addEventListener("keydown",e=>{if(!mapMode||libraryView!=="map"||activeDialog||document.body.classList.contains("readmode")||e.target.closest("input,textarea,select,#sidebar,#backstage")||e.ctrl
+ Key||e.metaKey||e.altKey||!/^Arrow/.test(e.key)||!mapSelected.size)return;e.preventDefault();e.stopImmediatePropagation();
+const step=e.shiftKey?20:5,updates=[];for(
+const node of[...displayedMap.nodes,...displayedMap.comments])if(mapSelected.has(node.id)){
+const point={x:node.x+(e.key==="ArrowRight"?step:e.key==="ArrowLeft"?-step:0),y:node.y+(e.key==="ArrowDown"?step:e.key==="ArrowUp"?-step:0)},comment=displayedMap.comments.includes(node);if(point.x!==node.x||point.y!==node.y)updates.push({no
+ de:node,point:point,comment:comment})}
+const horizontal=new Set(updates.filter(({node:node,point:point})=>node.x!==point.x).map(({node:node})=>node.id));if(updates.length)mapChanged(()=>{for(const{node:node,point:point,comment:comment}of
+  updates)if(comment)Object.assign(node,point);else{library.map.positions[node.id]=point;Object.assign(node,point)}if(horizontal.size)updateSpatialFileHierarchy(displayedMap,horizontal)})},true);
+/* Left-to-right map layout and shared, allocation-light canvas rendering. */
+const MAP_ROOT_X=60,MAP_COLUMN=320,MAP_BRANCH_GAP=36;
+let mapFileRecordIndex=new Map;
+const indexedFileMapRender=renderMap;renderMap=function(){mapFileRecordIndex=new Map(files.map(file=>[file.id,file]));return indexedFileMapRender()};
+function mapForest(graph,fileMap=false){
+const nodes=new Map(graph.nodes.map(node=>[node.id,node])),parent=new Map,parentEdge=new Map,adj=new Map,children=new Map;for(
+const id of nodes.keys()){adj.set(id,[]);children.set(id,[])}for(
+const edge of graph.edges){if(!nodes.has(edge.from)||!nodes.has(edge.to)||edge.from===edge.to)continue;adj.get(edge.from).push({id:edge.to,edge:edge});adj.get(edge.to).push({id:edge.from,edge:edge});
+const structural=!fileMap||edge.id.startsWith("parent:")||edge.id.startsWith("folderlink:")||edge.groupFolder&&edge.groupMember===edge.to;if(structural&&!parent.has(edge.to)){parent.set(edge.to,edge.from);parentEdge.set(edge.to,edge.id)}}
+// Resolve malformed/circular input once, without recursion or discarding links.
+
+const checked=new Set;for(
+const id of nodes.keys()){
+let cursor=id;
+const path=new Set;while(parent.has(cursor)&&!checked.has(cursor)&&!path.has(cursor)){path.add(cursor);cursor=parent.get(cursor)}if(path.has(cursor)){parent.delete(cursor);parentEdge.delete(cursor)}for(
+const item of path)checked.add(item)}for(const[child,owner]of parent)children.get(owner).push(child);
+const roots=[...nodes.values()].filter(node=>!parent.has(node.id)).sort((a,b)=>Number(!!b.folder)-Number(!!a.folder)),seen=new Set;for(
+const root of roots){if(seen.has(root.id))continue;seen.add(root.id);
+const queue=[root.id];for(
+let i=0;i<queue.length;i++){
+const id=queue[i];for(
+const child of children.get(id)){if(!seen.has(child)){seen.add(child);queue.push(child)}}for(
+const link of adj.get(id)){
+const other=nodes.get(link.id);if(seen.has(other.id)||parent.has(other.id)||fileMap&&other.folder)continue;parent.set(other.id,id);parentEdge.set(other.id,link.edge.id);children.get(id).push(other.id);seen.add(other.id);queue.push(other.id)
+ }}}
+const finalRoots=roots.filter(root=>!parent.has(root.id)),order=[],depth=new Map;for(
+const root of finalRoots){
+const stack=[{id:root.id,level:0}];while(stack.length){
+const item=stack.pop();depth.set(item.id,item.level);order.push(item.id);
+const list=children.get(item.id);for(
+let i=list.length-1;i>=0;i--)stack.push({id:list[i],level:item.level+1})}}return{nodes:nodes,parent:parent,parentEdge:parentEdge,children:children,roots:finalRoots,order:order,depth:depth,treeEdges:new Set(parentEdge.values())}}
+const layoutFileGraph=mapFiles;mapFiles=function(){
+const graph=layoutFileGraph(),memberships=new Map(files.map(file=>["file:"+file.id,noteMeta(file).folder]));
+// A grouped edge points from the original/anchor file to its attached member.
+for(
+const edge of graph.edges)if(edge.groupFolder&&edge.groupMember&&(edge.groupMember===edge.from||edge.groupMember===edge.to)&&memberships.get(edge.from)===edge.groupFolder&&memberships.get(edge.to)===edge.groupFolder){if(edge.groupMember===e
+ dge.from)[edge.from,edge.to]=[edge.to,edge.from]}graph.flow=mapForest(graph,true);for(
+const anchor of library.map.spatialAnchors||[]){
+const file=graph.flow.nodes.get("file:"+anchor.file),folder=graph.flow.nodes.get("folder:"+anchor.folder);if(file&&folder&&memberships.get(file.id)!==anchor.folder)graph.edges.push({id:"spatial:"+file.id+":"+folder.id,from:folder.id,to:file
+ .id,kind:"spatiallink",bend:library.map.bends?.["spatial:"+file.id+":"+folder.id]||0})}return graph};
+let mapCardFirst=null,mapCardCount=-1,mapCardIndex=new Map;
+function indexedMapCards(){if(mapNodes.firstElementChild!==mapCardFirst||mapNodes.children.length!==mapCardCount){mapCardFirst=mapNodes.firstElementChild;mapCardCount=mapNodes.children.length;mapCardIndex=new
+  Map([...mapNodes.children].map(card=>[card.dataset.nodeId,card]))}return mapCardIndex}nodeAnchor=function(node,side){return{x:node.x+(side==="left"?0:190),y:node.y+(indexedMapCards().get(node.id)?.offsetHeight||90)/2}};
+function arrangedMapPositions(graph,fileMap){
+const flow=graph.flow||mapForest(graph,fileMap),cards=indexedMapCards(),column=Math.max(MAP_COLUMN,...graph.nodes.map(n=>(n.width||190)+100)),height=new Map,span=new Map,positions=new Map;for(
+const node of graph.nodes)height.set(node.id,cards.get(node.id)?.offsetHeight||90);for(
+let i=flow.order.length-1;i>=0;i--){
+const id=flow.order[i],kids=flow.children.get(id),childrenHeight=kids.reduce((sum,child)=>sum+span.get(child),0)+Math.max(0,kids.length-1)*MAP_BRANCH_GAP;span.set(id,Math.max(height.get(id),childrenHeight))}
+let top=80;for(
+const root of flow.roots){
+const stack=[{id:root.id,top:top}];while(stack.length){
+const item=stack.pop(),kids=flow.children.get(item.id),total=span.get(item.id);positions.set(item.id,{x:MAP_ROOT_X+flow.depth.get(item.id)*column,y:item.top+(total-height.get(item.id))/2});
+const childrenHeight=kids.reduce((sum,child)=>sum+span.get(child),0)+Math.max(0,kids.length-1)*MAP_BRANCH_GAP;
+let childTop=item.top+(total-childrenHeight)/2;
+const pending=[];for(
+const child of kids){pending.push({id:child,top:childTop});childTop+=span.get(child)+MAP_BRANCH_GAP}for(
+let i=pending.length-1;i>=0;i--)stack.push(pending[i])}top+=span.get(root.id)+80}
+let commentTop=top+40,rowHeight=0;for(
+let i=0;i<graph.comments.length;i++){
+const comment=graph.comments[i];if(i&&i%3===0){commentTop+=rowHeight+MAP_BRANCH_GAP;rowHeight=0}positions.set(comment.id,{x:MAP_ROOT_X+i%3*MAP_COLUMN,y:commentTop});rowHeight=Math.max(rowHeight,cards.get(comment.id)?.offsetHeight||90)}retur
+ n positions}
+/* Re-evaluate existing connections after a horizontal move; proximity alone
+   never creates a connection. File-only links remain independent of folders. */
+function updateSpatialFileHierarchy(graph,changedIds=null){
+const nodes=new Map(graph.nodes.map(node=>[node.id,node])),folderRecords=new Map(collectionFolders().map(folder=>[folder.id,folder])),adj=new Map(collectionFolders().map(folder=>[folder.id,[]]));for(
+const edge of graph.edges){
+const a=nodes.get(edge.from),b=nodes.get(edge.to);if(a?.folder&&b?.folder&&adj.has(a.folder)&&adj.has(b.folder)){adj.get(a.folder).push(b.folder);adj.get(b.folder).push(a.folder)}}
+const visited=new Set;for(
+const folder of collectionFolders()){if(visited.has(folder.id))continue;
+const component=[folder.id];visited.add(folder.id);for(
+let i=0;i<component.length;i++)for(
+const next of adj.get(component[i]))if(!visited.has(next)){visited.add(next);component.push(next)}if(component.length<2||changedIds&&!component.some(id=>changedIds.has("folder:"+id)))continue;component.sort((a,b)=>nodes.get("folder:"+a).x-n
+ odes.get("folder:"+b).x||a.localeCompare(b));
+const rank=new Map(component.map((id,i)=>[id,i])),root=component[0];for(
+const id of component){
+const left=adj.get(id).filter(other=>rank.get(other)<rank.get(id)).sort((a,b)=>rank.get(b)-rank.get(a));folderRecords.get(id).parent=id===root?null:left[0]||root}}
+const fileRecords=new Map(collectionFiles().map(file=>[file.id,file])),anchors=new Map((library.map.spatialAnchors||[]).filter(anchor=>fileRecords.has(anchor.file)&&folderRecords.has(anchor.folder)).map(anchor=>[anchor.file,anchor.folder]))
+ ,groups=new Map(collectionFiles().map(file=>[file.id,[]]));for(
+const file of collectionFiles()){
+const parent=noteMeta(file).folder;if(parent&&folderRecords.has(parent))anchors.set(file.id,parent)}for(
+const link of library.map.links||[])if(link.groupFolder){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file;if(a&&b){groups.get(a).push(b);groups.get(b).push(a)}}
+const linksByFile=new Map(collectionFiles().map(file=>[file.id,[]]));for(
+const link of library.map.links||[])if(link.groupFolder){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file;if(a&&b){linksByFile.get(a).push(link);linksByFile.get(b).push(link)}}
+const checked=new Set;for(
+const file of collectionFiles()){if(checked.has(file.id))continue;
+const component=[file.id];checked.add(file.id);for(
+let i=0;i<component.length;i++)for(
+const next of groups.get(component[i]))if(!checked.has(next)){checked.add(next);component.push(next)}
+const groupLinks=new Set(component.flatMap(id=>linksByFile.get(id))),candidates=new Set([...component.map(id=>anchors.get(id)),...[...groupLinks].map(link=>link.groupFolder)].filter(folder=>folderRecords.has(folder)));if(!candidates.size||c
+ hangedIds&&!component.some(id=>changedIds.has("file:"+id))&&![...candidates].some(id=>changedIds.has("folder:"+id)))continue;for(
+const id of component){
+const node=nodes.get("file:"+id);if(!node)continue;
+let parent=null,x=-Infinity;for(
+const folder of candidates){
+const point=nodes.get("folder:"+folder);if(point&&point.x<node.x&&point.x>x){parent=folder;x=point.x}}noteMeta(fileRecords.get(id)).folder=parent;if(parent){anchors.set(id,parent);expandLibraryDestination(parent)}}
+// Keep a single folder anchor for the group; the remaining collectionFiles() form a chain.
+
+const ordered=component.filter(id=>noteMeta(fileRecords.get(id)).folder).sort((a,b)=>nodes.get("file:"+a).x-nodes.get("file:"+b).x||a.localeCompare(b)),rank=new Map(ordered.map((id,i)=>[id,i]));for(
+const link of groupLinks){
+const a=nodes.get(link.from)?.file,b=nodes.get(link.to)?.file,parent=a&&noteMeta(fileRecords.get(a)).folder;if(!rank.has(a)||!rank.has(b)||!parent||noteMeta(fileRecords.get(b)).folder!==parent)continue;link.groupFolder=parent;link.groupMemb
+ er="file:"+(rank.get(a)>rank.get(b)?a:b)}}library.map.spatialAnchors=[...(library.map.spatialAnchors||[]).filter(anchor=>!collectionFiles().some(file=>file.id===anchor.file)),...[...anchors].map(([file,folder])=>({file:file,folder:folder})
+ )]}
+const unlinkSpatialConnection=unlinkFileMapEdge;unlinkFileMapEdge=function(id){
+const edge=displayedMap?.edges.find(edge=>edge.id===id);if(edge?.kind==="spatiallink"){mapChanged(()=>{
+const file=displayedMap.nodes.find(node=>node.id===edge.to)?.file,folder=displayedMap.nodes.find(node=>node.id===edge.from)?.folder;library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(anchor=>anchor.file!==file||anchor.folder
+ !==folder);delete library.map.bends?.[id];mapEdgeSelected=null});return}if(edge?.id.startsWith("folderlink:")){mapChanged(()=>{
+const file=files.find(file=>"file:"+file.id===edge.to);if(file){noteMeta(file).folder=null;library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(anchor=>anchor.file!==file.id)}mapEdgeSelected=null});return}return
+  unlinkSpatialConnection(id)};mapActions.

@@ -1,0 +1,20 @@
+ontains(event.target)||event.target===srcArea)lastEdit83=performance.now()},true);
+const scheduleDisk83=scheduleFileWrite;scheduleFileWrite=function(){clearTimeout(fileWriteTimer);if(auditWritePaused||!notebookHandle)return;fileWriteTimer=setTimeout(
+function idleSave(){if(editorComposing||performance.now()-lastEdit83<1400){fileWriteTimer=setTimeout(idleSave,1e3);return}writeNotebookFile()},2200)};async 
+function removeFolder83(id){
+const folder=folderById(id);if(!folder)return false;if(!await appConfirm("Remove “"+folder.name+"”? Its files and child folders will stay in this collection and move to its root."))return false;await auditGuardedMutation("Before removing
+  folder "+folder.name,()=>{if(!folderById(id))return false;library.folders=library.folders.filter(f=>f.id!==id);for(
+const f of library.folders)if(f.parent===id)f.parent=null;for(
+const f of files)if(noteMeta(f).folder===id)noteMeta(f).folder=null;
+const node="folder:"+id;library.map.links=(library.map.links||[]).filter(e=>e.from!==node&&e.to!==node);for(
+const field of["positions","colors","sizes","spatialAnchors"])if(library.map[field]&&!Array.isArray(library.map[field]))delete
+  library.map[field][node];if(Array.isArray(library.map.spatialAnchors))library.map.spatialAnchors=library.map.spatialAnchors.filter(a=>a!==node&&a?.id!==node&&a?.from!==node&&a?.to!==node&&a?.folder!==id);
+const validEdges=freeLibraryEdgeIds(library,files);for(
+const field of["controls","bends"])for(
+const edge of Object.keys(library.map[field]||{}))if(!validEdges.has(edge))delete library.map[field][edge];library.expandedFolders=(library.expandedFolders||[]).filter(value=>value!==id);mapSelected.delete(node);if(currentFolder===id)curren
+ tFolder=null;closeWriterDialog();commitLibrary()});return true}
+const originalFolderDialog83=folderDialog;folderDialog=function(folder,...args){
+const result=originalFolderDialog83(folder,...args);if(folder&&$("#folderRemove"))$("#folderRemove").onclick=async()=>{try{await removeFolder83(folder.id)}catch(error){writerFormFeedback(error.message)}};return result};
+/* Offline proofing: bounded local typing rules; dictionary work stays in a worker. */
+const PROOF_KEY84="notepad:proofing:v1";
+const proofRules84={i:"I",teh:"the",hte:"the",thier:"their",recieve:"receive",recieved:"received",recieving:"receiving",definately:"definitely",seperate:"separate",seperately:"separately",occured:"occurred",occurence:"occu

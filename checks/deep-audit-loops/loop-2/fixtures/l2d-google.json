@@ -1,0 +1,70 @@
+{
+ "format": "notepad-google-docs",
+ "document": {
+  "title": "L2D Google Doc",
+  "tabs": [
+   {
+    "tabProperties": {
+     "tabId": "t1",
+     "title": "Main tab"
+    },
+    "documentTab": {
+     "body": {
+      "content": [
+       {
+        "paragraph": {
+         "elements": [
+          {
+           "textRun": {
+            "content": "Hello from google tab one"
+           }
+          }
+         ]
+        }
+       },
+       {
+        "paragraph": {
+         "elements": [
+          {
+           "textRun": {
+            "content": "Second paragraph with bold",
+            "textStyle": {
+             "bold": true
+            }
+           }
+          }
+         ]
+        }
+       }
+      ]
+     }
+    },
+    "childTabs": [
+     {
+      "tabProperties": {
+       "tabId": "t2",
+       "title": "Sub tab"
+      },
+      "documentTab": {
+       "body": {
+        "content": [
+         {
+          "paragraph": {
+           "elements": [
+            {
+             "textRun": {
+              "content": "Sub tab content"
+             }
+            }
+           ]
+          }
+         }
+        ]
+       }
+      }
+     }
+    ]
+   }
+  ]
+ }
+}

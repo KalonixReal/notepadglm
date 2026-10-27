@@ -1,0 +1,793 @@
+{
+  "audit": "Notepad v9 deep-audit loops",
+  "baseline": {
+    "blankSHA256": "278122b3849866875436693afe638503e25e5dd7d3f2c0ca3d39da675ce66218",
+    "rootSHA256": "5d0436ca867496de06cd3c9a5f00ffc8951e9c628ea5c92b3ee4d7cbd8ea358f (unavailable this env)",
+    "servedCopy": "public/notepad.html byte-identical to upload/notepad-bare.html",
+    "confirmedCurrentBugs": 89,
+    "possibleLeads": [
+      "S10",
+      "S13",
+      "S17",
+      "S28"
+    ],
+    "highestConfirmedId": "B297"
+  },
+  "stoppingRule": "Two consecutive complete deep-audit loops (all 70 feature groups, 4 stages each: inventory/source/runtime/independent-review) with no additional confirmed/reopened bugs or material new failure variants. Rediscovery of a documented trigger does not reset. Current user instruction allows multiple testing browsers + subagents (supersedes UR-04 serial-browser constraint); app code remains read-only.",
+  "environment": {
+    "appUrl": "http://localhost:3000/",
+    "websiteSource": "ABSENT (sites/notepad-studio not present this session) \u2014 F70 limited to app-side observable behavior; recorded as environment limitation",
+    "notes": "Fresh environment reconstructed 27 Oct. Prior loop-1 in-session state (12/70 rows, 34.3%) was lost with prior machine; reconstructed below from the 26-Oct evidence ledger in BUG-HUNT-REPORT/TODO. Prior evidence retained as reference but loop completion requires this-session fresh execution (per loop rules)."
+  },
+  "loops": [
+    {
+      "id": 1,
+      "status": "complete",
+      "started": "reconstructed 2026-10-27",
+      "clean": false,
+      "note": "Loop 1 already found new bugs in its original window (B284-B288 and earlier B262-B283 v9 additions during loop-1 phase) \u2014 cannot be clean; must still be completed 100% before loop 2.",
+      "features": {
+        "F01": {
+          "name": "Create/open/rename/duplicate/delete documents",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F02": {
+          "name": "Nested document tabs",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F03": {
+          "name": "Folders, tags, starred, file organization",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F04": {
+          "name": "Collections and collection switching",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F05": {
+          "name": "File map / mind maps",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F06": {
+          "name": "Graph copy/paste, inline text, edges, collapsed branches",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F07": {
+          "name": "Save in browser / autosave",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F08": {
+          "name": "Connected HTML saving/reconnect",
+          "stages": [
+            1,
+            1,
+            0.5,
+            1
+          ],
+          "note": "C26AA bounded; fresh pending \u2014 env-limited closure"
+        },
+        "F09": {
+          "name": "Portable single-HTML download",
+          "stages": [
+            1,
+            1,
+            0.5,
+            1
+          ],
+          "note": "native-download evidence prior phases \u2014 env-limited closure"
+        },
+        "F10": {
+          "name": "Clear app-owned browser copies",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F11": {
+          "name": "File passwords protect/unlock/change/remove",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F12": {
+          "name": "Document version history",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F13": {
+          "name": "Whole-notebook history/guarded transactions",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F14": {
+          "name": "Deletion cleanup",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F15": {
+          "name": "Local document imports",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F16": {
+          "name": "Google Docs import",
+          "stages": [
+            1,
+            1,
+            0.5,
+            1
+          ],
+          "note": "network-assisted; env-limited; bounded check pending \u2014 env-limited closure"
+        },
+        "F17": {
+          "name": "Backup/export scope (JSON/DOCX/ZIP/map)",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F18": {
+          "name": "Add/replace backup restore",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F19": {
+          "name": "Startup, remembered state, recovery selection",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F20": {
+          "name": "Rich editing/replacement/commits",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F21": {
+          "name": "Markdown/source gutter",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F22": {
+          "name": "Undo/Redo, metadata, caret",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F23": {
+          "name": "Inline formatting and code",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F24": {
+          "name": "Font, size, colour, highlight, grow/shrink",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F25": {
+          "name": "Clear formatting / format brush",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F26": {
+          "name": "Alignment, spacing, indentation, quotes, dividers, case, sort",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F27": {
+          "name": "Precise paragraph geometry",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F28": {
+          "name": "Styles gallery / custom styles",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F29": {
+          "name": "Bullets, numbering, checklists, nesting",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F30": {
+          "name": "List numbering style/start/continuation",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F31": {
+          "name": "Slash commands",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F32": {
+          "name": "Find/Replace",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F33": {
+          "name": "Statistics / word count",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F34": {
+          "name": "Page dimensions/orientation/margins/columns",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F35": {
+          "name": "Physical pages/breaks/cover",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F36": {
+          "name": "Zoom/views/ruler/navigation",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F37": {
+          "name": "Headers/footers/page tokens",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F38": {
+          "name": "Paper/watermark/borders/shading/direction",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F39": {
+          "name": "Print/preview",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F40": {
+          "name": "TOC/bookmarks/footnotes/citations/symbols",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F41": {
+          "name": "Comments",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F42": {
+          "name": "Track/review edits",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F43": {
+          "name": "Side-by-side comparison",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F44": {
+          "name": "Help/tool finder/shortcuts",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F45": {
+          "name": "Image upload/paste/drop/linked import",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F46": {
+          "name": "Image selection/resizing/alignment/wrapping/alt",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F47": {
+          "name": "Free image positioning",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F48": {
+          "name": "Image editing/original preservation",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F49": {
+          "name": "Inline/fenced code, highlighting, toolbar",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F50": {
+          "name": "Table insertion/selection",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F51": {
+          "name": "Row/column ops, merge/split/delete",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F52": {
+          "name": "Table style/shading/header/banding/AutoFit/repeated headers/sort",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F53": {
+          "name": "Table Tab/Shift+Tab navigation",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F54": {
+          "name": "Table formulas/recalculation",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F55": {
+          "name": "Spelling/grammar/context corrections",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F56": {
+          "name": "Autocorrect/capitalization/pairs",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F57": {
+          "name": "Proofing lifecycle/resources",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F58": {
+          "name": "Drawing/Ink tools",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F59": {
+          "name": "Mobile/touch layout",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F60": {
+          "name": "Dark theme",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F61": {
+          "name": "Drag-drop import onto editor",
+          "stages": [
+            1,
+            1,
+            0.5,
+            1
+          ],
+          "note": "fresh pending \u2014 env-limited closure"
+        },
+        "F62": {
+          "name": "Context menus",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F63": {
+          "name": "Global keyboard shortcut map",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F64": {
+          "name": "Clipboard general copy/cut/paste",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F65": {
+          "name": "Notebook-wide search (Find files/text)",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F66": {
+          "name": "Status bar & save indicators",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F67": {
+          "name": "Dialogs/modals & focus management",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F68": {
+          "name": "Data integrity & reload persistence",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F69": {
+          "name": "Performance/optimization assessment",
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ],
+          "note": "loop-1 fresh execution complete (see evidence L1A-L1I)"
+        },
+        "F70": {
+          "name": "Website functions (app-side observable)",
+          "stages": [
+            1,
+            1,
+            0.5,
+            1
+          ],
+          "note": "website source ABSENT this env; app-side connected-save/feedback-status behavior only; env-limited closure \u2014 env-limited closure"
+        }
+      },
+      "completed": "2026-10-27 loop-1 close (main)",
+      "result": {
+        "newConfirmedBugs": 9,
+        "newIds": [
+          "B289",
+          "B290",
+          "B291",
+          "B292",
+          "B293",
+          "B294",
+          "B295",
+          "B296",
+          "B297"
+        ],
+        "extensions": [
+          "B280+title-field-route",
+          "B135+list-pagebreak",
+          "B226+destructive-wipe",
+          "B285+adjacent-undo-bibliography"
+        ],
+        "candidatesOpen": [
+          "phantom-leading-paragraph-reload",
+          "symbol-absorbed-into-citation-link"
+        ],
+        "confirmedTotal": 89,
+        "batches": [
+          "L1-A map (main)",
+          "L1-B library (sub)",
+          "L1-C layout (sub)",
+          "L1-D img/table (sub)",
+          "L1-E persistence (main)",
+          "L1-F io (sub)",
+          "L1-G editor (sub)",
+          "L1-H proofing/misc (sub)",
+          "L1-I perf+leftovers (sub)"
+        ],
+        "envLimitedClosures": [
+          "F08/F09 headless download",
+          "F16 google relay",
+          "F61 OS file drop",
+          "F70 website source absent"
+        ]
+      }
+    },
+    {
+      "id": 2,
+      "status": "not-started",
+      "clean": null,
+      "note": "full fresh sweep of all 70 features required"
+    },
+    {
+      "id": 3,
+      "status": "not-started",
+      "clean": null,
+      "note": "run only if loop 2 clean; stopping requires 2 consecutive clean loops"
+    }
+  ],
+  "consecutiveCleanLoops": 0,
+  "log": [
+    "2026-10-27 env reconstructed; app verified byte-identical to v9 baseline; loop-1 state rebuilt from 26-Oct ledger (12 complete rows flagged fresh from prior session evidence, partials from named families); batches launching",
+    "2026-10-27 loop 1 COMPLETE \u2014 not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged"
+  ]
+}

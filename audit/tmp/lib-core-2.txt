@@ -1,0 +1,35 @@
+eItem(PFX+id);cache.removeItem("notepadV3:rmrec:"+id)}catch{}Hist.remove(id);Undo.forget(id);delete library.map.positions?.["file:"+id]}visits=visits.filter(id=>!deleted.has(id));visitIndex=Math.min(visitIndex,visits.length-1);clearFileSele
+ ction();sbOrderDirty=true;if(!files.length)files=[Store.newFileObj("Untitled","")];if(wasActive)activate(collectionFileFallback());commitLibrary();toast(selected.length+" "+(selected.length===1?"file deleted":"files
+  deleted"))},"Delete")};sbList.addEventListener("keydown",e=>{
+const row=e.target.closest("[data-document-id]"),mod=e.ctrlKey||e.metaKey;if(mod&&e.key.toLowerCase()==="a"){e.preventDefault();e.stopImmediatePropagation();selectedFiles=new
+  Set([...sbList.querySelectorAll("[data-document-id]")].map(row=>row.dataset.documentId));syncFileSelection();return}if(e.key==="Escape"){e.preventDefault();e.stopImmediatePropagation();clearFileSelection();return}if(selectedFiles.size&&["
+ Delete","Backspace"].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();$("#deleteSelectedFiles").click();return}if(!row||e.target.closest(".more"))return;if(e.target.matches(".file-check")&&["
+  ","Enter"].includes(e.key)){e.stopImmediatePropagation();return}if(e.shiftKey&&["ArrowDown","ArrowUp"].includes(e.key)){e.preventDefault();e.stopImmediatePropagation();
+const rows=[...sbList.querySelectorAll("[data-document-id]")],index=rows.indexOf(row),next=rows[Math.max(0,Math.min(rows.length-1,index+(e.key==="ArrowDown"?1:-1)))];if(!fileSelectionAnchor)fileSelectionAnchor=row.dataset.documentId;selectF
+ ile(next.dataset.documentId,true,mod);next.tabIndex=0;next.focus()}else if(e.key===" "&&!e.target.matches("input")){e.preventDefault();e.stopImmediatePropagation();selectFile(row.dataset.documentId,false,true)}else
+  if(e.key==="Enter"&&!e.target.matches("input"))clearFileSelection()},true);
+function canMoveLibraryFolder(id,parent){if(!folderById(id)||parent&&!folderById(parent))return false;
+const seen=new Set;while(parent){if(parent===id||seen.has(parent))return false;seen.add(parent);parent=folderById(parent)?.parent}return true}
+function expandLibraryDestination(parent){
+const expanded=new Set(library.expandedFolders||[]),seen=new Set;while(parent&&!seen.has(parent)){seen.add(parent);expanded.add(parent);parent=folderById(parent)?.parent}library.expandedFolders=[...expanded]}
+function moveLibraryFiles(ids,parent){if(parent&&!folderById(parent))return;flushCommit();
+const moving=new Set(ids),moved=files.filter(f=>moving.has(f.id));for(
+const f of moved)noteMeta(f).folder=parent;expandLibraryDestination(parent);commitLibrary();if(moved.length)toast(moved.length+" "+(moved.length===1?"file moved":"files moved"))}
+function libraryDrag(transfer){if(transfer.types.includes("application/x-notepad-folder"))return{folder:transfer.getData("application/x-notepad-folder")};
+let ids;try{ids=JSON.parse(transfer.getData("application/x-notepad-files"))}catch{}return{files:Array.isArray(ids)?ids:[transfer.getData("application/x-notepad-file")].filter(Boolean)}}
+function clearLibraryDropHints(){for(
+const el of sidebar.querySelectorAll(".library-drop-target"))el.classList.remove("library-drop-target")}
+function bindLibraryDrop(target,parent){target.ondragover=e=>{
+const types=e.dataTransfer.types;if(!types.some(type=>["application/x-notepad-folder","application/x-notepad-files","application/x-notepad-file"].includes(type)))return;e.preventDefault();e.stopPropagation();e.dataTransfer.dropEffect="move"
+ ;clearLibraryDropHints();target.classList.add("library-drop-target")};target.ondragleave=e=>{if(!target.contains(e.relatedTarget))target.classList.remove("library-drop-target")};target.ondrop=e=>{e.preventDefault();e.stopPropagation();clea
+ rLibraryDropHints();
+const packet=libraryDrag(e.dataTransfer);if(packet.folder){if(!canMoveLibraryFolder(packet.folder,parent)){toast("A folder cannot go inside itself or its subfolders","warn");return}
+const folder=folderById(packet.folder);if(folder.parent===parent)return;flushCommit();folder.parent=parent;expandLibraryDestination(parent);commitLibrary();toast("Folder moved")}else
+  if(packet.files.length)moveLibraryFiles(packet.files,parent)}}bindLibraryDrop(rootDrop,null);
+const moveButton=document.createElement("button");moveButton.dataset.fm="move";moveButton.textContent="Move to folder…";fileMenu.insertBefore(moveButton,fileMenu.lastElementChild);moveButton.onclick=()=>{
+const f=files.find(f=>f.id===fileMenuFor);if(!f)return;closeMenus();showWriterDialog("Move "+f.name,'<label for="moveFolder">Folder</label><select
+  id="moveFolder">'+folderOptions(noteMeta(f).folder)+"</select>",()=>{noteMeta(f).folder=$("#moveFolder").value||null;commitLibrary()})};
+const originalDuplicate=duplicateFile;duplicateFile=function(id){originalDuplicate(id);if(doc.writer?.map){renderMap();Store.save()}};for(
+const method of["undo","redo"]){
+const previous=Undo[method];Undo[method]=function(){
+const metadata=doc.writer?.library,result=previous.call(this);return result&&metadata?{...result,writer:{...result.writer,lib

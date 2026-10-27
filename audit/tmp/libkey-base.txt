@@ -1,0 +1,7 @@
+map(el=>el.dataset.fn));
+let n=1;while(used.has(String(n)))n++;return String(n)};
+/* Notebook workspace: folders, linked notes and offline map canvases. */
+const LIBRARY_KEY="notepad:library:v2";
+let library;try{library=JSON.parse(cache.getItem(LIBRARY_KEY)||"{}")}catch{library={}}library.folders=Array.isArray(library.folders)?library.folders.filter(f=>f&&typeof f.id==="string"&&typeof
+  f.name==="string"):[];library.expandedFolders=Array.isArray(library.expandedFolders)?library.expandedFolders.filter(id=>library.folders.some(f=>f.id===id)):[];library.map=library.map||{positions:{},comments:[],view:{x:40,y:40,z:1}};
+let currentFolder=null,libraryView="list",mapMode=false,mapSelected=new Set,mapEdg

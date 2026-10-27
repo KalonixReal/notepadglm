@@ -1,0 +1,5 @@
+sbSortLabel"),sbNew=$("#sbNew");
+const ctxMenu=$("#ctxMenu"),fileMenu=$("#fileMenu"),lightbox=$("#lightbox");
+const themeToggle=$("#themeToggle"),themeIcon=$("#themeIcon");
+const handles=[...document.querySelectorAll(".rs-h")];
+const findBar=$("#findBar"),findInput=$("#findInput"),replaceInput=$("#repla

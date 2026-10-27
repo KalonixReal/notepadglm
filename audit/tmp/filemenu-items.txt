@@ -1,0 +1,16 @@
+trl+A"],["Copy / duplicate nodes","Ctrl+C / Ctrl+V"],["Delete selected nodes","Delete"],["Pan canvas","Drag empty space"],["Zoom canvas","Mouse wheel"]]]);KEY_GROUPS[2][0]="Drawing tools";keysSearch.oninput=()=>{
+const q=keysSearch.value.toLowerCase();for(
+const row of $("#keysGrid").querySelectorAll(".keys-row"))row.hidden=!row.textContent.toLowerCase().includes(q)};
+/* Remove Markdown export while keeping Markdown editing and import. */document.querySelectorAll("[data-fm=export],[data-bsact=download],[data-bs=saveas],[data-bspane=saveas]").forEach(el=>el.remove());IO.download=()=>{};exportById=()=>{};
+/* An image studio with immediate dimensions, aspect lock, rotation and crop. */
+const imageStudio=document.createElement("div");imageStudio.id="imageStudio";imageStudio.className="pop";imageStudio.setAttribute("role","dialog");imageStudio.setAttribute("aria-label","Image studio");imageStudio.innerHTML='<h3>Image
+  studio</h3><div class="image-measures"><label>Width <input id="studioWidth" type="number" min="24" max="10000"></label><label>Height <input id="studioHeight" type="number" min="24" max="10000"></label></div><label
+  class="studio-lock"><input id="studioLock" type="checkbox" checked> Lock aspect ratio</label><div class="studio-actions"><button data-studio="rotateLeft">↶ Rotate</button><button data-studio="rotateRight">Rotate ↷</button><button
+  data-studio="flip">Flip</button><button data-studio="duplicate">Duplicate</button><button data-studio="crop">Crop…</button><button data-studio="reset">Natural size</button><button class="danger"
+  data-studio="delete">Delete</button></div><p>Drag corner handles to resize. Drag the picture to move it between paragraphs.</p>';document.body.appendChild(imageStudio);pops.studio=imageStudio;
+const studioButton=document.createElement("button");studioButton.textContent="Edit image";studioButton.className="studio-trigger";studioButton.setAttribute("aria-label","Open image studio");imgToolbar.appendChild(studioButton);
+const imageDropGuide=document.createElement("div");imageDropGuide.id="imageDropGuide";canvasWrap.appendChild(imageDropGuide);editor.addEventListener("pointerdown",startNormalImageGesture,true);studioButton.onclick=e=>{e.stopPropagation();if
+ (!selectedFig)return;
+const img=selectedFig.querySelector("img");$("#studioWidth").value=Math.round(img.getBoundingClientRect().width/(zoom/100));$("#studioHeight").value=Math.round(img.getBoundingClientRect().height/(zoom/100));openPop("studio",studioButton)};
+function studioSize(from){if(!selectedFig)return;
+const img=selectedFig.querySelector("img"),ratio=img.naturalWidth/img.

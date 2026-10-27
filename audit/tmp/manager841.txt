@@ -1,0 +1,35 @@
+)===recordCollectionId(folder)});clearCollectionTransient();saveLibrary();if(recordCollectionId(doc)!==activeCollectionId())activate(collectionFileFallback());Store.save();renderSidebar();renderCollectionTabs841();if(mapMode)renderMap();ret
+ urn true}
+function openCollectionManager841(id=activeCollectionId()){if($("#writerDialog").classList.contains("on")&&$("#collectionManager841")){closeWriterDialog();return}ensureCollections();
+let chosen=library.collections.find(c=>c.id===id)||library.collections[0];showWriterDialog("Collections",'<div id="collectionManager841"><div id="collectionManagerList841"></div><div id="collectionManagerFiles841"></div></div><div
+  class="collection-new"><input id="newCollectionName" maxlength="100" placeholder="New collection name" aria-label="New collection name"><button class="btn" id="createCollection">Create</button><button class="btn"
+  id="collectionImport">Import…</button></div><p class="dialog-note">Drag a file or folder from the sidebar onto a collection tab to move it. Double-click a tab to edit collection details.</p>',null);
+const list=$("#collectionManagerList841"),contents=$("#collectionManagerFiles841");
+function paint(){list.replaceChildren();for(
+const c of library.collections){
+const row=document.createElement("button");row.className="btn collection-choice"+(c.id===chosen.id?" active":"");row.textContent=c.name+" ·
+  "+collectionFiles(c.id).length;row.onclick=()=>{chosen=c;paint()};list.append(row)}contents.replaceChildren();
+const heading=document.createElement("h3");heading.textContent=chosen.name;
+const actions=document.createElement("div");actions.className="collection-new";for(const[label,fn]of[["Open",()=>{closeWriterDialog();switchCollection(chosen.id)}],["Edit
+  details",()=>openCollectionSettings(chosen.id)],["Delete…",()=>deleteCollectionDialog83(chosen.id)]]){
+const b=document.createElement("button");b.className="btn";b.textContent=label;b.onclick=fn;actions.append(b)}contents.append(heading,actions);
+const tree=document.createElement("div");tree.className="collection-file-tree";
+const seen=new Set;
+function branch(parent,depth){for(
+const folder of collectionFolders(chosen.id).filter(f=>f.parent===parent||parent===null&&!f.parent)){if(seen.has(folder.id))continue;seen.add(folder.id);
+const details=document.createElement("details");details.open=true;
+const summary=document.createElement("summary");summary.textContent=folder.name;details.append(summary);tree.append(details);
+const prior=tree.lastElementChild;
+const inner=document.createElement("div");inner.style.paddingLeft="16px";
+const before=tree.childNodes.length;branch(folder.id,depth+1);while(tree.childNodes.length>before)inner.append(tree.childNodes[before]);prior.append(inner)}for(
+const f of collectionFiles(chosen.id).filter(f=>(noteMeta(f).folder||null)===parent)){
+const b=document.createElement("button");b.className="collection-file";b.textContent=(f.writer?.map?"◈ ":"▤
+  ")+f.name;b.onclick=()=>{closeWriterDialog();switchCollection(chosen.id);openFile(f.id)};tree.append(b)}}branch(null,0);if(!tree.childNodes.length)tree.textContent="Empty
+  collection";contents.append(tree)}paint();$("#createCollection").onclick=()=>{try{
+const name=$("#newCollectionName").value;createCollection(name);closeWriterDialog();openCollectionManager841()}catch(error){writerFormFeedback(error.message)}};$("#collectionImport").onclick=openCollectionImport}
+const collectionSync841=syncCollectionButton;syncCollectionButton=function(){collectionSync841();renderCollectionTabs841()};
+const collectionSave841=saveLibrary;saveLibrary=function(...args){
+const result=collectionSave841.apply(this,args);renderCollectionTabs841();return result};
+const collectionStyle841=document.createElement("style");collectionStyle841.textContent="#collectionTabs841{display:flex;align-items:end;flex:0 0 35px;min-height:35px;gap:8px;padding:0 12px;background:var(--chrome);border-bottom:1px solid
+  var(--chrome-line);overflow:hidden}.collection-tab-list{display:flex;min-width:0;overflow-x:auto;align-self:stretch;align-items:end;gap:3px;scrollbar-width:thin;flex:1}.collection-tab{border:1px solid
+  transparent;border-bottom:0;border-radius:9px 9px 0 0;max-width:220px;min-width:90px;white-space:nowrap;text-overflow:ellipsis;overflow:hidden;padding:7px 16px;background:transparent;color:var(--muted);font

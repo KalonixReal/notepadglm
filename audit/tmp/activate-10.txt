@@ -1,0 +1,14 @@
+ookNavigation=value}catch{}
+function rememberNotebookNavigation(){if(isBooting||!doc?.id)return;notebookNavigation.activeId=doc.id;notebookNavigation.collectionId=activeCollectionId();
+const tab=doc.writer?.documentTabs?.activeId;if(tab)notebookNavigation.tabs[doc.id]=tab;try{sessionStorage.setItem(notebookNavigationKey,JSON.stringify(notebookNavigation))}catch{}}
+const navigationActivate=activate;activate=function(...args){
+const result=navigationActivate.apply(this,args);rememberNotebookNavigation();return result};
+const navigationSelectTab=selectDocumentTab;selectDocumentTab=function(...args){
+const result=navigationSelectTab.apply(this,args);if(result)rememberNotebookNavigation();return result};
+const navigationBoot=boot;boot=function(...args){
+const target=workspace.files?.find(file=>file.id===notebookNavigation.activeId);if(target){workspace.prefs={...workspace.prefs||{},activeId:target.id};if(library.collections?.some(c=>c.id===notebookNavigation.collectionId))library.activeCol
+ lectionId=notebookNavigation.collectionId}for(
+const file of workspace.files||[]){
+const id=notebookNavigation.tabs[file.id];if(typeof id==="string")selectStoredDocumentTab(file,id)}return navigationBoot.apply(this,args)};
+function inkSegmentsIntersect(a,b,c,d){
+const cross=(p,q,r)=>(q[0]-p[0])*(r[1]-p[1])-(q[1]

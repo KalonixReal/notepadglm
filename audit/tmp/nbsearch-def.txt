@@ -1,0 +1,12 @@
+eld affordance. */
+const paperActivate843=activate;activate=function(...args){
+const result=paperActivate843.apply(this,args);applyPageBackground843();return result};
+const autoStatus843=$("#autosaveIndicator");if(autoStatus843)$("#tCenter").append(autoStatus843);
+const findTop843=$("#tSearch");$("#titlebar").append(findTop843);findTop843.setAttribute("aria-label","Find files and text across the notebook");findTop843.title="Find files and text across all collections and
+  tabs";findTop843.querySelector("span").textContent="Find all";sbSearch.hidden=true;sbSearch.tabIndex=-1;sbSearch.value="";sbQuery="";
+const viewColourStyle843=document.createElement("style");viewColourStyle843.textContent=`\n#sbSearch{display:none!important}#page{background:var(--np-view-paper,var(--paper))!important;--page-ink:var(--np-view-ink,#202c3c);--page-muted:var(
+ --np-view-ink,#566171);--page-link:var(--np-view-link,#245fc5)}@media screen{#page #editor.empty-hint::before{color:var(--page-muted)}}\n@media
+  print{#collectionTabs841{display:none!important}#canvasWrap{background:transparent!important}#zoomLayer{padding:0!important}}\n.paper-colours843{display:flex;flex-wrap:wrap;gap:10px;margin:14px 0}.paper-colours843
+  button{width:36px;height:36px;border:1px solid var(--chrome-line);border-radius:50%}.paper-colours843 button[aria-pressed=true]{outline:3px solid var(--accent);outline-offset:2px}.paper-preview843{padding:24px;margin-top:18px;border:1px
+  solid var(--chrome-line);border-radius:8px;font-size:18px}.paper-preview843 small{font-size:12px}#pageColourPicker843{flex:none;width:42px;min-width:42px;height:36px;padding:3px}#pageColourHex843{max-width:140px}\n#titlebar{position:relat
+ ive}#tCenter{max-width:calc(50vw - 220px);gap:0}#tCenter #docTitle{height:22px}#tCenter #autosaveIndicator{height:24px;min-height:24px;max-width:100%;padding:0 6px;margin:0;line-height:24px;border:0;background:transparent;f

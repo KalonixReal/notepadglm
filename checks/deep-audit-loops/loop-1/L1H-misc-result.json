@@ -1,0 +1,173 @@
+{
+  "task": "L1-H proofing completion + misc surfaces",
+  "session": "l1misc",
+  "url": "http://localhost:3000/",
+  "date": "2026-07-28",
+  "families": {
+    "F55_spelling_grammar_context": {
+      "steps": [
+        "Reset via localStorage.clear()+reload (predecessor state re-persisted by beforeunload flush; typed own synthetic text over it via Ctrl+A+Delete)",
+        "Typed 'Teh recieve definately damaed letters today.' -> autocorrect made 'The ... definitely ...'; underlines appeared in #harperProofLayer85 overlay (classes harper-spelling / harper-grammar) after ~4s cold start",
+        "DISCLOSED synthetic input: MouseEvent('contextmenu',{bubbles:true,clientX,clientY}) dispatched on editor at caret-position coordinates of the misspelled word (Range.getBoundingClientRect) because agent-browser cannot right-click; window proofing contextmenu listener uses caretPositionFromPoint so this matches real right-click path",
+        "Spelling menu on 'recieve': items [receive, relieve, recipe, Ignore for this session, Add to shared dictionary]; clicked 'receive' -> text fixed to 'receive'",
+        "Grammar: 'He have been there. I could of done it. We saw the the dog.' -> 3 harper-grammar marks after ~9s; contextmenu -> note 'Use `have` rather than `of` here.' + suggestion 'could have' + 'Ignore this suggestion'; applied -> 'could have'",
+        "'Add to shared dictionary' on 'damaed' -> all marks cleared, spelling mark for damaed gone after rescan; grammar marks returned ~5s later without another edit (no B288 exact repro)",
+        "Context menu on heading 'Tmp': spelling suggestions [Tap, Temp, Tip, Ignore, Add to dictionary] + standard items; clicked 'Temp' -> heading text corrected"
+      ],
+      "expected": "underlines poll <=10s; suggestions present; corrections applied; add-to-dictionary clears underline",
+      "observed": "all as expected",
+      "controls": "mid-document plain paragraphs vs heading; grammar rescan recovery observed without intervening edit",
+      "predicates": {"pass": 8, "fail": 0}
+    },
+    "F56_autocorrect": {
+      "steps": [
+        "Standard pairs: 'Teh '->'The ', 'definately '->'definitely ' on space; sentence-start lowercase 'hello world. second ...' -> 'Hello world. Second ...'",
+        "Settings dialog (Review > 'Spelling, grammar and autocorrect'): checkboxes (autocorrect/capitalize/suggestions/grammar), language combobox, custom replacements textarea (predecessor pair 'qwe = qtt' present), added 'zqx = zqxfixed'; Never-autocorrect textarea (predecessor 'florr'), added 'teh'; personal dictionary textarea shows 'damaed' from Add-to-shared-dictionary; Save closed dialog",
+        "Custom pair: 'zqx '->'zqxfixed '; exception 'teh ' stays 'teh '",
+        "Variants: pair correction inside H1 heading ('Tmp' + ' zqx tail' -> 'Tmp zqxfixed tail'); inside real LI ('probe zqxfixed tail') - both correct",
+        "Correction chip (#proofCorrection84 with Undo / Never correct buttons) appears at corrected word; immediate Undo mid-sentence: 'mid qwe '->'qtt' -> Undo -> exact 'qwe' restored (CONTROL PASS)",
+        "FINDING-1 sentence-start: fresh paragraph 'qwe ' -> 'Qtt ' -> chip Undo -> 'Qwe ' (typed text was 'qwe'); reproduced with zqx -> 'Zqx' too; control mid-sentence restores exact lowercase",
+        "FINDING-2 stale chip: 'definately more words ' -> 'Definitely more words '; chip still visible; Undo click -> text unchanged (silent no-op, chip dismissed); reproduced also with zqx ('Zqxfixed undo test ' stayed)",
+        "Session ignore after Undo: subsequent 'mid zqx ' not re-corrected same session; after reload 'qwe '->'qtt' again (session ignore reset, exception 'teh' persisted across reload)"
+      ],
+      "expected": "corrections fire on space; exceptions/pairs persist; chip Undo restores typed text and stays functional while visible",
+      "observed": "two deviations: sentence-start chip Undo restores capitalized form; chip Undo silent no-op after continued typing while chip remains visible",
+      "controls": "mid-sentence immediate Undo restores exact text (pass) vs sentence-start (fail); fresh-session correction after reload for persistence",
+      "predicates": {"pass": 11, "fail": 2}
+    },
+    "F57_proofing_lifecycle": {
+      "steps": [
+        "Review tab 'Toggle spell checking' click -> #harperProofLayer85 marks 0, #spellBtn aria-pressed=false",
+        "Click again -> after ~6s rescan marks=15, aria-pressed=true"
+      ],
+      "expected": "underlines clear when off, return when on",
+      "observed": "as expected (UR-26 full-Off contract not counted - requested design)",
+      "controls": "mark counts before/off/on",
+      "predicates": {"pass": 2, "fail": 0}
+    },
+    "F58_ink": {
+      "steps": [
+        "Tools tab: Start inking -> Ink.live=true; Pen selected; inkCanvas rect (531,91,792x1123)",
+        "CDP mouse move/down/move x3/up -> stroke 1 (tool pen, 4 pts, fractional page coords); second stroke at y~500",
+        "Select Objects: marquee drag -> sel=1; drag inside bbox -> pts shifted +0.1008 x (move works); drag starting outside bbox -> marquee restart (no move) - expected",
+        "Eraser: stroke over stroke 1 -> strokes 2->1",
+        "Reload -> strokes=1 persisted (Ink.live=false, strokes stored per file)",
+        "'Erase all ink from the document' -> strokes=0"
+      ],
+      "expected": "draw/select/move/erase/persist/erase-all all functional",
+      "observed": "all functional; classified honestly as clean",
+      "controls": "stroke counts before/after each op; bbox-outside drag no-op control",
+      "predicates": {"pass": 7, "fail": 0}
+    },
+    "F59_mobile": {
+      "steps": [
+        "set viewport 390 844: compact quick access (open document tabs button), tabs visible; editor paper 794px wide, canvasWrap sw=832 cw=366 -> horizontal scroll of paper in Print Layout (page emulation; Web Layout alternative exists; consistent with B211/S17 context, not counted as new)",
+        "Typing works (typed text landed in editor)",
+        "screenshot checks/deep-audit-loops/loop-1/l1h-mobile.png; restored 1280x720"
+      ],
+      "expected": "usable layout + typing at 390px",
+      "observed": "usable; paper requires horizontal pan (print-layout emulation)",
+      "controls": "documentElement.scrollWidth == innerWidth (no page-level h-scroll)",
+      "predicates": {"pass": 3, "fail": 0}
+    },
+    "F60_dark_theme": {
+      "steps": [
+        "Quick Access 'Toggle dark mode' -> body bg rgb(16,23,34), html[data-theme=dark]",
+        "Pixel analysis of screenshot l1h-dark.png: editor area mostly white (255,255,255 x5519 samples) with dark ink pixels (32,44,60) -> paper stays white, text readable",
+        "Typing while dark works",
+        "Reload while dark -> html[data-theme=dark] persisted, dark bg persisted (theme stored inside workspace snapshot prefs)",
+        "Toggled back to light (html[data-theme=light])"
+      ],
+      "expected": "dark chrome + readable document; persistence across reload",
+      "observed": "as expected",
+      "controls": "pixel-count contrast check vs body bg",
+      "predicates": {"pass": 4, "fail": 0}
+    },
+    "F62_context_menus": {
+      "steps": [
+        "Selection 'damaed' + synthetic contextmenu -> menu [Cut, Copy, Paste, Bold, Italic, Underline, Highlight, Center, Hyperlink, Insert footnote, New comment]; clicked Bold -> <b> created (action works)",
+        "On H1 heading -> spelling suggestions + standard items; applied 'Temp'",
+        "On LI -> standard items present"
+      ],
+      "expected": "menus with valid items and at least one working action per surface",
+      "observed": "as expected (B241 paste path not re-tested - known)",
+      "controls": "text/heading/list three surfaces",
+      "predicates": {"pass": 4, "fail": 0}
+    },
+    "F66_status_bar": {
+      "steps": [
+        "stPage 'Page 1 of 1'; wordCount '63 words' total / '1 word selected' with selection",
+        "Save indicator: typing -> 'Saving to browser...' transient -> settles back to 'Autosaved in browser'"
+      ],
+      "expected": "live page/word/save indicators",
+      "observed": "as expected (initial '1 word selected' staleness was due to button focus stealing keystrokes, not the counter)",
+      "controls": "before/immediate/after-1.5s/after-2s reads",
+      "predicates": {"pass": 4, "fail": 0}
+    },
+    "F67_dialogs": {
+      "steps": [
+        "Word Count dialog (Review > Word count statistics): OK focused; Tab keeps focus trapped (single control); typed 'zzq' -> NOT inserted into document (background typing blocked); Escape -> dialog hidden (w=0), focus returns to #editor",
+        "Replace bar (Home > Replace): Find text input + Match case/Prev/Next/Close + Replace with/Replace/Replace all/scope; Tab input->Match case button; Shift+Tab back to input; Escape -> bar closed, focus #editor, CSS.highlights np3-find/np3-cur removed (cleanup)"
+      ],
+      "expected": "Tab cycles within, Escape closes, focus returns, document typing blocked",
+      "observed": "as expected",
+      "controls": "dialog template elements remain hidden in DOM (w=0) - verified not open",
+      "predicates": {"pass": 7, "fail": 0}
+    },
+    "F68_reload_integrity": {
+      "steps": [
+        "Doc with paragraphs + UL list + H1 heading + bold word: pre-reload innerText (460 chars) + kids=14 lis=3 heads=1 bolds=1",
+        "Reload -> innerText identical (difflib unified diff empty, len 460=460), kids/lis/heads/bolds identical, localStorage keys=1 (notepad:workspace:notepad-studio-portable-v1:..., contains files AND prefs)"
+      ],
+      "expected": "exact round-trip, single app-owned key",
+      "observed": "as expected",
+      "controls": "structure counts + byte-exact text diff",
+      "predicates": {"pass": 3, "fail": 0}
+    },
+    "F61_drag_drop": {
+      "coverage": "SOURCE-ONLY: dragover preventDefault + drop handler; drop-over-sidebar branch; internal document-tab drag via dataTransfer.getData('application/x-notepad-document-tab'); file drops filtered by supportedDocument regex on dataTransfer.files. NOT runtime-tested (agent-browser cannot perform OS file drops)."
+    }
+  },
+  "source_pass": {
+    "symbols": [
+      "proofReplacement84 - enabled/language/exceptions/personal/sessionIgnore/pairs chain (matches runtime: exception+session-ignore behavior)",
+      "proofPrefs84 - JSON prefs in extra[PROOF_KEY84], memoized; defaults enabled/suggestions/personal/exceptions",
+      "addGrammarMenu85 - proof-menu-section + proof-menu-note + suggestions + Ignore",
+      "paintHarperView85 / harperCSS85 - fixed overlay #harperProofLayer85 (pointer-events:none) with harper-spelling/harper-grammar <i> marks",
+      "Harper85 worker (stop on pagehide); harperProofOn85 toggle via #spellBtn/#stSpell window click listener (syncHarperToggle85)",
+      "proofReverse84 - guard last.state!==Undo.last -> proofClearCorrection84 and return false (mechanism for stale-chip finding); proofApplyTarget84(last.target,last.original) - original recorded after capitalization already applied (mechanism for sentence-start finding)",
+      "proofChip84 #proofCorrection84 with data-proof-undo / data-proof-never buttons, positioned via positionContextMenu",
+      "autoMarks841 (max 8, until=now+5e3) + ::highlight(notepad-autocorrect) dotted underline",
+      "Ink object (strokes/tool/color/live/sel/marquee/lasso/moveSel/scaleSel/hitStroke/parse/loadFrom) + inkCanvas pointerdown/setPointerCapture + Tools ribbon buttons",
+      "applyTheme + dataset.theme persisted inside workspace prefs (original file; theme JS is in an earlier script block outside app-js.txt extract lines 3569-4981)"
+    ],
+    "note": "Only runtime-reproduced behaviors counted toward findings; source pass found no additional unreproduced defects counted."
+  },
+  "findings": [
+    {
+      "title": "Autocorrect correction-chip Undo at a sentence start restores the capitalized form instead of the typed text",
+      "repro": "New paragraph, type 'qwe ' (custom pair qwe = qtt) -> becomes 'Qtt ' with correction chip; click chip 'Undo' -> 'Qwe ' remains (typed text was 'qwe'). Same with pair zqx = zqxfixed -> 'Zqx '.",
+      "expected": "Undo restores the exact typed text 'qwe' (control: mid-sentence 'mid qwe ' -> 'qtt' -> Undo -> exact 'qwe')",
+      "observed": "'Qwe' / 'Zqx' - first letter stays capitalized",
+      "control": "mid-sentence immediate Undo restores exact lowercase (pass)",
+      "source": "app-js.txt proofReverse84 -> proofApplyTarget84(last.target, last.original); proofLast84.original recorded at replacement time, after the sentence-capitalization correction already rewrote the first letter; single-level undo cannot revert the earlier capitalization; proofSessionIgnore84.add(original) already prevents re-fire so exact restore was feasible",
+      "classification": "CONFIRMED (minor)",
+      "impact": "one-character case fidelity loss on the revert affordance; fix: record the pre-capitalization original or revert both corrections"
+    },
+    {
+      "title": "Autocorrect correction chip keeps offering Undo after further typing but the click silently does nothing",
+      "repro": "Type 'definately more words ' -> 'Definitely more words ' with chip visible; click chip 'Undo' -> text unchanged, chip just disappears. Also reproduced with 'zqx undo test ' -> 'Zqxfixed undo test ' unchanged after Undo click.",
+      "expected": "chip either hides once invalidated, or Undo still reverts the correction (Word smart-tag behavior)",
+      "observed": "visible dead Undo button (silent no-op)",
+      "control": "immediate Undo (no further typing) reverts successfully",
+      "source": "app-js.txt proofReverse84 first guard: last.state!==Undo.last -> proofClearCorrection84(); return false - chip is not hidden on invalidation",
+      "classification": "CANDIDATE (design intent of the 5s affordance window uncertain; broken affordance is concrete)",
+      "impact": "misleading undo affordance for ~5s after a correction; fix: hide chip when Undo.last changes"
+    }
+  ],
+  "known_not_retriggered": [
+    "B207/B208/B209/B212/B213/B216/B220/B288 avoided by scope; B288-adjacent transient empty proof layer after replacement scan recovered without another edit (not counted)",
+    "B211 mobile image toolbar (no image inserted); B229/B230 Quick Access (not retested); B241 context Paste plain-text (not retested); B248/B279 out of scope"
+  ],
+  "totals": {"predicates_pass": 53, "predicates_fail": 2, "new_findings": 2, "rediscoveries": 0}
+}

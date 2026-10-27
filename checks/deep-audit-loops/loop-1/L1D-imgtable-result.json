@@ -1,0 +1,88 @@
+{
+  "taskId": "L1-D",
+  "area": "Images (F45-F48) + Tables (F50-F54)",
+  "session": "l1img",
+  "date": "loop-1 deep audit",
+  "harnessDisclosures": {
+    "cellSelectionSetup": "Raw mouse/click events do not carry modifier keys. Cell-selection setup used a DISCLOSED synthetic MouseEvent('mousedown',{bubbles:true,cancelable:true,button:0,shiftKey:true,clientX,clientY}) dispatched on the target cell (the app listens to editor mousedown with e.shiftKey); the merge/split operations themselves were real toolbar clicks.",
+    "imageClicks": "Image selection used real mouse move/down/up at coordinates measured from getBoundingClientRect.",
+    "drag": "Free-image drag used real mouse move/down/move/up."
+  },
+  "findings": [
+    {
+      "id": "L1D-1",
+      "title": "Image toolbar Align left / Align center buttons are rendered underneath the document-tabs sidebar at default desktop viewport (<= ~1345px), so clicks land on tab-tree UI",
+      "classification": "CONFIRMED",
+      "repro": [
+        "Viewport 1280x720 (default), zoom 100%, rich mode, Print Layout.",
+        "Insert any image (Insert > Pictures) at/near top of the page; click it to show the floating image toolbar.",
+        "Observe toolbar style left:-65px inside #canvasWrap (canvasWrap x=512 w=768; toolbar offsetWidth=825).",
+        "elementFromPoint at first two button centers returns BUTTON#document-tab-tab-main / button.document-tab-row-menu (sidebar paints above the toolbar's left spill).",
+        "agent-browser click on 'Align left' -> 'covered by <button#document-tab-tab-main>'; data-align stays 'center'. Same for 'Align center' (covered by document-tab-row-menu). 'Align right' (x>520) succeeds -> data-align='right'."
+      ],
+      "expected": "All image-toolbar buttons clickable; toolbar clamped inside the canvas area.",
+      "observed": "First two toolbar buttons (Align left, Align center) are covered by the document-tabs sidebar; clicks are misdirected to tab UI.",
+      "controls": [
+        "Same toolbar, same y: 'Align right' button click works (x past sidebar edge).",
+        "Viewport 1600x900: canvasWrap w=1088 > toolbar 825+16 -> toolbar left:131.5px, first button clickable (elementFromPoint = the button itself).",
+        "Geometry: tabs sidebar rect [272..512] vertically 190..542; toolbar at viewport x=447..1272."
+      ],
+      "sourceMechanism": "app-js.txt line ~962 (Images.sync toolbar positioning): tl=clamp(tl,8,canvasWrap.clientWidth-tw-8). With tw(825) > canvasWrap.clientWidth(768)-16 the max bound is negative and clamp returns it -> imgToolbar.style.left='-65px' -> toolbar slides left out of #canvasWrap under the document-tabs sidebar which paints above it. Related to B211 family (toolbar placement) but different trigger/mechanism (desktop clamp inversion, sidebar overlap), not the mobile viewport case.",
+      "impact": "Align left/center unreachable from the toolbar on common laptop widths; misdirected clicks hit the tab tree (possible unintended tab context-menu activation). Fix: clamp max must respect min (Math.max(min, ...)) or wrap the toolbar."
+    },
+    {
+      "id": "L1D-2",
+      "title": "Rediscovered B210: free-image selection outline (figure.img-fig.selected outline solid 2px) stays at the original anchor while the image renders at its offset position (also after arrow-key nudge at 100% zoom)",
+      "classification": "REDISCOVERY (known B210)",
+      "evidence": "After drag: img rect (626,550) vs figure rect (776,286); figure carries class 'selected' + computed outline 'solid 2px'. After ArrowRight/ArrowDown nudge (data-image-x -150->-149, y 264->265) the figure outline still sits at the anchor."
+    },
+    {
+      "id": "L1D-3",
+      "title": "Rediscovered B283: sorting table rows reverses aggregate formula ranges (=SUM(B2:B3) -> =SUM(B3:B2) -> '#REF!'); also reproduced with a 3-body-row sort (rotation), same reversed-range outcome",
+      "classification": "REDISCOVERY (known B283)",
+      "evidence": "3-row case: rows B/C/A with =SUM(B2:B4)=40 -> after sort by Name: formula '=SUM(B3:B2)' displayed '#REF!'. Undo of sort restores range and value exactly. No silent-wrong-value variant found: the remap is per-moved-cell, so only relative-order reversal breaks (always loud #REF!)."
+    },
+    {
+      "id": "L1D-4",
+      "title": "Free image placement round-trip changes stored width 100% -> 50% (enter) and keeps 50% on exit",
+      "classification": "REJECTED (intended behavior)",
+      "evidence": "Source (app-js.txt, free-placement toggle): entering free mode sets width to 50% when figure width >= 95% of editor width (explicit code path); exit deletes placement attrs without touching width. Width remains user-adjustable; not a data-integrity violation. Observed earlier exit-to-natural(10px) was traced to my own stray click on the toolbar's Natural size button, not app behavior."
+    },
+    {
+      "id": "L1D-5",
+      "title": "'=SUM(ABOVE)' yields '#FORMULA!'",
+      "classification": "REJECTED (documented capability boundary)",
+      "evidence": "Parser supports explicit A1-style refs/ranges only; the Table formula dialog explicitly says 'Use cell references, + - x /, SUM, AVERAGE, ...'. Word's ABOVE/LEFT keywords are a parity gap, not a contract violation."
+    }
+  ],
+  "verifiedClean": [
+    "F45: upload insert produces <figure class=img-fig contenteditable=false data-align=center data-w=100%><img alt=filename-stem>; Edit alt text dialog sets and persists img.alt.",
+    "F46: 25%/50%/100%/Natural width buttons set data-w + rendered width exactly (151/301/603/10 px on 603px page); image box within page bounds; Delete image removes figure; Ctrl+Z restores img with alt/data-w/data-align intact.",
+    "F47: free placement drag moves image by exact pointer delta (data-image-x/y track -150/+264); arrow nudge moves 1px per key; toggling free off removes data-image-* cleanly.",
+    "F50: Insert table 3x3 -> thead(3 th) + 2 body rows; typing lands in first and later cells correctly.",
+    "F51: Insert row below inserts a row and REMAPS the formula range correctly (B2:B3 -> B2:B4, value follows); merge (synthetic shift-mousedown setup + real toolbar click) creates colSpan=2 + merge record in doc.writer.tableMerges; split restores original cells/attrs and deletes the record; undo of split re-merges (record restored); undo of merge restores spans and record count 0; no span corruption.",
+    "F52: Header row (data-nohdr), Banded rows (data-band), AutoFit (data-fit), Repeat Header Rows (data-rh) attribute toggles all work; Cell shading sets data-sh + background on target cell.",
+    "F53: Tab moves cell-to-cell; Tab in last cell appends a row and places caret in its first cell; Shift+Tab moves backward within row; Shift+Tab in first header cell exits table to the preceding paragraph.",
+    "F54: =SUM(B2:B4) computes 40; editing an input cell (10->15) auto-recalculates on flush (30->35) without manual Recalculate; undo after sort restores formula+value; formula survives merge/split cycles with correct recalculation (25 while merged, 40 after split).",
+    "F48 (bounded): Image Studio Rotate left re-encodes src (new data URL, len 166); 'Restore original' restores the EXACT original PNG bytes (src len 126, tail matches original base64) and re-enables correctly.",
+    "Persistence: doc with text + 5-row table (banding, repeat-header, shaded cell, =SUM(B2:B4)=40) + image (alt l1d, w=100%) round-trips exactly after autosave + reload (grid, attrs, formula+value, shading, image alt/width, text all identical)."
+  ],
+  "notTested": [
+    "B221 image loads into wrong inner tab (single-tab fixtures only; multi-tab image race not covered this loop)",
+    "B222 selected free image intercepts arrows from tab tree (focus path not exercised)",
+    "B245 Shift+Tab out of table into preceding image (no image directly before table in final fixture)",
+    "B249 image paste failing to replace selected text (clipboard image paste route not driven)",
+    "Image Studio crop flow (rotate+restore only); Replace image; wrap-left/right modes; zoom-variant outline (B227)",
+    "Explicit 'Recalculate tables' menu entry (auto-recalc path verified instead)"
+  ],
+  "predicates": {
+    "total": 41,
+    "pass": 37,
+    "fail": 4,
+    "failBreakdown": {
+      "newFinding_L1D-1": 2,
+      "knownB210_rediscovery": 1,
+      "knownB283_rediscovery": 1
+    }
+  }
+}

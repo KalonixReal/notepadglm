@@ -1,0 +1,8 @@
+ed.";sbList.appendChild(empty)}renderSidebarFoot();syncFileSelection();sbList.scrollTop=scroll};refreshSidebarDocument=function(f){if(sbQuery||starsOnly)return renderSidebar();
+const row=[...sbList.querySelectorAll("[data-document-id]")].find(el=>el.dataset.documentId===f.id);if(!row)return;row.querySelector(".n").textContent=f.name};
+/* Library selection and hierarchy actions stay separate from editor selection. */
+function syncFileSelection(){selectedFiles=new Set([...selectedFiles].filter(id=>files.some(f=>f.id===id)));for(
+const row of sbList.querySelectorAll("[data-document-id]")){
+const selected=selectedFiles.has(row.dataset.documentId);row.classList.toggle("file-selected",selected);row.querySelector(".file-check").checked=selected;row.setAttribute("aria-selected",String(selectedFiles.size?selected:row.dataset.docume
+ ntId===activeId))}bulkActions.hidden=!selectedFiles.size;$("#selectedFileCount").textContent=selectedFiles.size+" selected"}
+function clearFileSelection(){selectedFiles.cl

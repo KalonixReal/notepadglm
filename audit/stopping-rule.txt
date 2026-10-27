@@ -1,0 +1,24 @@
+## Current completion rule — two consecutive complete deep-audit loops
+
+**Current loop completion estimate: 34.3% | Read-only audit | Loop 1 in progress | Complete loops: 0 | Consecutive clean loops: 0/2.** The former90% threshold is superseded. A clean loop finds no additional bugs; already reported unfixed bugs remain listed.
+
+- Each loop covers the whole Notepad app and website, including editing, controls/conditional dialogs, files/tabs/maps, storage/protection/history/import/export, images/drawing/code/tables/proofing, layout/references, website behavior and optimization assessment.
+- Percentage basis: 96.0/280 staged checklist units across 70 feature groups (inventory, source review, runtime execution and independent evidence review). Partial stages earn half credit; this estimates work completed, not bug-discovery confidence.
+- Complete feature rows this loop: **12/70**. Prior evidence is retained but is not counted as fresh execution. Subfeatures/conditional controls must be enumerated before marking a grouped feature complete. A handful of tests is not a whole loop.
+- A newly confirmed defect, reopened finding or materially new failure variant resets the streak. Exact rediscovery of an already documented trigger does not. Enhancement/research suggestions are separate from bugs.
+- Before a loop can be clean: finish current-loop runtime and source coverage, adjudicate new candidates, review the evidence independently, tidy the report, and verify the baseline is unchanged. Record genuine limitations explicitly; do not silently count untested controls.
+- Keep useful evidence under `checks/`; canonical report, TODO and function guide stay in the Notepad root. Browser work remains one serial isolated headless workload; subagents perform parallel read-only analysis.
+- Authoritative loop state and complete matrix: `checks/deep-audit-loops/loop-state.json`. The old percentages and sweep rules below are historical and cannot override this block.
+
+Updated UTC: 2026-10-27T03:14:46.862550+00:00.
+<!-- DEEP_AUDIT_LOOPS_END -->
+
+
+<!-- USER_STOPPING_DIRECTIVE -->
+**Continue until the stopping condition is met:** two consecutive complete whole-app deep-audit loops with no additional bugs. Finishing a batch, updating these files or saving a checkpoint is not completion. Keep auditing; verify subagent candidates with actual evidence before counting them.
+<!-- USER_STOPPING_DIRECTIVE_END -->
+
+
+
+
+<!-- Q26_EXECUTED_FAMILY_LEDGER_START -->

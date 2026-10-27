@@ -1,0 +1,113 @@
+{
+  "taskId": "L1-C",
+  "agent": "audit subagent (layout variants F34/F35/F36/F37/F38/F39)",
+  "session": "l1layout",
+  "date": "2026-10-27",
+  "salvageNote": "Session was warm with predecessor files (Untitled + 'L1C Doc A'); storage cleared + reloaded; 'L1C Doc A' deleted via UI; leftover 'Untitled' kept (contained predecessor's 3 page-break markers, used only as noise, not as evidence base). All findings reproduced on freshly created docs 'Untitled 2'/'Untitled 3' with typed synthetic content.",
+  "families": [
+    {
+      "family": "F34 page size / orientation / margins / columns",
+      "steps": "Fresh doc; typed heading + paragraphs; A4→Letter→landscape→narrow margins→2 cols→3 cols→1 col; typed after each variant change; measured page/editor/paragraph rects via eval; checked markdown doc-settings marker after each change; B214-family probe (mid-paragraph selection through margin change: selection 'esh' preserved; typing after variant changes landed correctly with in-page geometry).",
+      "expected": "geometry follows settings; text stays inside paper; marker records non-defaults; restore on switch back.",
+      "observed": "Letter w=816, landscape 1056, narrow marker, cols 2→459px columns, cols 3→295px ×3 columns; all paragraph rects inside page bounds; marker 'm=narrow o=landscape s=letter' then 's=a4' after A4 return (default values omitted). No gap-text overlap reproduced. Clean.",
+      "controls": "paragraph rect vs page rect at every variant; markdown marker diff per change.",
+      "predicates": {"pass": 10, "fail": 0}
+    },
+    {
+      "family": "F35 page breaks at new positions",
+      "steps": "Breaks inserted: at document start (caret Control+Home), at paragraph end, at document end, with caret in middle of 3-item list, with caret in table cell; consecutive breaks (4 in a row at doc end); spacer serialization check.",
+      "expected": "break at caret position; markdown gains '<!-- np3:pb -->' comment only (no spacer text); consecutive breaks each force a page.",
+      "observed": "FINDING A (CONFIRMED): after inserting a page break, the next keystroke(s) land at the PRE-INSERT caret position (before the break / old page) although the visible caret was placed in the new paragraph after the spacer — reproduced 3x (typed QUOTE/Z/J all appended to the paragraph BEFORE the break) with clean controls (identical pipeline without the insert: pressed chars landed exactly at the live DOM selection, offset-verified; mid-paragraph press control landed at offset 1). FINDING B (B135-family extension): break inserted with caret inside 'List item beta' lands after the WHOLE list (after 'gamma'), not at the caret. Break with caret in a table cell lands after the table (acceptable block semantics, noted). Doc-start break: marker '<!-- np3:pb -->' right after doc marker, 4 pages, correct page numbers. Consecutive breaks: 4 pbs → 5 gaps, no collapse. Markdown contains only HTML comments — no spacer text ✓.",
+      "controls": "no-insert press control; offset-1 press control; markdown diff per insert.",
+      "predicates": {"pass": 6, "fail": 2}
+    },
+    {
+      "family": "F36 zoom / ruler / go-to / source-mode zoom",
+      "steps": "Zoom 50% (slider Home), 200% (End), 100% (ArrowLeft x5), page-width (65%), web layout; typed one char at each level with editor focus verified; caret rect vs page rect; ruler toggle on/off; Go to page 2 dialog; source mode at 200% then switch back to rich.",
+      "expected": "caret stays inside page bounds while typing at every zoom; zoom retained across mode switch; content unchanged.",
+      "observed": "All pass: caret inPage:true at 50/100/200/page-width; web layout typing OK; ruler toggles; go-to-page scrolled canvas (scrollTop 560); source→rich kept zoom 200% and content (mdLen 595 intact). One harness pitfall logged: typing after clicking the zoom slider goes to the slider (focus) — re-focused via find-text click before judging.",
+      "controls": "caret rect vs page rect per level; mdLen before/after mode switch.",
+      "predicates": {"pass": 8, "fail": 0}
+    },
+    {
+      "family": "F37 headers/footers",
+      "steps": "Header 'HDR-{page}/{pages}-{title}', footer 'FTR-{page} of {pages} on {date}'; breaks forced 5 pages; furniture verified on all pages; header edited to 'HDR2-{page}/{pages}' → all pages; paper letter→A4 with furniture set (B280-variant probe); reload persistence.",
+      "expected": "furniture on every page with correct tokens; edit updates all pages; settings change refreshes furniture; persists.",
+      "observed": "5 pages × header+footer, tokens correct ({page}/{pages}/{title}/{date}); header edit updated all 5 pages live; A4 switch re-rendered furniture with correct text and inside-page geometry (no stale cache); after reload header/footer strings, tokens and page dataset persisted exactly (m=narrow o=landscape s=a4, furniture 10 els, HDR2-1/5).",
+      "controls": "furniture text dump before/after edit and after settings change; localStorage doc.writer compare pre/post reload.",
+      "predicates": {"pass": 7, "fail": 0}
+    },
+    {
+      "family": "F38 watermark / borders+shading / RTL",
+      "steps": "Watermark 'WM-LAYOUT-AUDIT' applied → visible absolute-positioned, typing still works → removed (empty). Paragraph borders: 'box' + shading applied to caret's paragraph → computed solid border + background rgb(234,241,251); serialized as encoded '<!-- np3:ba…' comment; survives reload (border+bg+dir all restored). Text direction toggle → dir=rtl + direction:rtl + align:start on the heading; RTL in-paragraph typing check inconclusive (paragraph off-viewport; harness scroll), style-level verified.",
+      "expected": "apply/behind-content/remove; borders+shading persist; RTL flips direction/alignment.",
+      "observed": "All verified except deep RTL caret-typing (not fully covered — noted honestly).",
+      "predicates": {"pass": 6, "fail": 0, "partial": "RTL typing anchor not exercised to completion"}
+    },
+    {
+      "family": "F39 print preview",
+      "steps": "File→Print clicked twice (backstage closes, window.print() deferred 80ms — headless no-op); editor innerText hash compared before/after; page errors checked.",
+      "expected": "document unchanged after closing print flow.",
+      "observed": "hash 1942922053 / len 475 identical before/after; no page errors. NOTE (source): renderPrintPreview targets holder '#bsPv' which is never created anywhere in app-js.txt — dead code; the real print path is window.print() with @media print CSS. No runtime defect claimed from dead code.",
+      "controls": "innerText hash + mdLen before/after.",
+      "predicates": {"pass": 2, "fail": 0}
+    },
+    {
+      "family": "persistence + per-document settings",
+      "steps": "Waited ~2.6s autosave; full pre-reload state capture (writer.header/footer, page dataset, pb count, mdLen, border/rtl markers); reload; same capture; then switched to second doc and compared its own settings.",
+      "expected": "identical persistence; each doc restores its own settings/furniture.",
+      "observed": "Untitled 2: header/footer/dataset(m=narrow,o=landscape,s=a4)/pb=4/mdLen 878 all identical post-reload; furniture restored; bordered+RTL heading restored via np3:ba marker. Untitled 3 (no marker = defaults): rendered m=normal s=a4 portrait with no furniture — per-document separation correct. OBSERVATION C (CANDIDATE, cosmetic): doc whose markdown begins with '<!-- np3:pb -->' (break at very start) renders an extra EMPTY leading paragraph after reload that was not present in the live DOM pre-reload (first p pre-reload = heading; post-reload first p empty, heading second); markdown identical (mdLen 878 both sides) so the phantom paragraph is render-only and does not re-serialize — control doc without leading break shows no phantom.",
+      "controls": "pre/post reload JSON diff; second-doc switch comparison; no-leading-break control.",
+      "predicates": {"pass": 8, "fail": 0, "candidateObserved": "phantom empty leading paragraph after reload (render-only)"}
+    }
+  ],
+  "findings": [
+    {
+      "title": "The first keystroke(s) after inserting a page break land at the pre-insert caret position (before the break, on the old page) even though the caret is visibly placed on the new page",
+      "classification": "CONFIRMED",
+      "repro": "1) Fresh doc, two paragraphs 'ParaAlpha text one' / 'ParaBeta text two'. 2) Click into the editor, press Control+End (caret at end of ParaBeta). 3) Insert ribbon → 'Insert a page break'. 4) Immediately type (e.g. 'J'). 5) Inspect: the typed characters append to 'ParaBeta text two' BEFORE the '<!-- np3:pb -->' spacer; the empty paragraph created after the spacer (where the caret was visibly placed) stays empty.",
+      "expected": "Typing after inserting a page break goes after the break (new page), matching the caret the app itself placed via placeCaretStart.",
+      "observed": "3 reproductions: typed 'QUOTE' (5 chars), 'Z', 'J' all landed before the break; markdown order '…ParaBeta text twoQUOTEZYJ\\n\\n<!-- np3:pb -->…' while the DOM caret (evaluated immediately after insert, before typing) sat in the new empty paragraph after the spacer (anchor text empty, offset 0, editor focused).",
+      "controls": "(a) Same pipeline WITHOUT the break insert: pressed 'K' landed exactly at the live DOM selection (offset 1 mid-paragraph) — proves press-input honors the live selection normally. (b) Mid-paragraph caret + failed-insert control: 'K' landed at offset 1. (c) Post-insert caret eval proves the DOM selection is in the new paragraph at insert time.",
+      "sourceMechanism": "app-js.txt final pageBreak override (bookmark-based: 'pageBreak=function(){let bookmark=selectionBookmark();…withMutation(()=>{const r=rangeFromBookmark(bookmark)||getRange();…block.after(pb,next);placeCaretStart(next);lastEditorRange=getRange()?.cloneRange()…})') — the spacer insertion and caret placement are correct, but the app's next-input anchor (selectionBookmark/lastEditorRange captured at mousedown on the .pop menu, per document mousedown preventDefault handler that keeps editor focus, plus flushCommit→normalizeDom inside withMutation) re-anchors the following keystroke at the stale pre-insert bookmark. Exact stale variable not fully pinned; behavior discrimination is empirical.",
+      "impact": "Silent wrong placement: text the user types right after inserting a page break goes onto the old page before the break (opposite of Word parity); they must notice and manually re-click after the break. Fix: after pageBreak's mutation, refresh the input bookmark (selectionBookmark/lastEditorRange) from the post-insert caret."
+    },
+    {
+      "title": "B135-family extension: a page break inserted while the caret is inside a list item is placed after the entire list instead of at the caret",
+      "classification": "CONFIRMED (extension of known B135 pattern — new trigger route)",
+      "repro": "1) Doc with a 3-item bulleted list (alpha/beta/gamma). 2) Put the caret in 'List item beta' (verified via selection anchor eval). 3) Insert ribbon → 'Insert a page break'. 4) Inspect markdown: '<!-- np3:pb -->' is appended after 'List item gamma' (end of UL), not between beta and gamma.",
+      "expected": "Break at the caret position (splitting the list across pages, Word parity) — or at minimum between the caret's item and the next.",
+      "observed": "pb inserted after the whole UL; list unsplit (lis:3 before and after).",
+      "controls": "caret anchor eval proved the caret was inside 'beta' at insert time; same insert at paragraph-level caret splits correctly at the caret.",
+      "sourceMechanism": "app-js.txt pageBreak: closestTopBlock(r.startContainer) resolves to the UL for a caret in an LI; the P|H1-6 split branch is skipped and 'block.after(pb)' places the spacer after the whole list. Same block-escape shape as B135 (slash Table after whole list/quote).",
+      "impact": "User cannot insert a page break inside a list at a chosen item; the whole list stays on one page and the break goes to its end. Fix: resolve LI-level blocks (split the list or insert within the LI's own text flow)."
+    },
+    {
+      "title": "Reload of a document whose markdown begins with a page break renders an extra empty leading paragraph that was not present in the live session",
+      "classification": "CANDIDATE (render-only, cosmetic, no data change)",
+      "repro": "1) Insert a page break at the very start of a document with content (live DOM: first <p> is the heading; markdown '<!-- np3:doc … -->\\n<!-- np3:pb -->\\n\\n…heading…'). 2) Reload. 3) First <p> in the editor is now EMPTY; the heading is the second paragraph.",
+      "expected": "Re-rendered DOM matches the pre-reload DOM (heading first).",
+      "observed": "Phantom empty first <p> after reload; markdown byte-identical pre/post (mdLen 878 both) so it does not re-serialize — pure MD.render artifact for a leading pb comment.",
+      "controls": "doc without a leading break shows no phantom paragraph after switch/reload.",
+      "sourceMechanism": "MD.render emits an empty paragraph for the leading comment-only block before the pb spacer div (app-js.txt render path: '…np3:pb\\s*-->$/.test(line)){flush();html+='<div class=\"np3-pb\"…' — the flush() before the spacer emits the empty leading paragraph).",
+      "impact": "One extra empty line at the top of page 1 after reload; no data corruption. Fix: skip emitting the empty block when only comments precede a leading pb."
+    }
+  ],
+  "investigatedNotReproduced": [
+    "Mid-session anomaly (text merge 'MIDCOLPAGE2-CONTENT start' + a pb appearing to vanish and re-appear at doc end) — occurred only during uncontrolled harness typing (type-through-covered-element clicks moving the caret unpredictably); all controlled re-tests of pb insertion serialized correctly. Attributed to harness caret chaos, NOT claimed as an app bug."
+  ],
+  "knownBugChecks": {
+    "B280": "title-field/header-footer token staleness — furniture tokens refresh correctly after paper-settings changes and header edits (no new variant found in layout settings routes)",
+    "B214": "no page-gap text overlap reproduced during typing after paper/orientation/margin/column changes (paragraph rects inside page bounds at every variant)",
+    "B208/B227": "not re-triggered (no proofing-underline or image-frame geometry changes tested this run — those are separate feature surfaces)"
+  },
+  "notCovered": [
+    "RTL paragraph caret-typing anchor (style-level only; paragraph was off-viewport and harness could not place the caret reliably)",
+    "Print preview visual fidelity (app has no in-app preview surface; window.print() is a headless no-op — only document-unchanged verified; renderPrintPreview is dead code targeting never-created #bsPv)",
+    "Custom paper size dialog (menu opened, custom size not exercised — budget)",
+    "Cover page feature (no cover-page control found on Layout/Insert ribbons; only template route exists)",
+    "Watermark persistence across reload (watermark was removed before the persistence checkpoint; apply/remove verified live only)",
+    "Zoom while composing/IME, zoom + image geometry (B227 surface untouched)"
+  ],
+  "predicateTotals": {"pass": 47, "fail": 2, "candidates": 1}
+}

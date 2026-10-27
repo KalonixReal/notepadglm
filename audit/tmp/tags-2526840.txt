@@ -1,0 +1,8 @@
+i).match(/^&(?:#[0-9]{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});/);if(entity){out+=entity[0];i+=entity[0].length;continue}}if(char==="<"&&depth<24){
+const comment=text.slice(i).match(/^<span data-cid="([\w-]+)">/);if(comment){
+const tags=/<\/?span(?:\s[^<>]*)?>/g;tags.lastIndex=i+comment[0].length;
+let nesting=1,closing;while(closing=tags.exec(text)){nesting+=closing[0].startsWith("</")?-1:1;if(!nesting)break}if(closing&&!nesting){out+=put('<span
+  data-cid="'+escAttr(comment[1])+'">'+markdownInline(text.slice(i+comment[0].length,closing.index),depth+1)+"</span>");i=tags.lastIndex;continue}}}if(char==="<"){
+const portable=text.slice(i).match(/^<!-- np3:code64 ([A-Za-z0-9+/=]+) -->/);if(portable){out+=put(inlineCodeFrom64(portable[1]));i+=portable[0].length;continue}
+const raw=text.slice(i).match(/^(?:<\/(?:u|sub|sup|mark|span)>|<(?:u|sub|sup|mark)>|<span data-cid="[\w-]+">|<span style="[^"<>]*">)/);if(raw){
+const token=raw[0];if(!token.includes("style=")||token.slice(13,-2).split(";")

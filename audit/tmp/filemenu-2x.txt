@@ -1,0 +1,14 @@
+.flush();location.reload()}catch(error){toast(error.message,"warn")}}for(const[action,label]of[["protect","Protect with password…"],["unlock","Unlock file…"],["change","Change file password…"],["remove","Remove file
+  password…"],["lock","Lock protected files"]]){
+const button=document.createElement("button");button.type="button";button.dataset.fileSecurity=action;button.textContent=label;fileMenu.appendChild(button)}
+const protectedFileMenu=showFileMenu;showFileMenu=function(file,...args){for(
+const button of fileMenu.querySelectorAll("[data-file-security]"))button.hidden=button.dataset.fileSecurity==="protect"?fileIsProtected(file):button.dataset.fileSecurity==="unlock"?!fileIsLocked(file):button.dataset.fileSecurity==="lock"?!f
+ ileIsProtected(file):!fileIsProtected(file)||fileIsLocked(file);return protectedFileMenu.call(this,file,...args)};fileMenu.addEventListener("click",event=>{
+const action=event.target.closest("[data-file-security]")?.dataset.fileSecurity;if(!action)return;
+const id=fileMenuFor;closeMenus();if(action==="protect"||action==="change")filePasswordDialog([id]);else if(action==="unlock")unlockFileDialog(id);else if(action==="remove")removeFileProtectionDialog(id);else lockProtectedFiles()});
+const fileSecurityRow=document.createElement("div");fileSecurityRow.className="setting-row";fileSecurityRow.innerHTML='<div><strong>Protect specific files</strong><p>Give selected documents or mind maps their own password. Other notes stay
+  accessible.</p><p id="fileSecurityCount"></p></div><div class="security-actions"><button class="btn" id="protectSpecificFiles">Choose files…</button><button class="btn" id="lockProtectedFiles" hidden>Lock protected
+  files</button></div>';document.querySelector("[data-bspane=settings] .settings-card").appendChild(fileSecurityRow);$("#protectSpecificFiles").onclick=()=>filePasswordDialog([activeId],true);$("#lockProtectedFiles").onclick=lockProtectedFi
+ les;
+function syncFileSecurity(){
+const count=files.filter(fileIsProtected).length;$("#f

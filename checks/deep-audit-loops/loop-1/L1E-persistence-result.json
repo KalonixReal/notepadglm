@@ -1,0 +1,48 @@
+{
+  "family": "L1E — Persistence, protection, history (F07-F14)",
+  "executor": "main agent (session l1save, fresh isolated profile)",
+  "predicates": {"pass": 18, "fail": 1, "envBounded": 2},
+  "confirmedNewBugs": [
+    {
+      "title": "Deleting a document removes it from every notebook-version-history snapshot, so the advertised 'Earlier notebook states, including removed files' can never restore a removed file (and the pre-delete capture's reason is rewritten to a generic label)",
+      "feature": "F13 whole-notebook history/guarded transactions + F14 deletion cleanup",
+      "repro": [
+        "1. Notebook with file A ('Untitled', content 'PERSIST 1'). Create file B ('Untitled 2', content 'DELA'), wait ~2.5s for autosave (settled).",
+        "2. Delete file B via sidebar row menu → Delete → confirm ('This cannot be undone').",
+        "3. File → Info → Notebook version history…: the only entry is 'Before a notebook change <time> · 1 file' — the pre-delete capture that originally contained 2 files and reason 'Before deleting Untitled 2' now contains 1 file.",
+        "4. Restore it → confirmed via Continue → notebook restored WITHOUT the deleted file. The removed file is unrecoverable from notebook history despite the dialog's first line: 'Earlier notebook states, including removed files.'"
+      ],
+      "expected": "Per the dialog text, earlier notebook states include removed files; at minimum the guarded 'Before deleting X' capture retains X.",
+      "observed": "Every recovery row's snapshot has the deleted file filtered out and its reason overwritten to 'Before a notebook change'.",
+      "controls": [
+        "Guarded capture itself fires (auditGuardedMutation → auditRecoveryCapture BEFORE the mutation runs) — source-verified.",
+        "Dedup control: a capture whose scrubbed content equals current state is hidden from the list (second delete cycle) — correct dedup, not the defect.",
+        "The delete dialog's own 'This cannot be undone' warning is honored; the defect is the history dialog's false 'including removed files' promise (same defect class as counted B229 misleading-UI)."
+      ],
+      "sourceMechanism": "app-js.txt: deletion cleanup iterates auditDatabase rows — `const hasDeleted=row.snapshot?.files?.some(file=>ids.has(file.id)), clean=scrubDeletedStoredValue(row,ids); … if(hasDeleted&&clean.reason)clean.reason=\"Before a notebook change\"; await auditDatabase(\"put\",row.key,clean)`. scrubDeletedSnapshot: `const kept=snapshot.files.filter(file=>!ids.has(file.id))` removes the deleted file from every stored snapshot, defeating the recovery capture taken one moment earlier.",
+      "classification": "CONFIRMED",
+      "impact": "Users relying on Notebook version history to recover a deleted file lose it permanently while the UI claims otherwise; history labels hide what actually changed.",
+      "fixDirection": "Exempt the pre-delete guarded capture from scrubbing (or scrub only protected-file private extras per the privacy contract), and/or correct the dialog text; reconcile with the delete dialog's no-undo warning deliberately."
+    }
+  ],
+  "cleanChecks": [
+    {"area": "F07 autosave", "result": "typed text persisted across reload; save indicator transitions observed — pass"},
+    {"area": "F11 notebook password set", "result": "Settings → Set password (8+ chars) → Apply; storage key added — pass"},
+    {"area": "F11 unlock + wrong-password rejection", "result": "reload → 'Unlock notebook' screen; wrong password stays locked; correct password unlocks with exact content and file list — pass"},
+    {"area": "F11 password change/rotation", "result": "Change password → old password rejected after reload, new password unlocks, content intact — pass"},
+    {"area": "F11 password removal", "result": "Remove password protection → Apply → reload → no lock screen, content accessible — pass"},
+    {"area": "F12 document version save/list/restore", "result": "Save a version now creates timestamped rows (words/chars); restore via row click + confirm restores exact earlier text; versions persist across reload — pass"},
+    {"area": "F12 restore not undoable", "result": "Ctrl+Z after restore does not revert the restore — observation only: destructive restore is dialog-guarded ('Restore the version from…?'), no undo contract established; not counted"},
+    {"area": "F10 clear browser data", "result": "Type-CLEAR confirmation; localStorage keys 2→0; working doc resets to blank — matches the dialog's explicit contract ('removes local browser copies… Unsaved edits will be lost'); B264's known handle-retention defect is separately prior-evidenced — pass (bounded)"},
+    {"area": "F14 deletion cleanup (storage level)", "result": "delete file → app-owned storage key count 3→2 (scrub ran); scope stayed app-owned — pass (the snapshot over-reach is the counted F13 bug)"}
+  ],
+  "envBounded": [
+    "F08 connected HTML save: 'Save notebook HTML' click in headless (no File System Access picker, no observable download completion) silently closes backstage; prior native-download CDP evidence (24 Oct supersession note) stands; not re-verified here.",
+    "F09 portable single-HTML download: same headless limitation; prior evidence stands."
+  ],
+  "notCovered": [
+    "per-FILE password protection (File security menu path not located this run; B252's delayed-lock family is prior-evidenced)",
+    "edit-during-async-save ordering (needs timing hooks; prior C26AA bounded evidence stands)",
+    "version Compare view, Download version, Clear history destructive paths (clear partially covered by dialog presence)"
+  ]
+}

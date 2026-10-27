@@ -1,0 +1,25 @@
+ediatePropagation()}dismissManagedMenu(menu);return}if(!["ArrowDown","ArrowUp","Home","End"].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();
+const items=managedMenuItems(menu),index=items.indexOf(document.activeElement),next=event.key==="Home"?0:event.key==="End"?items.length-1:(index+(event.key==="ArrowDown"?1:-1)+items.length)%items.length;for(
+const item of items)item.tabIndex=-1;
+const target=items[next];if(target){target.tabIndex=0;target.focus({preventScroll:true})}},true);
+const keyboardFileMenu=showFileMenu;showFileMenu=function(file,anchor){
+const result=keyboardFileMenu.apply(this,arguments);if(fileMenu.classList.contains("on"))focusManagedMenu(fileMenu,anchor);return result};sbNew.addEventListener("keydown",event=>{if(!["ArrowDown","ArrowUp","Enter","
+  "].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();if(newMenu.classList.contains("on")&&["Enter","
+  "].includes(event.key)){dismissManagedMenu(newMenu);return}popupGesture=null;if(!newMenu.classList.contains("on"))openPop("newfile",sbNew);sbNew.setAttribute("aria-expanded","true");focusManagedMenu(newMenu,sbNew,event.key==="ArrowUp")});
+function visibleRibbonTabs(){return[...document.querySelectorAll(".rtab[role=tab][data-tab]")].filter(visibleKeyboardControl)}
+function syncRibbonTabStops(){
+const tabs=visibleRibbonTabs(),current=tabs.find(tab=>tab.getAttribute("aria-selected")==="true")||tabs[0];for(
+const tab of tabs)tab.tabIndex=tab===current?0:-1}
+const keyboardRibbonShow=Shell.show;Shell.show=function(...args){
+const result=keyboardRibbonShow.apply(this,args);syncRibbonTabStops();return result};document.addEventListener("keydown",event=>{
+const tab=event.target.closest?.(".rtab[role=tab][data-tab]");if(!tab||!["ArrowLeft","ArrowRight","Home","End"].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();
+const tabs=visibleRibbonTabs(),index=tabs.indexOf(tab),next=event.key==="Home"?0:event.key==="End"?tabs.length-1:(index+(event.key==="ArrowRight"?1:-1)+tabs.length)%tabs.length,target=tabs[next];if(target){Shell.show(target.dataset.tab);tar
+ get.focus({preventScroll:true})}},true);syncRibbonTabStops();
+const keyboardInkPicker=Ink.syncPicker;Ink.syncPicker=function(...args){
+const result=keyboardInkPicker.apply(this,args);for(const[id,selector,active]of[["inkColors","button[data-c]",node=>node.dataset.c===this.color],["inkThick",".thick-opt",node=>+node.dataset.tw===this.thick]]){
+const group=document.getElementById(id);group.setAttribute("role","radiogroup");for(
+const button of group.querySelectorAll(selector)){
+const checked=active(button);button.setAttribute("role","radio");button.setAttribute("aria-checked",String(checked));button.tabIndex=checked?0:-1}}return result};for(
+const id of["inkColors","inkThick"])document.getElementById(id).addEventListener("keydown",event=>{
+const button=event.target.closest("[role=radio]");if(!button||!["ArrowLeft","ArrowRight","ArrowUp","ArrowDown","Home","End"].includes(event.key))return;event.preventDefault();event.stopImmediatePropagation();
+const group=button.closest("[role=radiogroup]"),toolbar=button.closest("[role=toolbar]"),horizontal=["ArrowLeft","ArrowRight"].in

@@ -1,0 +1,12 @@
+lder.collectionId=target;if(!folderIds.has(folder.parent))folder.parent=null}for(
+const f of moving){
+const meta=noteMeta(f);meta.collectionId=target;if(!folderIds.has(meta.folder))meta.folder=null}
+const nodeCollection=id=>{if(id.startsWith("folder:"))return recordCollectionId(folderById(id.slice(7)));
+const f=files.find(f=>f.id===id||"file:"+f.id===id);if(f)return recordCollectionId(f);
+const comment=library.map.comments?.find(c=>c.id===id);return comment?recordCollectionId(comment):null};library.map.links=(library.map.links||[]).filter(edge=>{
+const a=nodeCollection(edge.from),b=nodeCollection(edge.to);return a&&b&&a===b});for(
+const edge of library.map.links)if(edge.groupFolder&&recordCollectionId(folderById(edge.groupFolder))!==nodeCollection(edge.from)){delete edge.groupFolder;delete
+  edge.groupMember}library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(anchor=>{
+const f=files.find(f=>f.id===anchor.file),folder=folderById(anchor.folder);return f&&folder&&recordCollectionId(f)===recordCollectionId(folder)});clearCollectionTransient();saveLibrary();if(recordCollectionId(doc)!==activeCollectionId())act
+ ivate(collectionFileFallback());Store.save();renderSidebar();renderCollectionTabs841();if(mapMode)renderMap();return true}
+function openCollectionManager841(id=activeCollecti

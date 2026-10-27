@@ -1,0 +1,11 @@
+y=NotepadVault.storage.key(i);if(!key?.startsWith(WORKSPACE_KEY+":edit:"))continue;try{
+const delta=JSON.parse(NotepadVault.storage.getItem(key)||"null");if(delta?.sessionId===sessionId)NotepadVault.storage.removeItem(key)}catch{}}lastStructure846=structureFingerprint846()}}catch{}}};
+const originalStoreSave846=Store.save;Store.save=function(...args){if(!isBooting&&doc?.id&&savedEditRecords.has(doc)){
+const current=editFingerprint846(doc),base=savedEditRecords.get(doc);if(current!==base)pendingEdit846={id:doc.id,baseHash:base,at:Date.now()}}return originalStoreSave846.apply(this,args)};
+let commitGateTimer846=0;scheduleCommit=function(){clearTimeout(commitTimer);commitTimer=0;if(commitIdle&&window.cancelIdleCallback)cancelIdleCallback(commitIdle);commitIdle=0;clearTimeout(commitGateTimer846);commitGateTimer846=setTimeout(
+function waitForTypingPause(){commitGateTimer846=0;if(editorComposing)return;
+const quiet=performance.now()-lastEditorActivity846;if(quiet<1450){commitGateTimer846=setTimeout(waitForTypingPause,Math.max(120,1450-quiet+40));return}
+const run=()=>{commitIdle=0;
+const idle=performance.now()-lastEditorActivity846;if(editorComposing||idle<1450){commitGateTimer846=setTimeout(waitForTypingPause,Math.max(120,1450-idle+40));return}flushCommit()};if(window.requestIdleCallback)commitIdle=requestIdleCallbac
+ k(run);else commitGateTimer846=setTimeout(run,250)},780)};
+const originalUp

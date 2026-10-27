@@ -1,0 +1,56 @@
+c).collectionId=activeCollectionId();saveLibrary();Store.save();return result};
+const collectionDeleteFile=deleteFile;deleteFile=async function(id){
+const result=await collectionDeleteFile(id);ensureCollections();if(!collectionFiles().length){
+const file=Store.newFileObj("Untitled","");files.push(file);activate(file);Store.save()}return result};
+function prepareCollectionRestore(snapshot,kind,destinationId){
+const lib=exportLibraryData(snapshot);if(kind!=="replace"){
+const mapping=new Map;if(destinationId){
+const target=library.collections.find(c=>c.id===destinationId);if(!target)throw Error("The destination collection no longer exists");for(
+const c of lib.collections||[{id:"collection-default"}])mapping.set(c.id,destinationId);lib.collections=[{...target}]}else if(Array.isArray(lib.collections)){for(
+const c of lib.collections)mapping.set(c.id,uid("collection"));lib.collections=lib.collections.map(c=>({...c,id:mapping.get(c.id)}))}else{lib.collections=[{id:activeCollectionId(),name:library.collections.find(c=>c.id===activeCollectionId()
+ ).name}];mapping.set("collection-default",activeCollectionId())}for(
+const file of snapshot.files)noteMeta(file).collectionId=mapping.get(recordCollectionId(file))||activeCollectionId();for(
+const folder of lib.folders||[])folder.collectionId=mapping.get(recordCollectionId(folder))||activeCollectionId();for(
+const comment of lib.map?.comments||[])comment.collectionId=mapping.get(recordCollectionId(comment))||activeCollectionId();lib.activeCollectionId=lib.collections[0]?.id;delete
+  lib.collectionViews}snapshot.extra[LIBRARY_KEY]=JSON.stringify(lib);return lib}
+function mergeIncomingCollections(lib){ensureCollections();for(
+const c of lib.collections||[])if(!library.collections.some(existing=>existing.id===c.id))library.collections.push({...c})}
+const collectionSchema=assertWorkspaceSchema;assertWorkspaceSchema=function(snapshot){collectionSchema(snapshot);
+const lib=exportLibraryData(snapshot);if(lib.collections===undefined)return;if(!Array.isArray(lib.collections)||!lib.collections.length||lib.collections.length>200)throw Error("Invalid collections");
+const ids=new Set;for(
+const c of lib.collections){if(!c||typeof c.id!=="string"||!c.id||ids.has(c.id)||typeof c.name!=="string"||!c.name||c.name.length>100)throw Error("Invalid or duplicate collection");if(c.description!==undefined&&(typeof
+  c.description!=="string"||c.description.length>1e3)||c.color!==undefined&&!/^#[0-9a-f]{6}$/i.test(c.color))throw Error("Invalid collection details");ids.add(c.id)}if(lib.activeCollectionId&&!ids.has(lib.activeCollectionId))throw
+  Error("Active collection is missing");for(
+const f of snapshot.files)if(!ids.has(recordCollectionId(f)))throw Error("A file belongs to a missing collection");
+const folders=new Map((lib.folders||[]).map(f=>[f.id,f]));for(
+const f of folders.values()){if(!ids.has(recordCollectionId(f)))throw Error("Folder collection is missing");if(f.parent&&recordCollectionId(folders.get(f.parent))!==recordCollectionId(f))throw Error("Folder hierarchy crosses
+  collections")}for(
+const file of snapshot.files){
+const folder=file.writer?.library?.folder;if(folder&&recordCollectionId(folders.get(folder))!==recordCollectionId(file))throw Error("File folder belongs to another collection")}for(
+const c of lib.map?.comments||[])if(!ids.has(recordCollectionId(c)))throw Error("Comment collection is missing")};syncCollectionButton();
+function collectionFileFallback(){
+let file=collectionFiles()[0];if(!file){file=Store.newFileObj("Untitled","");files.push(file)}return file}
+const collectionMapPaste=pasteFileMapPacket;pasteFileMapPacket=function(packet){if(packet.cut&&((packet.comments||[]).some(c=>recordCollectionId(c)!==activeCollectionId())||(packet.fileCopies||[]).some(f=>recordCollectionId(f)!==activeColle
+ ctionId())||(packet.nodes||[]).some(n=>n.folder&&recordCollectionId(folderById(n.folder))!==activeCollectionId()))){toast("Drag files onto the destination collection tab to move between collections.","warn");return}return
+  collectionMapPaste(packet)};
+function deleteCollectionDialog83(id){
+const item=library.collections.find(c=>c.id===id);if(!item)return;
+const count=collectionFiles(id).length;showWriterDialog("Remove collection","<p>Delete <strong>"+escHtml(item.name)+"</strong>, its "+count+" file"+(count===1?"":"s")+', folders and file-map comments? To keep the contents, first drag its
+  files and folders onto another collection tab.</p><p>A recovery copy is required before deletion.</p><label for="deleteCollectionConfirm">Type the collection name to confirm</label><input id="deleteCollectionConfirm"
+  autocomplete="off">',async()=>{if($("#deleteCollectionConfirm").value!==item.name){writerFormFeedback("Type the exact collection name.");return false}try{await auditGuardedMutation("Before deleting collection "+item.name,()=>{
+const deletedFiles=new Set(collectionFiles(id).map(f=>f.id)),deletedFolders=new Set(collectionFolders(id).map(f=>f.id)),deletedComments=new Set((library.map.comments||[]).filter(c=>recordCollectionId(c)===id).map(c=>c.id)),nodes=new
+  Set([...deletedFiles].map(value=>"file:"+value).concat([...deletedFolders].map(value=>"folder:"+value),[...deletedComments]));files=files.filter(f=>!deletedFiles.has(f.id));for(
+const fileId of deletedFiles){Hist.remove(fileId);Undo.forget(fileId);for(
+const key of[PFX+fileId,"notepadV3:hist:"+fileId,"notepadV3:rmrec:"+fileId])delete extra[key]}library.folders=library.folders.filter(f=>!deletedFolders.has(f.id));library.map.comments=(library.map.comments||[]).filter(c=>!deletedComments.ha
+ s(c.id));library.map.links=(library.map.links||[]).filter(e=>!nodes.has(e.from)&&!nodes.has(e.to));for(
+const field of["positions","colors","sizes"])for(
+const node of nodes)delete library.map[field]?.[node];library.map.spatialAnchors=(library.map.spatialAnchors||[]).filter(a=>!deletedFiles.has(a.file)&&!deletedFolders.has(a.folder));library.expandedFolders=(library.expandedFolders||[]).filt
+ er(value=>!deletedFolders.has(value));library.collections=library.collections.filter(c=>c.id!==id);delete library.collectionViews[id];
+const wasActive=activeCollectionId()===id;ensureCollections();clearCollectionTransient();if(wasActive||!files.some(f=>f.id===doc.id))activate(collectionFileFallback());commitLibrary()});return
+  true}catch(error){writerFormFeedback(error.message);return false}},"Delete collection")}
+/* Structured Google export: preserve tab hierarchy instead of flattening DOCX. */
+function googleImportColor(value){
+const rgb=value?.color?.rgbColor||value?.rgbColor;if(!rgb)return null;
+const channel=v=>Math.round(Math.max(0,Math.min(1,Number(v)||0))*255).toString(16).padStart(2,"0");return"#"+channel(rgb.red)+channel(rgb.green)+channel(rgb.blue)}
+function googleDimension(value){return value&&Number.isFinite(value.magnitude)?Math.max(0,Math.min(2e3,value.magnitude*(value.unit==="PT"?96/72:1))):null}
+function googleSignedDimension(value){return value&&Number.isFinite(value.magnitude)?Math.max(-2e3,Math.min(2e3,value.magnitude*(value.unit==="PT"?96/72:1))):null}fu

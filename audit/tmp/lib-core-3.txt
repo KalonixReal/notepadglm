@@ -1,0 +1,67 @@
+bar.style.removeProperty("--sidebar-width");libraryView="list";activate(files[0]);applyMotion();Store.save();saveLibrary();Backstage.close();toast("Notebook cleared")},"Remove everything");
+const resetApplySource=$("#resetNotebook").onclick;$("#resetNotebook").onclick=()=>{resetApplySource();
+const apply=writerApply;writerApply=()=>{if($("#resetConfirm").value!=="DELETE")return apply();libraryMapPast.length=0;libraryMapFuture.length=0;mapClipboard=null;combinedClipboard=null;objectClipboard=null;visits=[];visitIndex=-1;return
+  apply()}};
+/* New-file dropdown replaces the flat create button. */sbNew.removeEventListener("click",createFile);sbNew.innerHTML='<svg class="ic"><use href="#i-plus"/></svg><span>New</span><svg class="ic new-chevron" aria-hidden="true"><use
+  href="#i-chev-d"/></svg>';sbNew.setAttribute("aria-haspopup","menu");sbNew.setAttribute("aria-expanded","false");
+const newMenu=document.createElement("div");newMenu.className="pop new-menu";newMenu.id="newFileMenu";newMenu.setAttribute("role","menu");newMenu.innerHTML='<button role="menuitem" data-new-kind="document">▤ <span>Document<small>Write and
+  format a note</small></span></button><button role="menuitem" data-new-kind="mindmap">◈ <span>Mind map<small>Connect ideas on a
+  canvas</small></span></button>';document.body.appendChild(newMenu);pops.newfile=newMenu;sbNew.onclick=e=>{e.stopPropagation();openPop("newfile",sbNew);sbNew.setAttribute("aria-expanded",String(newMenu.classList.contains("on")))};
+const oldCreateFile=createFile;createFile=function(kind="document",name=null){flushCommit();Store.save();
+const f=Store.newFileObj(name||nextUntitledName(),"");noteMeta(f).folder=currentFolder;if(kind==="mindmap"){f.writer.map={nodes:[{id:uid("node"),x:330,y:220,text:"Central
+  node",color:"#dbeafe"}],edges:[],comments:[],view:{x:0,y:0,z:1}}}files.unshift(f);libraryView="list";closePops();activate(f);toast(kind==="mindmap"?"Mind map created":"Document created")};newMenu.onclick=e=>{
+const b=e.target.closest("[data-new-kind]");if(b)createFile(b.dataset.newKind)};
+/* One SVG/DOM map surface for both ideas and the file graph. */
+const mapSurface=document.createElement("section");mapSurface.id="mapSurface";mapSurface.tabIndex=0;mapSurface.setAttribute("aria-label","Mind map canvas");mapSurface.innerHTML='<div id="mapHint">Drag ideas to arrange · Double-click to
+  edit · Drag empty space to pan</div><div id="mapWorld"><svg id="mapEdges" xmlns="http://www.w3.org/2000/svg"></svg><div id="mapNodes"></div></div><div id="mapZoom"><button data-map="zoomOut" aria-label="Zoom out">−</button><span
+  id="mapZoomValue">100%</span><button data-map="zoomIn" aria-label="Zoom in">+</button><button data-map="fit">Fit</button></div>';canvasWrap.after(mapSurface);
+const mapWorld=$("#mapWorld"),mapNodes=$("#mapNodes"),mapEdges=$("#mapEdges");
+const mapRibbon=document.createElement("div");mapRibbon.id="mapRibbon";mapRibbon.innerHTML='<div class="map-ribbon-label">Mind map</div>'+[["edit","Exit read mode"],["add","+ Node"],["child","+ Connected
+  node"],["connect","Connect"],["comment","+ Comment"],["color","Color"],["duplicate","Duplicate"],["remove","Delete"],["undo","Undo"],["redo","Redo"],["arrange","Arrange"],["fit","Fit view"],["files","Back to note"]].map(([k,v])=>'<button
+  class="tool-btn" data-map="'+k+'">'+v+"</button>").join("");$("#ribbon").appendChild(mapRibbon);
+function mapData(){return libraryView==="map"?library.map:doc.writer?.map}
+function mapFiles(){
+const graph={nodes:[],edges:[],comments:library.map.comments||[],view:library.map.view};
+const positions=library.map.positions||{};
+let i=0;for(
+const folder of collectionFolders()){
+const id="folder:"+folder.id,p=positions[id]||{x:40+folderPath(folder.id).length*220,y:60+i++*120};graph.nodes.push({id:id,...p,text:folder.name,color:"#e0e7ff",folder:folder.id});if(folder.parent&&folderById(folder.parent))graph.edges.push
+ ({id:"parent:"+id,from:"folder:"+folder.parent,to:id})}i=0;
+const fileStart=Math.max(600,40+(Math.max(0,...collectionFolders().map(f=>folderPath(f.id).length))+1)*220);for(
+const f of collectionFiles()){
+const id="file:"+f.id,m=noteMeta(f),p=positions[id]||{x:fileStart,y:60+i*135};i++;graph.nodes.push({id:id,...p,text:f.name,color:f.writer?.map?"#dbeafe":"#ecfdf5",file:f.id});if(m.folder&&folderById(m.folder))graph.edges.push({id:"folderlin
+ k:"+id,from:"folder:"+m.folder,to:id})}for(
+const edge of graph.edges)edge.bend=library.map.bends?.[edge.id]||0;return graph}
+let displayedMap=null;
+const libraryMapPast=[],libraryMapFuture=[];
+function libraryMapSnapshot(){return JSON.stringify({map:library.map,folders:library.folders,expandedFolders:library.expandedFolders||[],memberships:files.map(f=>[f.id,noteMeta(f).folder])})}
+function connectFileMapNodes(from,to){if(!from||!to||from.id===to.id)return;
+let parent,file,folder;if(from.folder&&to.folder){folder=folderById(from.folder);parent=to.folder;if(!canMoveLibraryFolder(folder.id,parent)){toast("A folder cannot go inside itself or its subfolders","warn");return}}else
+  if(from.file&&to.folder){file=files.find(f=>f.id===from.file);parent=to.folder}else if(from.folder&&to.file){file=files.find(f=>f.id===to.file);parent=from.folder}else{toast("Connect a file to a folder, or a folder to another
+  folder");return}if((file?noteMeta(file).folder:folder?.parent)===parent)return;mapChanged(()=>{for(
+const n of displayedMap.nodes)library.map.positions[n.id]={x:n.x,y:n.y};if(file)noteMeta(file).folder=parent;else folder.parent=parent;expandLibraryDestination(parent);mapSelected=new Set([file?"file:"+file.id:"folder:"+folder.id])})}
+function unlinkFileMapEdge(id){
+const edge=displayedMap.edges.find(edge=>edge.id===id),target=displayedMap.nodes.find(n=>n.id===edge?.to);if(!target)return;mapChanged(()=>{if(target.file){
+const f=files.find(f=>f.id===target.file);if(f)noteMeta(f).folder=null}else if(target.folder){
+const folder=folderById(target.folder);if(folder)folder.parent=null}mapEdgeSelected=null})}
+function rememberLibraryMap(before=libraryMapSnapshot()){libraryMapPast.push(before);if(libraryMapPast.length>100)libraryMapPast.shift();libraryMapFuture.length=0}
+function undoLibraryMap(redo=false){if(document.body.classList.contains("readmode"))return;
+const source=redo?libraryMapFuture:libraryMapPast,target=redo?libraryMapPast:libraryMapFuture;if(!source.length)return;target.push(libraryMapSnapshot());
+const snapshot=JSON.parse(source.pop());library.map=snapshot.map;library.folders=snapshot.folders;library.expandedFolders=snapshot.expandedFolders;
+const folders=new Set(library.folders.map(f=>f.id)),memberships=new Map(snapshot.memberships);for(
+const f of files){
+const folder=memberships.has(f.id)?memberships.get(f.id):noteMeta(f).folder;noteMeta(f).folder=folders.has(folder)?folder:null}mapEdgeSelected=null;Store.save();saveLibrary();renderSidebar();renderMap()}
+function showWorkspace(on){mapMode=on;libraryActions.hidden=libraryView==="map";document.body.classList.toggle("map-mode",on);mapRibbon.querySelector(".map-ribbon-label").textContent=libraryView==="map"?"File map":"Mind
+  map";mapRibbon.querySelector("[data-map=files]").textContent=libraryView==="map"?"Back to note":"Files";for(
+const key of["add","child","connect","color","duplicate","arrange"])mapRibbon.querySelector("[data-map="+key+"]").hidden=false;mapRibbon.querySelector("[data-map=add]").textContent=libraryView==="map"?"New ▾":"+
+  Node";$("#libraryGraph").classList.toggle("active",libraryView==="map");$("#libraryList").classList.toggle("active",libraryView!=="map");$("#libraryGraph").setAttribute("aria-pressed",String(libraryView==="map"));$("#libraryList").setAttr
+ ibute("aria-pressed",String(libraryView!=="map"));if(on){Images.deselect();if(Ink.live)Ink.startLive(false);renderMap()}else schedulePages()}
+const nextRender=renderFromMd;renderFromMd=function(){nextRender();if(!isBooting){showWorkspace(libraryView==="map"||!!doc.writer?.map);if(!mapMode)decorateWiki()}};
+const nextActivate=activate;activate=function(f){if(inlineMapEdit)finishInlineMapEdit();allObjectsSelected=false;page.classList.remove("all-selected");mapSelected.clear();mapEdgeSelected=null;mapLinkFrom=null;libraryView="list";nextActivate
+ (f);showWorkspace(!!doc.writer?.map);if(!mapMode)decorateWiki();recordVisit(f.id)};
+const nextFlush=flushCommit;flushCommit=function(){if(doc?.writer?.map){doc.markdown=doc.writer.map.nodes.map(n=>n.text).join("\n\n")+"\n"+doc.writer.map.comments.map(n=>n.text).join("\n");return}return nextFlush()};
+function mapChanged(action){if(libraryView==="map"){rememberLibraryMap();action?.();Store.save();saveLibrary();renderSidebar();renderMap();return}flushCommit();action?.();flushCommit();doc.updatedAt=Date.now();Undo.commit(doc.markdown);Stor
+ e.save();renderMap()}
+const editMapMutation=mapChanged;mapChanged=function(action){if(document.body.classList.contains("readmode")){toast("Exit reading view to edit");return false}if(inlineMapEdit)finishInlineMapEdit();return editMapMutation(action)};
+function mapPoint(e){
+const r=mapSurface.getBoundingClientRect(),v=mapData().view;return{x:(e.clientX-r.

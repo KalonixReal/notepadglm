@@ -1,0 +1,5 @@
+ted(file=doc){return fileIsLocked(file)||NotepadFileVault.isProtected(file?.id)}
+const fileProtectionCommit=flushCommit;flushCommit=function(...args){if(fileIsLocked()){clearTimeout(commitTimer);clearTimeout(saveTimer);return}return fileProtectionCommit.apply(this,args)};
+const fileProtectionMutation=withMutation;withMutation=function(...args){if(fileIsLocked())return;return fileProtectionMutation.apply(this,args)};
+const fileProtectionHistory=Hist.snap;Hist.snap=function(id,...args){if(fileIsLocked(files.find(f=>f.id===id)))return false;return fileProtectionHistory.call(this,id,...args)};
+const protectedRender=renderFromMd;renderFromMd=function(...args){editor.contentEditable=fileIsLocked()||do

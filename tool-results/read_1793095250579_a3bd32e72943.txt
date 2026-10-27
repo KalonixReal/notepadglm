@@ -1,0 +1,1096 @@
+     1→r(id=>library.folders.some(f=>f.id===id)):[];
+     2→library.map=library.map||{
+     3→positions:{
+     4→
+     5→}
+     6→,comments:[],view:{
+     7→x:40,y:40,z:1
+     8→}
+     9→
+    10→}
+    11→;
+    12→let currentFolder=null,libraryView="list",mapMode=false,mapSelected=new Set,mapEdgeSelected=null,mapLinkFrom=null,mapTool="select",mapDrag=null,mapRaf=0,mapClipboard=null;
+    13→let selectedFiles=new Set,fileSelectionAnchor=null;
+    14→const uid=prefix=>prefix+"-"+(crypto.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2));
+    15→function noteMeta(f=doc){
+    16→if(!f.writer)f.writer={
+    17→
+    18→}
+    19→;
+    20→if(!f.writer.library)f.writer.library={
+    21→folder:null,tags:[],star:false
+    22→}
+    23→;
+    24→return f.writer.library
+    25→}
+    26→function saveLibrary(){
+    27→cache.setItem(LIBRARY_KEY,JSON.stringify(library))
+    28→}
+    29→function folderById(id){
+    30→return library.folders.find(f=>f.id===id)
+    31→}
+    32→function folderPath(id){
+    33→const seen=new Set,parts=[];
+    34→while(id&&!seen.has(id)){
+    35→seen.add(id);
+    36→const f=folderById(id);
+    37→if(!f)break;
+    38→parts.unshift(f.name);
+    39→id=f.parent
+    40→}
+    41→return parts
+    42→}
+    43→const fileTextCache=new WeakMap;
+    44→function fileText(f){
+    45→const cached=fileTextCache.get(f);
+    46→if(cached&&cached.md===f.markdown&&cached.at===f.updatedAt)return cached.text;
+    47→const text=f.writer?.map?[...f.writer.map.nodes,...f.writer.map.comments].map(n=>n.text||"").join(" "):snippetOf(f.markdown);
+    48→fileTextCache.set(f,{
+    49→md:f.markdown,at:f.updatedAt,text:text
+    50→}
+    51→);
+    52→return text
+    53→}
+    54→function commitLibrary(){
+    55→if(libraryView!=="map"){
+    56→libraryMapPast.length=0;
+    57→libraryMapFuture.length=0
+    58→}
+    59→Store.save();
+    60→saveLibrary();
+    61→renderSidebar();
+    62→if(mapMode)renderMap()
+    63→}
+    64→const libraryTop=document.createElement("div");
+    65→libraryTop.id="libraryTop";
+    66→libraryTop.innerHTML='<div class="library-modes"><button id="libraryList" class="active" aria-pressed="true">Files</button><button id="libraryGraph" aria-pressed="false">File map</button></div>';
+    67→sbSearch.before(libraryTop);
+    68→const libraryActions=document.createElement("div");
+    69→libraryActions.id="libraryActions";
+    70→libraryActions.innerHTML='<button id="libraryFolder" aria-label="New folder"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>New folder</button>';
+    71→sbList.after(libraryActions);
+    72→const bulkActions=document.createElement("div");
+    73→bulkActions.id="libraryBulk";
+    74→bulkActions.hidden=true;
+    75→bulkActions.innerHTML='<div class="bulk-selection-count"><span id="selectedFileCount" role="status"></span><button id="clearFileSelection" aria-label="Clear file selection">×</button></div><div class="bulk-selection-buttons"><button id="moveSelectedFiles">Move…</button><button class="danger" id="deleteSelectedFiles">Delete</button></div>';
+    76→libraryActions.prepend(bulkActions);
+    77→const rootDrop=$("#libraryList");
+    78→rootDrop.dataset.tip="Files · Drop files or folders here to move to the top level";
+    79→sbList.setAttribute("aria-multiselectable","true");
+    80→sbSearch.placeholder="Search files…";
+    81→let starsOnly=false;
+    82→const resizeBar=document.createElement("div");
+    83→resizeBar.id="sidebarResize";
+    84→resizeBar.tabIndex=0;
+    85→resizeBar.setAttribute("role","separator");
+    86→resizeBar.setAttribute("aria-label","Resize file sidebar");
+    87→resizeBar.setAttribute("aria-orientation","vertical");
+    88→sidebar.appendChild(resizeBar);
+    89→function resizeSidebar(width,save=false){
+    90→width=clamp(width,210,Math.min(520,innerWidth*.65));
+    91→sidebar.style.width=width+"px";
+    92→sidebar.style.setProperty("--sidebar-width",width+"px");
+    93→resizeBar.setAttribute("aria-valuenow",Math.round(width));
+    94→if(save){
+    95→library.width=width;
+    96→saveLibrary()
+    97→}
+    98→Images.sync()
+    99→}
+   100→if(library.width)resizeSidebar(library.width);
+   101→resizeBar.onpointerdown=e=>{
+   102→e.preventDefault();
+   103→resizeBar.setPointerCapture(e.pointerId);
+   104→resizeBar.onpointermove=e=>resizeSidebar(e.clientX-sidebar.getBoundingClientRect().left);
+   105→resizeBar.onpointerup=()=>{
+   106→resizeBar.onpointermove=null;
+   107→resizeSidebar(sidebar.getBoundingClientRect().width,true)
+   108→}
+   109→
+   110→}
+   111→;
+   112→resizeBar.onkeydown=e=>{
+   113→if(["ArrowLeft","ArrowRight"].includes(e.key)){
+   114→e.preventDefault();
+   115→resizeSidebar(sidebar.getBoundingClientRect().width+(e.key==="ArrowRight"?20:-20),true)
+   116→}
+   117→
+   118→}
+   119→;
+   120→function folderOptions(selected=null){
+   121→return'<option value="">Notebook root</option>'+collectionFolders().map(f=>'<option value="'+escAttr(f.id)+'"'+(f.id===selected?" selected":"")+">"+escHtml(folderPath(f.id).join(" / "))+"</option>").join("")
+   122→}
+   123→function folderDialog(existing=null,parentHint=null){
+   124→showWriterDialog(existing?"Edit folder":"New folder",'<label for="folderName">Name</label><input id="folderName" maxlength="100" value="'+escAttr(existing?.name||"")+'">'+(existing?'<label for="folderParent">Parent folder</label><select id="folderParent">'+folderOptions(existing.parent)+"</select>":"")+(existing?'<button class="btn danger" id="folderRemove">Remove folder;
+   125→ move its files to root</button>':""),()=>{
+   126→const name=$("#folderName").value.trim(),parent=existing?$("#folderParent").value||null:parentHint;
+   127→if(!name){
+   128→toast("Give the folder a name");
+   129→return false
+   130→}
+   131→let id=parent,seen=new Set;
+   132→while(id&&!seen.has(id)){
+   133→if(existing&&id===existing.id){
+   134→toast("A folder cannot go inside itself","warn");
+   135→return false
+   136→}
+   137→seen.add(id);
+   138→id=folderById(id)?.parent
+   139→}
+   140→if(existing)Object.assign(existing,{
+   141→name:name,parent:parent
+   142→}
+   143→);
+   144→else library.folders.push({
+   145→id:uid("folder"),name:name,parent:parent,collectionId:activeCollectionId()
+   146→}
+   147→);
+   148→commitLibrary()
+   149→}
+   150→);
+   151→if(existing)$("#folderRemove").onclick=async()=>{
+   152→if(!await appConfirm("Remove “"+existing.name+"”? Its notes and child folders will move to the notebook root."))return;
+   153→library.folders=library.folders.filter(f=>f.id!==existing.id);
+   154→for(const f of library.folders)if(f.parent===existing.id)f.parent=null;
+   155→for(const f of files)if(noteMeta(f).folder===existing.id)noteMeta(f).folder=null;
+   156→if(currentFolder===existing.id)currentFolder=null;
+   157→closeWriterDialog();
+   158→commitLibrary()
+   159→}
+   160→
+   161→}
+   162→$("#libraryFolder").onclick=()=>folderDialog();
+   163→const originalSidebarFoot=renderSidebarFoot;
+   164→renderSidebarFoot=function(){
+   165→originalSidebarFoot();
+   166→sbCount.textContent=files.length;
+   167→sbStorageEl.textContent=Math.max(1,Math.round(JSON.stringify(files).length/1024))+" KB stored"
+   168→}
+   169→;
+   170→function toggleFolder(id){
+   171→const expanded=new Set(library.expandedFolders||[]);
+   172→expanded.has(id)?expanded.delete(id):expanded.add(id);
+   173→library.expandedFolders=[...expanded];
+   174→const scroll=sbList.scrollTop;
+   175→saveLibrary();
+   176→renderSidebar();
+   177→sbList.scrollTop=scroll;
+   178→sbList.querySelector('[data-folder-toggle="'+CSS.escape(id)+'"]')?.focus({
+   179→preventScroll:true
+   180→}
+   181→)
+   182→}
+   183→function revealFolder(id){
+   184→const expanded=new Set(library.expandedFolders||[]),seen=new Set;
+   185→let folder=folderById(id);
+   186→while(folder&&!seen.has(folder.id)){
+   187→seen.add(folder.id);
+   188→expanded.add(folder.id);
+   189→folder=folderById(folder.parent)
+   190→}
+   191→library.expandedFolders=[...expanded];
+   192→libraryView="list";
+   193→currentFolder=null;
+   194→saveLibrary();
+   195→showWorkspace(!!doc.writer?.map);
+   196→renderSidebar();
+   197→sbList.querySelector('[data-folder-toggle="'+CSS.escape(id)+'"]')?.scrollIntoView({
+   198→block:"nearest"
+   199→}
+   200→)
+   201→}
+   202→renderSidebar=function(){
+   203→if(sbSortMode==="recent"&&sbOrderDirty){
+   204→sbOrder=collectionFiles().sort((a,b)=>b.updatedAt-a.updatedAt).map(f=>f.id);
+   205→sbOrderDirty=false
+   206→}
+   207→const scroll=sbList.scrollTop,q=sbQuery.trim().toLowerCase(),expanded=new Set(library.expandedFolders||[]),ranks=new Map(sbOrder.map((id,index)=>[id,index]));
+   208→sbList.replaceChildren();
+   209→const ordered=collectionFiles().sort(sbSortMode==="name"?(a,b)=>a.name.localeCompare(b.name):(a,b)=>(ranks.get(a.id)??1e9)-(ranks.get(b.id)??1e9));
+   210→const folderIds=new Set(collectionFolders().map(f=>f.id)),folderGroups=new Map,fileGroups=new Map;
+   211→const group=(groups,key,item)=>{
+   212→if(!groups.has(key))groups.set(key,[]);
+   213→groups.get(key).push(item)
+   214→}
+   215→;
+   216→for(const folder of collectionFolders())group(folderGroups,folderIds.has(folder.parent)?folder.parent:null,folder);
+   217→for(const folders of folderGroups.values())folders.sort((a,b)=>a.name.localeCompare(b.name));
+   218→for(const f of ordered)group(fileGroups,folderIds.has(noteMeta(f).folder)?noteMeta(f).folder:null,f);
+   219→const appendFile=(f,parent,depth)=>{
+   220→const m=noteMeta(f),row=document.createElement("div");
+   221→row.className="sb-item"+(f.id===activeId?" active":"");
+   222→row.dataset.documentId=f.id;
+   223→row.style.setProperty("--file-depth",depth);
+   224→row.tabIndex=f.id===activeId?0:-1;
+   225→row.setAttribute("role","option");
+   226→row.setAttribute("aria-selected",String(f.id===activeId));
+   227→row.setAttribute("aria-label",f.name);
+   228→row.draggable=true;
+   229→row.innerHTML='<input class="file-check" type="checkbox" aria-label="Select '+escAttr(f.name)+'"><div class="file-kind">'+(f.writer?.map?"◈":"▤")+'</div><div class="n">'+escHtml(f.name)+'</div><button class="more" aria-label="File menu">⋯</button>';
+   230→row.onclick=e=>{
+   231→if(e.target.closest(".file-check"))return;
+   232→if(e.ctrlKey||e.metaKey||e.shiftKey){
+   233→e.preventDefault();
+   234→selectFile(f.id,e.shiftKey,e.ctrlKey||e.metaKey);
+   235→row.focus();
+   236→return
+   237→}
+   238→if(!e.target.closest(".more")){
+   239→clearFileSelection();
+   240→libraryView="list";
+   241→openFile(f.id);
+   242→if(mapMode&&!f.writer?.map)showWorkspace(false)
+   243→}
+   244→
+   245→}
+   246→;
+   247→row.querySelector(".more").onclick=e=>{
+   248→e.stopPropagation();
+   249→showFileMenu(f,e.currentTarget)
+   250→}
+   251→;
+   252→row.querySelector(".file-check").onchange=()=>selectFile(f.id,false,true);
+   253→row.ondragstart=e=>{
+   254→if(!selectedFiles.has(f.id)){
+   255→selectedFiles=new Set([f.id]);
+   256→fileSelectionAnchor=f.id;
+   257→syncFileSelection()
+   258→}
+   259→e.dataTransfer.effectAllowed="move";
+   260→e.dataTransfer.setData("application/x-notepad-file",f.id);
+   261→e.dataTransfer.setData("application/x-notepad-files",JSON.stringify([...selectedFiles]))
+   262→}
+   263→;
+   264→row.ondragend=clearLibraryDropHints;
+   265→parent.appendChild(row)
+   266→}
+   267→;
+   268→const seen=new Set,appendFolder=(folder,parent,depth)=>{
+   269→if(seen.has(folder.id))return;
+   270→seen.add(folder.id);
+   271→const open=expanded.has(folder.id),branch=document.createElement("div"),row=document.createElement("div"),children=document.createElement("div");
+   272→branch.className="folder-branch";
+   273→row.className="folder-row";
+   274→row.style.setProperty("--file-depth",depth);
+   275→children.className="folder-children";
+   276→children.id="folder-children-"+folder.id;
+   277→children.hidden=!open;
+   278→children.setAttribute("role","group");
+   279→children.setAttribute("aria-label",folder.name+" contents");
+   280→row.innerHTML='<button class="folder-open" data-folder-toggle="'+escAttr(folder.id)+'" aria-expanded="'+open+'" aria-controls="'+escAttr(children.id)+'"><svg class="folder-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg><span class="folder-icon">▰</span><span class="folder-name">'+escHtml(folder.name)+'</span></button><button class="folder-edit" aria-label="Edit folder '+escAttr(folder.name)+'">⋯</button>';
+   281→row.querySelector(".folder-open").onclick=()=>toggleFolder(folder.id);
+   282→row.querySelector(".folder-open").onkeydown=e=>{
+   283→if(e.key==="ArrowRight"&&!open||e.key==="ArrowLeft"&&open){
+   284→e.preventDefault();
+   285→toggleFolder(folder.id)
+   286→}
+   287→
+   288→}
+   289→;
+   290→row.querySelector(".folder-edit").onclick=()=>folderDialog(folder);
+   291→row.draggable=true;
+   292→row.ondragstart=e=>{
+   293→e.stopPropagation();
+   294→e.dataTransfer.effectAllowed="move";
+   295→e.dataTransfer.setData("application/x-notepad-folder",folder.id)
+   296→}
+   297→;
+   298→row.ondragend=clearLibraryDropHints;
+   299→bindLibraryDrop(row,folder.id);
+   300→branch.append(row,children);
+   301→parent.appendChild(branch);
+   302→if(open){
+   303→for(const child of folderGroups.get(folder.id)||[])appendFolder(child,children,depth+1);
+   304→for(const f of fileGroups.get(folder.id)||[])appendFile(f,children,depth+1);
+   305→if(!children.children.length){
+   306→const empty=document.createElement("p");
+   307→empty.className="folder-empty";
+   308→empty.style.setProperty("--file-depth",depth+1);
+   309→empty.textContent="Empty folder";
+   310→children.appendChild(empty)
+   311→}
+   312→
+   313→}
+   314→
+   315→}
+   316→;
+   317→if(q){
+   318→for(const f of ordered)if([f.name,fileText(f)].join(" ").toLowerCase().includes(q))appendFile(f,sbList,0)
+   319→}
+   320→else{
+   321→for(const folder of folderGroups.get(null)||[])appendFolder(folder,sbList,0);
+   322→for(const f of fileGroups.get(null)||[])appendFile(f,sbList,0)
+   323→}
+   324→if(!sbList.children.length){
+   325→const empty=document.createElement("p");
+   326→empty.className="sb-empty";
+   327→empty.textContent=q?"No matching notes":"Create a document, mind map or folder to get started.";
+   328→sbList.appendChild(empty)
+   329→}
+   330→renderSidebarFoot();
+   331→syncFileSelection();
+   332→sbList.scrollTop=scroll
+   333→}
+   334→;
+   335→refreshSidebarDocument=function(f){
+   336→if(sbQuery||starsOnly)return renderSidebar();
+   337→const row=[...sbList.querySelectorAll("[data-document-id]")].find(el=>el.dataset.documentId===f.id);
+   338→if(!row)return;
+   339→row.querySelector(".n").textContent=f.name
+   340→}
+   341→;
+   342→
+   343→/* Library selection and hierarchy actions stay separate from editor selection. */function syncFileSelection(){
+   344→selectedFiles=new Set([...selectedFiles].filter(id=>files.some(f=>f.id===id)));
+   345→for(const row of sbList.querySelectorAll("[data-document-id]")){
+   346→const selected=selectedFiles.has(row.dataset.documentId);
+   347→row.classList.toggle("file-selected",selected);
+   348→row.querySelector(".file-check").checked=selected;
+   349→row.setAttribute("aria-selected",String(selectedFiles.size?selected:row.dataset.documentId===activeId))
+   350→}
+   351→bulkActions.hidden=!selectedFiles.size;
+   352→$("#selectedFileCount").textContent=selectedFiles.size+" selected"
+   353→}
+   354→function clearFileSelection(){
+   355→selectedFiles.clear();
+   356→fileSelectionAnchor=null;
+   357→syncFileSelection()
+   358→}
+   359→function selectFile(id,range=false,toggle=false){
+   360→const ids=[...sbList.querySelectorAll("[data-document-id]")].map(row=>row.dataset.documentId);
+   361→if(range&&fileSelectionAnchor&&ids.includes(fileSelectionAnchor)){
+   362→if(!toggle)selectedFiles.clear();
+   363→const from=ids.indexOf(fileSelectionAnchor),to=ids.indexOf(id);
+   364→for(const item of ids.slice(Math.min(from,to),Math.max(from,to)+1))selectedFiles.add(item)
+   365→}
+   366→else{
+   367→if(!toggle)selectedFiles.clear();
+   368→if(toggle&&selectedFiles.has(id))selectedFiles.delete(id);
+   369→else selectedFiles.add(id);
+   370→fileSelectionAnchor=id
+   371→}
+   372→syncFileSelection()
+   373→}
+   374→$("#clearFileSelection").onclick=clearFileSelection;
+   375→$("#moveSelectedFiles").onclick=()=>{
+   376→const ids=[...selectedFiles];
+   377→showWriterDialog("Move "+ids.length+" "+(ids.length===1?"file":"files"),'<label for="bulkMoveFolder">Destination folder</label><select id="bulkMoveFolder">'+folderOptions()+"</select>",()=>{
+   378→moveLibraryFiles(ids,$("#bulkMoveFolder").value||null)
+   379→}
+   380→,"Move")
+   381→}
+   382→;
+   383→$("#deleteSelectedFiles").onclick=()=>{
+   384→const ids=[...selectedFiles],selected=files.filter(f=>ids.includes(f.id));
+   385→if(!selected.length)return;
+   386→showWriterDialog("Delete "+selected.length+" "+(selected.length===1?"file":"files")+"?",'<p>This cannot be undone.</p><ul class="bulk-delete-list">'+selected.map(f=>"<li>"+escHtml(f.name)+"</li>").join("")+"</ul>",()=>{
+   387→flushCommit();
+   388→const deleted=new Set(ids),wasActive=deleted.has(activeId);
+   389→files=files.filter(f=>!deleted.has(f.id));
+   390→for(const id of deleted){
+   391→try{
+   392→cache.removeItem(PFX+id);
+   393→cache.removeItem("notepadV3:rmrec:"+id)
+   394→}
+   395→catch{
+   396→
+   397→}
+   398→Hist.remove(id);
+   399→Undo.forget(id);
+   400→delete library.map.positions?.["file:"+id]
+   401→}
+   402→visits=visits.filter(id=>!deleted.has(id));
+   403→visitIndex=Math.min(visitIndex,visits.length-1);
+   404→clearFileSelection();
+   405→sbOrderDirty=true;
+   406→if(!files.length)files=[Store.newFileObj("Untitled","")];
+   407→if(wasActive)activate(collectionFileFallback());
+   408→commitLibrary();
+   409→toast(selected.length+" "+(selected.length===1?"file deleted":"files deleted"))
+   410→}
+   411→,"Delete")
+   412→}
+   413→;
+   414→sbList.addEventListener("keydown",e=>{
+   415→const row=e.target.closest("[data-document-id]"),mod=e.ctrlKey||e.metaKey;
+   416→if(mod&&e.key.toLowerCase()==="a"){
+   417→e.preventDefault();
+   418→e.stopImmediatePropagation();
+   419→selectedFiles=new Set([...sbList.querySelectorAll("[data-document-id]")].map(row=>row.dataset.documentId));
+   420→syncFileSelection();
+   421→return
+   422→}
+   423→if(e.key==="Escape"){
+   424→e.preventDefault();
+   425→e.stopImmediatePropagation();
+   426→clearFileSelection();
+   427→return
+   428→}
+   429→if(selectedFiles.size&&["Delete","Backspace"].includes(e.key)){
+   430→e.preventDefault();
+   431→e.stopImmediatePropagation();
+   432→$("#deleteSelectedFiles").click();
+   433→return
+   434→}
+   435→if(!row||e.target.closest(".more"))return;
+   436→if(e.target.matches(".file-check")&&[" ","Enter"].includes(e.key)){
+   437→e.stopImmediatePropagation();
+   438→return
+   439→}
+   440→if(e.shiftKey&&["ArrowDown","ArrowUp"].includes(e.key)){
+   441→e.preventDefault();
+   442→e.stopImmediatePropagation();
+   443→const rows=[...sbList.querySelectorAll("[data-document-id]")],index=rows.indexOf(row),next=rows[Math.max(0,Math.min(rows.length-1,index+(e.key==="ArrowDown"?1:-1)))];
+   444→if(!fileSelectionAnchor)fileSelectionAnchor=row.dataset.documentId;
+   445→selectFile(next.dataset.documentId,true,mod);
+   446→next.tabIndex=0;
+   447→next.focus()
+   448→}
+   449→else if(e.key===" "&&!e.target.matches("input")){
+   450→e.preventDefault();
+   451→e.stopImmediatePropagation();
+   452→selectFile(row.dataset.documentId,false,true)
+   453→}
+   454→else if(e.key==="Enter"&&!e.target.matches("input"))clearFileSelection()
+   455→}
+   456→,true);
+   457→function canMoveLibraryFolder(id,parent){
+   458→if(!folderById(id)||parent&&!folderById(parent))return false;
+   459→const seen=new Set;
+   460→while(parent){
+   461→if(parent===id||seen.has(parent))return false;
+   462→seen.add(parent);
+   463→parent=folderById(parent)?.parent
+   464→}
+   465→return true
+   466→}
+   467→function expandLibraryDestination(parent){
+   468→const expanded=new Set(library.expandedFolders||[]),seen=new Set;
+   469→while(parent&&!seen.has(parent)){
+   470→seen.add(parent);
+   471→expanded.add(parent);
+   472→parent=folderById(parent)?.parent
+   473→}
+   474→library.expandedFolders=[...expanded]
+   475→}
+   476→function moveLibraryFiles(ids,parent){
+   477→if(parent&&!folderById(parent))return;
+   478→flushCommit();
+   479→const moving=new Set(ids),moved=files.filter(f=>moving.has(f.id));
+   480→for(const f of moved)noteMeta(f).folder=parent;
+   481→expandLibraryDestination(parent);
+   482→commitLibrary();
+   483→if(moved.length)toast(moved.length+" "+(moved.length===1?"file moved":"files moved"))
+   484→}
+   485→function libraryDrag(transfer){
+   486→if(transfer.types.includes("application/x-notepad-folder"))return{
+   487→folder:transfer.getData("application/x-notepad-folder")
+   488→}
+   489→;
+   490→let ids;
+   491→try{
+   492→ids=JSON.parse(transfer.getData("application/x-notepad-files"))
+   493→}
+   494→catch{
+   495→
+   496→}
+   497→return{
+   498→files:Array.isArray(ids)?ids:[transfer.getData("application/x-notepad-file")].filter(Boolean)
+   499→}
+   500→
+   501→}
+   502→function clearLibraryDropHints(){
+   503→for(const el of sidebar.querySelectorAll(".library-drop-target"))el.classList.remove("library-drop-target")
+   504→}
+   505→function bindLibraryDrop(target,parent){
+   506→target.ondragover=e=>{
+   507→const types=e.dataTransfer.types;
+   508→if(!types.some(type=>["application/x-notepad-folder","application/x-notepad-files","application/x-notepad-file"].includes(type)))return;
+   509→e.preventDefault();
+   510→e.stopPropagation();
+   511→e.dataTransfer.dropEffect="move";
+   512→clearLibraryDropHints();
+   513→target.classList.add("library-drop-target")
+   514→}
+   515→;
+   516→target.ondragleave=e=>{
+   517→if(!target.contains(e.relatedTarget))target.classList.remove("library-drop-target")
+   518→}
+   519→;
+   520→target.ondrop=e=>{
+   521→e.preventDefault();
+   522→e.stopPropagation();
+   523→clearLibraryDropHints();
+   524→const packet=libraryDrag(e.dataTransfer);
+   525→if(packet.folder){
+   526→if(!canMoveLibraryFolder(packet.folder,parent)){
+   527→toast("A folder cannot go inside itself or its subfolders","warn");
+   528→return
+   529→}
+   530→const folder=folderById(packet.folder);
+   531→if(folder.parent===parent)return;
+   532→flushCommit();
+   533→folder.parent=parent;
+   534→expandLibraryDestination(parent);
+   535→commitLibrary();
+   536→toast("Folder moved")
+   537→}
+   538→else if(packet.files.length)moveLibraryFiles(packet.files,parent)
+   539→}
+   540→
+   541→}
+   542→bindLibraryDrop(rootDrop,null);
+   543→const moveButton=document.createElement("button");
+   544→moveButton.dataset.fm="move";
+   545→moveButton.textContent="Move to folder…";
+   546→fileMenu.insertBefore(moveButton,fileMenu.lastElementChild);
+   547→moveButton.onclick=()=>{
+   548→const f=files.find(f=>f.id===fileMenuFor);
+   549→if(!f)return;
+   550→closeMenus();
+   551→showWriterDialog("Move "+f.name,'<label for="moveFolder">Folder</label><select id="moveFolder">'+folderOptions(noteMeta(f).folder)+"</select>",()=>{
+   552→noteMeta(f).folder=$("#moveFolder").value||null;
+   553→commitLibrary()
+   554→}
+   555→)
+   556→}
+   557→;
+   558→const originalDuplicate=duplicateFile;
+   559→duplicateFile=function(id){
+   560→originalDuplicate(id);
+   561→if(doc.writer?.map){
+   562→renderMap();
+   563→Store.save()
+   564→}
+   565→
+   566→}
+   567→;
+   568→for(const method of["undo","redo"]){
+   569→const previous=Undo[method];
+   570→Undo[method]=function(){
+   571→const metadata=doc.writer?.library,result=previous.call(this);
+   572→return result&&metadata?{
+   573→...result,writer:{
+   574→...result.writer,library:JSON.parse(JSON.stringify(metadata))
+   575→}
+   576→
+   577→}
+   578→:result
+   579→}
+   580→
+   581→}
+   582→
+   583→/* One file chooser;
+   584→ Ctrl+S subsequently writes the chosen HTML. */const saveIconLabel=$("#saveNotebookBtn span");
+   585→if(saveIconLabel)saveIconLabel.textContent="Save notebook";
+   586→saveNotebook=async function(){
+   587→if(inlineMapEdit)finishInlineMapEdit();
+   588→flushCommit();
+   589→Store.save();
+   590→try{
+   591→verifyPortable(workspaceSnapshot())
+   592→}
+   593→catch(error){
+   594→toast(error.message,"warn");
+   595→return false
+   596→}
+   597→if(storageConflict)return downloadPortableNotebook("notepad-conflict.html");
+   598→if(!notebookHandle){
+   599→if(!window.showSaveFilePicker){
+   600→return downloadPortableNotebook("notepad.html")
+   601→}
+   602→await $("#connectNotebookFile").onclick();
+   603→return!!notebookHandle
+   604→}
+   605→clearTimeout(fileWriteTimer);
+   606→return writeNotebookFile()
+   607→}
+   608→;
+   609→const autoIndicator=document.createElement("button");
+   610→autoIndicator.id="autosaveIndicator";
+   611→autoIndicator.type="button";
+   612→autoIndicator.setAttribute("aria-live","polite");
+   613→autoIndicator.onclick=()=>{
+   614→Backstage.open();
+   615→Backstage.showPane("settings")
+   616→}
+   617→;
+   618→$("#saveNotebookBtn").before(autoIndicator);
+   619→const previousNotebookSaveState=updateSaveState;
+   620→updateSaveState=function(){
+   621→previousNotebookSaveState();
+   622→const state=storageFailed||storageConflict?"warning":fileWriteBusy?"saving":notebookHandle?htmlDirty?"saving":"saved":"local";
+   623→autoIndicator.dataset.state=state;
+   624→autoIndicator.textContent=storageConflict?"Conflicting tab":storageFailed?"Storage full":fileWriteBusy?"Saving…":notebookHandle?htmlDirty?"Updating HTML…":"Saved to "+notebookHandle.name:fileReconnect?"Reconnect HTML":"Autosaved in browser";
+   625→savedEl.textContent=autoIndicator.textContent;
+   626→savedEl.removeAttribute("title");
+   627→autoIndicator.dataset.tip=notebookHandle?"Changes automatically update your chosen HTML file":"Click to connect an HTML file for automatic saving"
+   628→}
+   629→;
+   630→$("#autoFileDescription").textContent="Select the HTML file once. Changes then save there automatically.";
+   631→let quotaFileContent=null;
+   632→const quotaAwarePersist=persistWorkspace;
+   633→persistWorkspace=function(){
+   634→quotaAwarePersist();
+   635→if(storageFailed){
+   636→const content=notebookDurableContent(workspaceSnapshot(0));
+   637→if(content!==quotaFileContent){
+   638→quotaFileContent=content;
+   639→htmlDirty=true;
+   640→updateSaveState()
+   641→}
+   642→
+   643→}
+   644→else quotaFileContent=null;
+   645→if(notebookHandle&&htmlDirty&&!fileWriteBusy)scheduleFileWrite()
+   646→}
+   647→;
+   648→
+   649→/* Clear just this notebook, with an explicit reviewable confirmation. */const resetRow=document.createElement("div");
+   650→resetRow.className="setting-row";
+   651→resetRow.innerHTML='<div><strong>Reset notebook</strong><p>Remove its notes, folders, mind maps, comments and history.</p></div><button class="btn danger" id="resetNotebook">Remove all data…</button>';
+   652→document.querySelector("[data-bspane=settings] .settings-card").appendChild(resetRow);
+   653→$("#resetNotebook").onclick=()=>showWriterDialog("Remove all notebook data",'<p>This removes every note, folder, map, comment and saved version in this notebook. A connected HTML file will also be updated.</p><label for="resetConfirm">Type DELETE to confirm</label><input id="resetConfirm" autocomplete="off">',async()=>{
+   654→if($("#resetConfirm").value!=="DELETE"){
+   655→toast("Type DELETE to confirm");
+   656→return false
+   657→}
+   658→clearTimeout(fileWriteTimer);
+   659→flushCommit();
+   660→clearTimeout(auditDurableTimer);
+   661→++auditDurableGeneration;
+   662→await NotepadVault.beginReset();
+   663→const canonical=JSON.parse(await NotepadVault.committed(WORKSPACE_KEY)||"null");
+   664→persistedRevision=canonical?.revision||canonical?.savedAt||null;
+   665→observedCacheRevision=persistedRevision;
+   666→storageConflict=false;
+   667→conflictNotice=false;
+   668→persistedContent=null;
+   669→pendingEdit846=null;
+   670→auditDurableContent=null;
+   671→for(const f of files)Undo.forget(f.id);
+   672→for(const key of Object.keys(extra))delete extra[key];
+   673→try{
+   674→for(let i=NotepadVault.storage.length-1;
+   675→i>=0;
+   676→i--){
+   677→const key=NotepadVault.storage.key(i);
+   678→if(key.startsWith(WORKSPACE_KEY+":conflict:"))NotepadVault.storage.removeItem(key)
+   679→}
+   680→
+   681→}
+   682→catch{
+   683→
+   684→}
+   685→library={
+   686→folders:[],map:{
+   687→positions:{
+   688→
+   689→}
+   690→,comments:[],view:{
+   691→x:40,y:40,z:1
+   692→}
+   693→
+   694→}
+   695→
+   696→}
+   697→;
+   698→currentFolder=null;
+   699→clearFileSelection();
+   700→starsOnly=false;
+   701→files=[Store.newFileObj("Untitled","")];
+   702→initialFiles=[];
+   703→sbQuery="";
+   704→sbSearch.value="";
+   705→sidebar.style.width="";
+   706→sidebar.style.removeProperty("--sidebar-width");
+   707→libraryView="list";
+   708→activate(files[0]);
+   709→applyMotion();
+   710→Store.save();
+   711→saveLibrary();
+   712→Backstage.close();
+   713→toast("Notebook cleared")
+   714→}
+   715→,"Remove everything");
+   716→const resetApplySource=$("#resetNotebook").onclick;
+   717→$("#resetNotebook").onclick=()=>{
+   718→resetApplySource();
+   719→const apply=writerApply;
+   720→writerApply=()=>{
+   721→if($("#resetConfirm").value!=="DELETE")return apply();
+   722→libraryMapPast.length=0;
+   723→libraryMapFuture.length=0;
+   724→mapClipboard=null;
+   725→combinedClipboard=null;
+   726→objectClipboard=null;
+   727→visits=[];
+   728→visitIndex=-1;
+   729→return apply()
+   730→}
+   731→
+   732→}
+   733→;
+   734→
+   735→/* New-file dropdown replaces the flat create button. */sbNew.removeEventListener("click",createFile);
+   736→sbNew.innerHTML='<svg class="ic"><use href="#i-plus"/></svg><span>New</span><svg class="ic new-chevron" aria-hidden="true"><use href="#i-chev-d"/></svg>';
+   737→sbNew.setAttribute("aria-haspopup","menu");
+   738→sbNew.setAttribute("aria-expanded","false");
+   739→const newMenu=document.createElement("div");
+   740→newMenu.className="pop new-menu";
+   741→newMenu.id="newFileMenu";
+   742→newMenu.setAttribute("role","menu");
+   743→newMenu.innerHTML='<button role="menuitem" data-new-kind="document">▤ <span>Document<small>Write and format a note</small></span></button><button role="menuitem" data-new-kind="mindmap">◈ <span>Mind map<small>Connect ideas on a canvas</small></span></button>';
+   744→document.body.appendChild(newMenu);
+   745→pops.newfile=newMenu;
+   746→sbNew.onclick=e=>{
+   747→e.stopPropagation();
+   748→openPop("newfile",sbNew);
+   749→sbNew.setAttribute("aria-expanded",String(newMenu.classList.contains("on")))
+   750→}
+   751→;
+   752→const oldCreateFile=createFile;
+   753→createFile=function(kind="document",name=null){
+   754→flushCommit();
+   755→Store.save();
+   756→const f=Store.newFileObj(name||nextUntitledName(),"");
+   757→noteMeta(f).folder=currentFolder;
+   758→if(kind==="mindmap"){
+   759→f.writer.map={
+   760→nodes:[{
+   761→id:uid("node"),x:330,y:220,text:"Central node",color:"#dbeafe"
+   762→}
+   763→],edges:[],comments:[],view:{
+   764→x:0,y:0,z:1
+   765→}
+   766→
+   767→}
+   768→
+   769→}
+   770→files.unshift(f);
+   771→libraryView="list";
+   772→closePops();
+   773→activate(f);
+   774→toast(kind==="mindmap"?"Mind map created":"Document created")
+   775→}
+   776→;
+   777→newMenu.onclick=e=>{
+   778→const b=e.target.closest("[data-new-kind]");
+   779→if(b)createFile(b.dataset.newKind)
+   780→}
+   781→;
+   782→
+   783→/* One SVG/DOM map surface for both ideas and the file graph. */const mapSurface=document.createElement("section");
+   784→mapSurface.id="mapSurface";
+   785→mapSurface.tabIndex=0;
+   786→mapSurface.setAttribute("aria-label","Mind map canvas");
+   787→mapSurface.innerHTML='<div id="mapHint">Drag ideas to arrange · Double-click to edit · Drag empty space to pan</div><div id="mapWorld"><svg id="mapEdges" xmlns="http://www.w3.org/2000/svg"></svg><div id="mapNodes"></div></div><div id="mapZoom"><button data-map="zoomOut" aria-label="Zoom out">−</button><span id="mapZoomValue">100%</span><button data-map="zoomIn" aria-label="Zoom in">+</button><button data-map="fit">Fit</button></div>';
+   788→canvasWrap.after(mapSurface);
+   789→const mapWorld=$("#mapWorld"),mapNodes=$("#mapNodes"),mapEdges=$("#mapEdges");
+   790→const mapRibbon=document.createElement("div");
+   791→mapRibbon.id="mapRibbon";
+   792→mapRibbon.innerHTML='<div class="map-ribbon-label">Mind map</div>'+[["edit","Exit read mode"],["add","+ Node"],["child","+ Connected node"],["connect","Connect"],["comment","+ Comment"],["color","Color"],["duplicate","Duplicate"],["remove","Delete"],["undo","Undo"],["redo","Redo"],["arrange","Arrange"],["fit","Fit view"],["files","Back to note"]].map(([k,v])=>'<button class="tool-btn" data-map="'+k+'">'+v+"</button>").join("");
+   793→$("#ribbon").appendChild(mapRibbon);
+   794→function mapData(){
+   795→return libraryView==="map"?library.map:doc.writer?.map
+   796→}
+   797→function mapFiles(){
+   798→const graph={
+   799→nodes:[],edges:[],comments:library.map.comments||[],view:library.map.view
+   800→}
+   801→;
+   802→const positions=library.map.positions||{
+   803→
+   804→}
+   805→;
+   806→let i=0;
+   807→for(const folder of collectionFolders()){
+   808→const id="folder:"+folder.id,p=positions[id]||{
+   809→x:40+folderPath(folder.id).length*220,y:60+i++*120
+   810→}
+   811→;
+   812→graph.nodes.push({
+   813→id:id,...p,text:folder.name,color:"#e0e7ff",folder:folder.id
+   814→}
+   815→);
+   816→if(folder.parent&&folderById(folder.parent))graph.edges.push({
+   817→id:"parent:"+id,from:"folder:"+folder.parent,to:id
+   818→}
+   819→)
+   820→}
+   821→i=0;
+   822→const fileStart=Math.max(600,40+(Math.max(0,...collectionFolders().map(f=>folderPath(f.id).length))+1)*220);
+   823→for(const f of collectionFiles()){
+   824→const id="file:"+f.id,m=noteMeta(f),p=positions[id]||{
+   825→x:fileStart,y:60+i*135
+   826→}
+   827→;
+   828→i++;
+   829→graph.nodes.push({
+   830→id:id,...p,text:f.name,color:f.writer?.map?"#dbeafe":"#ecfdf5",file:f.id
+   831→}
+   832→);
+   833→if(m.folder&&folderById(m.folder))graph.edges.push({
+   834→id:"folderlink:"+id,from:"folder:"+m.folder,to:id
+   835→}
+   836→)
+   837→}
+   838→for(const edge of graph.edges)edge.bend=library.map.bends?.[edge.id]||0;
+   839→return graph
+   840→}
+   841→let displayedMap=null;
+   842→const libraryMapPast=[],libraryMapFuture=[];
+   843→function libraryMapSnapshot(){
+   844→return JSON.stringify({
+   845→map:library.map,folders:library.folders,expandedFolders:library.expandedFolders||[],memberships:files.map(f=>[f.id,noteMeta(f).folder])
+   846→}
+   847→)
+   848→}
+   849→function connectFileMapNodes(from,to){
+   850→if(!from||!to||from.id===to.id)return;
+   851→let parent,file,folder;
+   852→if(from.folder&&to.folder){
+   853→folder=folderById(from.folder);
+   854→parent=to.folder;
+   855→if(!canMoveLibraryFolder(folder.id,parent)){
+   856→toast("A folder cannot go inside itself or its subfolders","warn");
+   857→return
+   858→}
+   859→
+   860→}
+   861→else if(from.file&&to.folder){
+   862→file=files.find(f=>f.id===from.file);
+   863→parent=to.folder
+   864→}
+   865→else if(from.folder&&to.file){
+   866→file=files.find(f=>f.id===to.file);
+   867→parent=from.folder
+   868→}
+   869→else{
+   870→toast("Connect a file to a folder, or a folder to another folder");
+   871→return
+   872→}
+   873→if((file?noteMeta(file).folder:folder?.parent)===parent)return;
+   874→mapChanged(()=>{
+   875→for(const n of displayedMap.nodes)library.map.positions[n.id]={
+   876→x:n.x,y:n.y
+   877→}
+   878→;
+   879→if(file)noteMeta(file).folder=parent;
+   880→else folder.parent=parent;
+   881→expandLibraryDestination(parent);
+   882→mapSelected=new Set([file?"file:"+file.id:"folder:"+folder.id])
+   883→}
+   884→)
+   885→}
+   886→function unlinkFileMapEdge(id){
+   887→const edge=displayedMap.edges.find(edge=>edge.id===id),target=displayedMap.nodes.find(n=>n.id===edge?.to);
+   888→if(!target)return;
+   889→mapChanged(()=>{
+   890→if(target.file){
+   891→const f=files.find(f=>f.id===target.file);
+   892→if(f)noteMeta(f).folder=null
+   893→}
+   894→else if(target.folder){
+   895→const folder=folderById(target.folder);
+   896→if(folder)folder.parent=null
+   897→}
+   898→mapEdgeSelected=null
+   899→}
+   900→)
+   901→}
+   902→function rememberLibraryMap(before=libraryMapSnapshot()){
+   903→libraryMapPast.push(before);
+   904→if(libraryMapPast.length>100)libraryMapPast.shift();
+   905→libraryMapFuture.length=0
+   906→}
+   907→function undoLibraryMap(redo=false){
+   908→if(document.body.classList.contains("readmode"))return;
+   909→const source=redo?libraryMapFuture:libraryMapPast,target=redo?libraryMapPast:libraryMapFuture;
+   910→if(!source.length)return;
+   911→target.push(libraryMapSnapshot());
+   912→const snapshot=JSON.parse(source.pop());
+   913→library.map=snapshot.map;
+   914→library.folders=snapshot.folders;
+   915→library.expandedFolders=snapshot.expandedFolders;
+   916→const folders=new Set(library.folders.map(f=>f.id)),memberships=new Map(snapshot.memberships);
+   917→for(const f of files){
+   918→const folder=memberships.has(f.id)?memberships.get(f.id):noteMeta(f).folder;
+   919→noteMeta(f).folder=folders.has(folder)?folder:null
+   920→}
+   921→mapEdgeSelected=null;
+   922→Store.save();
+   923→saveLibrary();
+   924→renderSidebar();
+   925→renderMap()
+   926→}
+   927→function showWorkspace(on){
+   928→mapMode=on;
+   929→libraryActions.hidden=libraryView==="map";
+   930→document.body.classList.toggle("map-mode",on);
+   931→mapRibbon.querySelector(".map-ribbon-label").textContent=libraryView==="map"?"File map":"Mind map";
+   932→mapRibbon.querySelector("[data-map=files]").textContent=libraryView==="map"?"Back to note":"Files";
+   933→for(const key of["add","child","connect","color","duplicate","arrange"])mapRibbon.querySelector("[data-map="+key+"]").hidden=false;
+   934→mapRibbon.querySelector("[data-map=add]").textContent=libraryView==="map"?"New ▾":"+ Node";
+   935→$("#libraryGraph").classList.toggle("active",libraryView==="map");
+   936→$("#libraryList").classList.toggle("active",libraryView!=="map");
+   937→$("#libraryGraph").setAttribute("aria-pressed",String(libraryView==="map"));
+   938→$("#libraryList").setAttribute("aria-pressed",String(libraryView!=="map"));
+   939→if(on){
+   940→Images.deselect();
+   941→if(Ink.live)Ink.startLive(false);
+   942→renderMap()
+   943→}
+   944→else schedulePages()
+   945→}
+   946→const nextRender=renderFromMd;
+   947→renderFromMd=function(){
+   948→nextRender();
+   949→if(!isBooting){
+   950→showWorkspace(libraryView==="map"||!!doc.writer?.map);
+   951→if(!mapMode)decorateWiki()
+   952→}
+   953→
+   954→}
+   955→;
+   956→const nextActivate=activate;
+   957→activate=function(f){
+   958→if(inlineMapEdit)finishInlineMapEdit();
+   959→allObjectsSelected=false;
+   960→page.classList.remove("all-selected");
+   961→mapSelected.clear();
+   962→mapEdgeSelected=null;
+   963→mapLinkFrom=null;
+   964→libraryView="list";
+   965→nextActivate(f);
+   966→showWorkspace(!!doc.writer?.map);
+   967→if(!mapMode)decorateWiki();
+   968→recordVisit(f.id)
+   969→}
+   970→;
+   971→const nextFlush=flushCommit;
+   972→flushCommit=function(){
+   973→if(doc?.writer?.map){
+   974→doc.markdown=doc.writer.map.nodes.map(n=>n.text).join("\n\n")+"\n"+doc.writer.map.comments.map(n=>n.text).join("\n");
+   975→return
+   976→}
+   977→return nextFlush()
+   978→}
+   979→;
+   980→function mapChanged(action){
+   981→if(libraryView==="map"){
+   982→rememberLibraryMap();
+   983→action?.();
+   984→Store.save();
+   985→saveLibrary();
+   986→renderSidebar();
+   987→renderMap();
+   988→return
+   989→}
+   990→flushCommit();
+   991→action?.();
+   992→flushCommit();
+   993→doc.updatedAt=Date.now();
+   994→Undo.commit(doc.markdown);
+   995→Store.save();
+   996→renderMap()
+   997→}
+   998→const editMapMutation=mapChanged;
+   999→mapChanged=function(action){
+  1000→if(document.body.classList.contains("readmode")){
+  1001→toast("Exit reading view to edit");
+  1002→return false
+  1003→}
+  1004→if(inlineMapEdit)finishInlineMapEdit();
+  1005→return editMapMutation(action)
+  1006→}
+  1007→;
+  1008→function mapPoint(e){
+  1009→const r=mapSurface.getBoundingClientRect(),v=mapData().view;
+  1010→return{
+  1011→x:(e.clientX-r.left-v.x)/v.z,y:(e.clientY-r.top-v.y)/v.z
+  1012→}
+  1013→
+  1014→}
+  1015→function applyMapView(){
+  1016→const v=mapData()?.view;
+  1017→if(!v)return;
+  1018→mapWorld.style.transform="translate("+v.x+"px,"+v.y+"px) scale("+v.z+")";
+  1019→mapSurface.style.backgroundPosition=v.x+"px "+v.y+"px";
+  1020→mapSurface.style.backgroundSize=24*v.z+"px "+24*v.z+"px";
+  1021→$("#mapZoomValue").textContent=Math.round(v.z*100)+"%"
+  1022→}
+  1023→function syncMapControls(){
+  1024→mapRibbon.querySelector("[data-map=edit]").hidden=!document.body.classList.contains("readmode");
+  1025→const fileMap=libraryView==="map",removable=(fileMap?displayedMap.comments.some(n=>mapSelected.has(n.id)):mapSelected.size>0)||displayedMap.edges.some(edge=>edge.id===mapEdgeSelected);
+  1026→mapRibbon.querySelector("[data-map=remove]").textContent=mapEdgeSelected&&!mapSelected.size?"Delete connection":fileMap?"Delete comment":"Delete";
+  1027→mapRibbon.querySelector("[data-map=remove]").disabled=!removable;
+  1028→mapRibbon.querySelector("[data-map=duplicate]").disabled=!mapSelected.size;
+  1029→mapRibbon.querySelector("[data-map=color]").disabled=!mapSelected.size;
+  1030→mapRibbon.querySelector("[data-map=undo]").disabled=!(fileMap?libraryMapPast.length:Undo.past.length);
+  1031→mapRibbon.querySelector("[data-map=redo]").disabled=!(fileMap?libraryMapFuture.length:Undo.future.length)
+  1032→}
+  1033→function renderMap(){
+  1034→if(!mapMode)return;
+  1035→displayedMap=libraryView==="map"?mapFiles():mindMapVisibleGraph(doc.writer.map);
+  1036→if(!displayedMap)return;
+  1037→const cards=new Map([...mapNodes.children].map(card=>[card.dataset.nodeId,card])),used=new Set;
+  1038→let cardIndex=0;
+  1039→for(const n of[...displayedMap.nodes,...displayedMap.comments]){
+  1040→const comment=displayedMap.comments.includes(n),card=cards.get(n.id)||document.createElement("div");
+  1041→used.add(n.id);
+  1042→card.className="map-node"+(comment?" map-comment":"")+(mapSelected.has(n.id)?" selected":"");
+  1043→card.dataset.nodeId=n.id;
+  1044→card.tabIndex=0;
+  1045→card.setAttribute("role","button");
+  1046→card.setAttribute("aria-label",n.text||"Untitled node");
+  1047→card.style.left=n.x+"px";
+  1048→card.style.top=n.y+"px";
+  1049→card.style.setProperty("--node-color",/^#[\da-f]{
+  1050→6
+  1051→}
+  1052→$/i.test(n.color||"")?n.color:comment?"#fef3c7":"#dbeafe");
+  1053→const signature=JSON.stringify([n.text,n.file,n.folder,comment,document.body.classList.contains("readmode")]);
+  1054→if(card.dataset.signature!==signature){
+  1055→card.dataset.signature=signature;
+  1056→card.innerHTML='<span class="map-node-kind">'+(comment?"Comment":n.file?mapFileRecordIndex.get(n.file)?.writer?.map?"Mind map":"Document":n.folder?"Folder":"Node")+'</span><span class="map-node-text"></span><button class="map-node-edit" aria-label="'+(n.file?"Open note":n.folder?"Show folder in Files":"Edit text")+'">'+(n.file||n.folder?"↗":"✎")+"</button>";
+  1057→card.querySelector(".map-node-text").textContent=n.text
+  1058→}
+  1059→if(!card.querySelector(".map-port")&&!document.body.classList.contains("readmode"))for(const side of["left","right"]){
+  1060→const port=document.createElement("button");
+  1061→port.className="map-port map-port-"+side;
+  1062→port.dataset.nodePort=side;
+  1063→port.setAttribute("aria-label","Connect node "+n.text);
+  1064→port.dataset.tip="Drag to another node, or into empty space to add a node";
+  1065→port.onclick=e=>{
+  1066→e.stopPropagation();
+  1067→if(e.detail===0){
+  1068→mapTool="connect";
+  1069→mapLinkFrom=n.id;
+  1070→renderMap()
+  1071→}
+  1072→
+  1073→}
+  1074→;
+  1075→card.appendChild(port)
+  1076→}
+  1077→card.ondblclick=()=>editMapNode(n);
+  1078→card.querySelector("button").onclick=e=>{
+  1079→e.stopPropagation();
+  1080→editMapNode(n)
+  1081→}
+  1082→;
+  1083→if(mapNodes.children[cardIndex]!==card)mapNodes.insertBefore(card,mapNodes.children[cardIndex]||null);
+  1084→cardIndex++
+  1085→}
+  1086→for(const[id,card]of cards)if(!used.has(id))card.remove();
+  1087→applyMapView();
+  1088→renderMapEdges();
+  1089→syncMapControls();
+  1090→mapRibbon.querySelector("[data-map=connect]").classList.toggle("active",mapTool==="connect");
+  1091→$("#mapHint").textContent=mapTool==="connect"?mapLinkFrom?"Click the second node to connect":"Click two nodes to connect":libraryView==="map"?"Drag a circle to connect files and folders · Right-click a line to move to top level":"Drag a node’s circle to connect · Double-click to edit · Drag empty space to pan"
+  1092→}
+  1093→function renderMapEdges(){
+  1094→if(!displayedMap)return;
+  1095→mapEdges.replaceChildren();
+  1096→const handles=[],nodes=new Map([...displayedMap.nodes,...displayed

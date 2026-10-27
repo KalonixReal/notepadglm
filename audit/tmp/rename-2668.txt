@@ -1,0 +1,14 @@
+ame=base+" "+suffix++;
+const content=source?auditClone({markdown:source.markdown,richHtml:source.richHtml||null,writer:source.writer}):{markdown:"",richHtml:null,writer:{}};
+const item={id:id,name:name,parentId:source?source.parentId:parentId,content:content};tabs.items.push(item);tabs.items=documentTabTree(tabs.items).ordered.map(entry=>entry.item);if(copyId)reorderDocumentTab(id,copyId,true);selectDocumentTab
+ (id);renderSidebar();return id}async 
+function renameDocumentTab(id){if(!canEditDocumentTabs())return false;
+const file=doc,tab=ensureDocumentTabs().items.find(t=>t.id===id);if(!tab)return false;
+const name=await appPrompt("Rename document tab",tab.name);if(name===null||doc!==file||!canEditDocumentTabs())return false;
+const value=name.trim();if(!value)return false;tab.name=value.slice(0,2e3);Store.save();renderDocumentTabs();return true}async 
+function deleteDocumentTab(id){if(!canEditDocumentTabs())return false;
+const file=doc,tabs=ensureDocumentTabs(),tab=tabs.items.find(t=>t.id===id);if(!tab||tabs.items.length===1)return false;
+const hasChildren=tabs.items.some(t=>t.parentId===id);if(!await appConfirm("Delete the tab “"+tab.name+"”? Its content will be kept in a recovery copy."+(hasChildren?" Its subtabs will move up one level and keep their
+  contents.":"")))return false;if(doc!==file||!canEditDocumentTabs())return false;try{await auditGuardedMutation("Before deleting document tab
+  "+tab.name,()=>{if(!files.includes(file)||file.writer?.documentTabs!==tabs||!tabs.items.includes(tab)||tabs.items.length===1)throw Error("This tab is no longer available.");flushCommit();if(tabs.activeId===id){
+const index=tabs.items.indexOf(tab),next=tabs.items[index-1]||tabs.items[index+1];if(do

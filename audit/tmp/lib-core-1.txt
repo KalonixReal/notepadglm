@@ -1,0 +1,76 @@
+:{x:40,y:40,z:1}};
+let currentFolder=null,libraryView="list",mapMode=false,mapSelected=new Set,mapEdgeSelected=null,mapLinkFrom=null,mapTool="select",mapDrag=null,mapRaf=0,mapClipboard=null;
+let selectedFiles=new Set,fileSelectionAnchor=null;
+const uid=prefix=>prefix+"-"+(crypto.randomUUID?.()||Date.now().toString(36)+Math.random().toString(36).slice(2));
+function noteMeta(f=doc){if(!f.writer)f.writer={};if(!f.writer.library)f.writer.library={folder:null,tags:[],star:false};return f.writer.library}
+function saveLibrary(){cache.setItem(LIBRARY_KEY,JSON.stringify(library))}
+function folderById(id){return library.folders.find(f=>f.id===id)}
+function folderPath(id){
+const seen=new Set,parts=[];while(id&&!seen.has(id)){seen.add(id);
+const f=folderById(id);if(!f)break;parts.unshift(f.name);id=f.parent}return parts}
+const fileTextCache=new WeakMap;
+function fileText(f){
+const cached=fileTextCache.get(f);if(cached&&cached.md===f.markdown&&cached.at===f.updatedAt)return cached.text;
+const text=f.writer?.map?[...f.writer.map.nodes,...f.writer.map.comments].map(n=>n.text||"").join(" "):snippetOf(f.markdown);fileTextCache.set(f,{md:f.markdown,at:f.updatedAt,text:text});return text}
+function commitLibrary(){if(libraryView!=="map"){libraryMapPast.length=0;libraryMapFuture.length=0}Store.save();saveLibrary();renderSidebar();if(mapMode)renderMap()}
+const libraryTop=document.createElement("div");libraryTop.id="libraryTop";libraryTop.innerHTML='<div class="library-modes"><button id="libraryList" class="active" aria-pressed="true">Files</button><button id="libraryGraph"
+  aria-pressed="false">File map</button></div>';sbSearch.before(libraryTop);
+const libraryActions=document.createElement("div");libraryActions.id="libraryActions";libraryActions.innerHTML='<button id="libraryFolder" aria-label="New folder"><svg class="ic" aria-hidden="true"><use href="#i-plus"/></svg>New
+  folder</button>';sbList.after(libraryActions);
+const bulkActions=document.createElement("div");bulkActions.id="libraryBulk";bulkActions.hidden=true;bulkActions.innerHTML='<div class="bulk-selection-count"><span id="selectedFileCount" role="status"></span><button id="clearFileSelection"
+  aria-label="Clear file selection">×</button></div><div class="bulk-selection-buttons"><button id="moveSelectedFiles">Move…</button><button class="danger" id="deleteSelectedFiles">Delete</button></div>';libraryActions.prepend(bulkActions);
+const rootDrop=$("#libraryList");rootDrop.dataset.tip="Files · Drop files or folders here to move to the top level";sbList.setAttribute("aria-multiselectable","true");sbSearch.placeholder="Search files…";
+let starsOnly=false;
+const resizeBar=document.createElement("div");resizeBar.id="sidebarResize";resizeBar.tabIndex=0;resizeBar.setAttribute("role","separator");resizeBar.setAttribute("aria-label","Resize file
+  sidebar");resizeBar.setAttribute("aria-orientation","vertical");sidebar.appendChild(resizeBar);
+function resizeSidebar(width,save=false){width=clamp(width,210,Math.min(520,innerWidth*.65));sidebar.style.width=width+"px";sidebar.style.setProperty("--sidebar-width",width+"px");resizeBar.setAttribute("aria-valuenow",Math.round(width));if
+ (save){library.width=width;saveLibrary()}Images.sync()}if(library.width)resizeSidebar(library.width);resizeBar.onpointerdown=e=>{e.preventDefault();resizeBar.setPointerCapture(e.pointerId);resizeBar.onpointermove=e=>resizeSidebar(e.clientX
+ -sidebar.getBoundingClientRect().left);resizeBar.onpointerup=()=>{resizeBar.onpointermove=null;resizeSidebar(sidebar.getBoundingClientRect().width,true)}};resizeBar.onkeydown=e=>{if(["ArrowLeft","ArrowRight"].includes(e.key)){e.preventDefa
+ ult();resizeSidebar(sidebar.getBoundingClientRect().width+(e.key==="ArrowRight"?20:-20),true)}};
+function folderOptions(selected=null){return'<option value="">Notebook root</option>'+collectionFolders().map(f=>'<option value="'+escAttr(f.id)+'"'+(f.id===selected?" selected":"")+">"+escHtml(folderPath(f.id).join(" /
+  "))+"</option>").join("")}
+function folderDialog(existing=null,parentHint=null){showWriterDialog(existing?"Edit folder":"New folder",'<label for="folderName">Name</label><input id="folderName" maxlength="100"
+  value="'+escAttr(existing?.name||"")+'">'+(existing?'<label for="folderParent">Parent folder</label><select id="folderParent">'+folderOptions(existing.parent)+"</select>":"")+(existing?'<button class="btn danger" id="folderRemove">Remove
+  folder; move its files to root</button>':""),()=>{
+const name=$("#folderName").value.trim(),parent=existing?$("#folderParent").value||null:parentHint;if(!name){toast("Give the folder a name");return false}
+let id=parent,seen=new Set;while(id&&!seen.has(id)){if(existing&&id===existing.id){toast("A folder cannot go inside itself","warn");return
+  false}seen.add(id);id=folderById(id)?.parent}if(existing)Object.assign(existing,{name:name,parent:parent});else
+  library.folders.push({id:uid("folder"),name:name,parent:parent,collectionId:activeCollectionId()});commitLibrary()});if(existing)$("#folderRemove").onclick=async()=>{if(!await appConfirm("Remove “"+existing.name+"”? Its notes and child
+  folders will move to the notebook root."))return;library.folders=library.folders.filter(f=>f.id!==existing.id);for(
+const f of library.folders)if(f.parent===existing.id)f.parent=null;for(
+const f of files)if(noteMeta(f).folder===existing.id)noteMeta(f).folder=null;if(currentFolder===existing.id)currentFolder=null;closeWriterDialog();commitLibrary()}}$("#libraryFolder").onclick=()=>folderDialog();
+const originalSidebarFoot=renderSidebarFoot;renderSidebarFoot=function(){originalSidebarFoot();sbCount.textContent=files.length;sbStorageEl.textContent=Math.max(1,Math.round(JSON.stringify(files).length/1024))+" KB stored"};
+function toggleFolder(id){
+const expanded=new Set(library.expandedFolders||[]);expanded.has(id)?expanded.delete(id):expanded.add(id);library.expandedFolders=[...expanded];
+const scroll=sbList.scrollTop;saveLibrary();renderSidebar();sbList.scrollTop=scroll;sbList.querySelector('[data-folder-toggle="'+CSS.escape(id)+'"]')?.focus({preventScroll:true})}
+function revealFolder(id){
+const expanded=new Set(library.expandedFolders||[]),seen=new Set;
+let folder=folderById(id);while(folder&&!seen.has(folder.id)){seen.add(folder.id);expanded.add(folder.id);folder=folderById(folder.parent)}library.expandedFolders=[...expanded];libraryView="list";currentFolder=null;saveLibrary();showWorkspa
+ ce(!!doc.writer?.map);renderSidebar();sbList.querySelector('[data-folder-toggle="'+CSS.escape(id)+'"]')?.scrollIntoView({block:"nearest"})}renderSidebar=function(){if(sbSortMode==="recent"&&sbOrderDirty){sbOrder=collectionFiles().sort((a,b
+ )=>b.updatedAt-a.updatedAt).map(f=>f.id);sbOrderDirty=false}
+const scroll=sbList.scrollTop,q=sbQuery.trim().toLowerCase(),expanded=new Set(library.expandedFolders||[]),ranks=new Map(sbOrder.map((id,index)=>[id,index]));sbList.replaceChildren();
+const ordered=collectionFiles().sort(sbSortMode==="name"?(a,b)=>a.name.localeCompare(b.name):(a,b)=>(ranks.get(a.id)??1e9)-(ranks.get(b.id)??1e9));
+const folderIds=new Set(collectionFolders().map(f=>f.id)),folderGroups=new Map,fileGroups=new Map;
+const group=(groups,key,item)=>{if(!groups.has(key))groups.set(key,[]);groups.get(key).push(item)};for(
+const folder of collectionFolders())group(folderGroups,folderIds.has(folder.parent)?folder.parent:null,folder);for(
+const folders of folderGroups.values())folders.sort((a,b)=>a.name.localeCompare(b.name));for(
+const f of ordered)group(fileGroups,folderIds.has(noteMeta(f).folder)?noteMeta(f).folder:null,f);
+const appendFile=(f,parent,depth)=>{
+const m=noteMeta(f),row=document.createElement("div");row.className="sb-item"+(f.id===activeId?" active":"");row.dataset.documentId=f.id;row.style.setProperty("--file-depth",depth);row.tabIndex=f.id===activeId?0:-1;row.setAttribute("role","
+ option");row.setAttribute("aria-selected",String(f.id===activeId));row.setAttribute("aria-label",f.name);row.draggable=true;row.innerHTML='<input class="file-check" type="checkbox" aria-label="Select '+escAttr(f.name)+'"><div
+  class="file-kind">'+(f.writer?.map?"◈":"▤")+'</div><div class="n">'+escHtml(f.name)+'</div><button class="more" aria-label="File
+  menu">⋯</button>';row.onclick=e=>{if(e.target.closest(".file-check"))return;if(e.ctrlKey||e.metaKey||e.shiftKey){e.preventDefault();selectFile(f.id,e.shiftKey,e.ctrlKey||e.metaKey);row.focus();return}if(!e.target.closest(".more")){clearFi
+ leSelection();libraryView="list";openFile(f.id);if(mapMode&&!f.writer?.map)showWorkspace(false)}};row.querySelector(".more").onclick=e=>{e.stopPropagation();showFileMenu(f,e.currentTarget)};row.querySelector(".file-check").onchange=()=>sel
+ ectFile(f.id,false,true);row.ondragstart=e=>{if(!selectedFiles.has(f.id)){selectedFiles=new Set([f.id]);fileSelectionAnchor=f.id;syncFileSelection()}e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("application/x-notepad-file",f.
+ id);e.dataTransfer.setData("application/x-notepad-files",JSON.stringify([...selectedFiles]))};row.ondragend=clearLibraryDropHints;parent.appendChild(row)};
+const seen=new Set,appendFolder=(folder,parent,depth)=>{if(seen.has(folder.id))return;seen.add(folder.id);
+const open=expanded.has(folder.id),branch=document.createElement("div"),row=document.createElement("div"),children=document.createElement("div");branch.className="folder-branch";row.className="folder-row";row.style.setProperty("--file-depth
+ ",depth);children.className="folder-children";children.id="folder-children-"+folder.id;children.hidden=!open;children.setAttribute("role","group");children.setAttribute("aria-label",folder.name+" contents");row.innerHTML='<button
+  class="folder-open" data-folder-toggle="'+escAttr(folder.id)+'" aria-expanded="'+open+'" aria-controls="'+escAttr(children.id)+'"><svg class="folder-chevron" viewBox="0 0 16 16" aria-hidden="true"><path d="M6 4l4 4-4 4"/></svg><span
+  class="folder-icon">▰</span><span class="folder-name">'+escHtml(folder.name)+'</span></button><button class="folder-edit" aria-label="Edit folder
+  '+escAttr(folder.name)+'">⋯</button>';row.querySelector(".folder-open").onclick=()=>toggleFolder(folder.id);row.querySelector(".folder-open").onkeydown=e=>{if(e.key==="ArrowRight"&&!open||e.key==="ArrowLeft"&&open){e.preventDefault();togg
+ leFolder(folder.id)}};row.querySelector(".folder-edit").onclick=()=>folderDialog(folder);row.draggable=true;row.ondragstart=e=>{e.stopPropagation();e.dataTransfer.effectAllowed="move";e.dataTransfer.setData("application/x-notepad-folder",f
+ older.id)};row.ondragend=clearLibraryDropHints;bindLibraryDrop(row,folder.id);branch.append(row,children);parent.appendChild(branch);if(open){for(
+const child of folderGroups.get(folder.id)||[])appendFolder(child,children,depth+1);for(
+const f of fileGroups.get(folder.id)||[])appendFile(f,children,depth+1);if(!children.children.length){
+const empty=document.createElement("p");empty.className="folder-empty";empty.style.setProperty("--file-depth",depth+1);empty.t

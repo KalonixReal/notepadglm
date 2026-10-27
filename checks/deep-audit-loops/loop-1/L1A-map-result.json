@@ -1,0 +1,63 @@
+{
+  "family": "L1A — Mind map / file map deep audit (F05, F06)",
+  "executor": "main agent (session l1map2, fresh isolated profile)",
+  "baseline": "v9 notepad-bare.html SHA-256 278122b3… served byte-identical at http://localhost:3000/",
+  "predicates": {"pass": 31, "fail": 1, "candidateObservations": 3},
+  "confirmedNewBugs": [
+    {
+      "title": "Canceling mind-map inline editing (Escape or blur with unchanged text) orphans the editor textarea, which remains a live ghost editor bound to node/comment data and can never be closed",
+      "feature": "F06 graph inline text; affects authored mind-map nodes AND map comments; NOT file-map nodes (their button is Open note)",
+      "repro": [
+        "1. Create a mind map file (sidebar New → Mind map). Dblclick a node (or click its ✎ Edit text button). Editor opens pre-filled, focused, text selected.",
+        "2. Without changing the text, press Escape (cancel) — or single-click the node (blur).",
+        "3. Observed: focus moves to the map canvas (finishInlineMapEdit ran) but the textarea REMAINS in the node card forever. Enter, Escape and blur all no-op afterwards (inlineMapEdit already null; onblur was nulled by finish).",
+        "4. Click the orphaned textarea (real mouse) and type (real keys): it is still live — node/comment text mutates in the authored graph in real time and PERSISTS across reload (verified: 'GHOST EHIDIT' survived reload).",
+        "5. Same repro on a map comment (open comment editor → Escape → orphaned)."
+      ],
+      "expected": "Escape/Enter/blur closes the inline editor and restores the rendered node card.",
+      "observed": "Editor orphaned whenever editing ends with text equal to the card's last-rendered signature; orphan stays live-bound to data.",
+      "controls": [
+        "Enter after typing DIFFERENT text → editor closes correctly and text commits (clean-flow control, passed).",
+        "After reload the orphan disappears (DOM rebuilt) but ghost-typed data remains — proving the ghost editor wrote authored data.",
+        "Synthetic Escape keydown dispatch on the orphan does nothing (handler present but finishInlineMapEdit no-ops on null inlineMapEdit) — confirms state, not event, is broken."
+      ],
+      "sourceMechanism": "finishInlineMapEdit (app-js.txt, search 'finishInlineMapEdit(cancel=') sets n.text, nulls inlineMapEdit/onblur, then relies on renderMap() to rebuild the card. renderMap() (search 'function renderMap()') only rebuilds card.innerHTML when JSON.stringify signature [text,file,folder,comment,readmode] differs from card.dataset.signature. When the committed/canceled text equals the last-rendered signature, the rebuild is SKIPPED and the textarea is never removed.",
+      "classification": "CONFIRMED",
+      "impact": "Stuck editing UI on every cancel/no-change blur; ghost editor silently keeps writing authored data (data-integrity); users cannot tell editing ended; overlaps node interactions.",
+      "fixDirection": "In finishInlineMapEdit, explicitly replace the textarea with the rendered .map-node-text span (or clear card.dataset.signature before renderMap) instead of relying on the signature-gated rebuild."
+    }
+  ],
+  "cleanChecks": [
+    {"area": "inline edit commit (changed text)", "result": "Enter commits, trims, closes editor, focuses canvas — pass"},
+    {"area": "copy single node → paste", "result": "fresh uid, no dupe ids — pass"},
+    {"area": "copy connected pair → paste", "result": "both nodes fresh uids + edge remapped to new uids with fresh edge id — pass"},
+    {"area": "cut pair (with internal edge) → paste", "result": "originals+edge removed on cut, restored on paste with fresh uids, edgeCount correct — pass (copy-semantics acceptable)"},
+    {"area": "map Undo/Redo ordering", "result": "undo stepped back paste→cut→paste exactly (10/2→8/1→10/2→8/1); redo restored — pass"},
+    {"area": "collapse/expand branch", "result": "authored children retained (10 nodes), visible projection 9, expand restores, collapse state persists across reload — pass"},
+    {"area": "ownership transition with pending inline draft", "result": "typed DRAFT uncommitted → switch to MAPA (no editor DOM leak, note mode ok) → switch back: draft preserved via flush, editor closed — pass"},
+    {"area": "mind-map persistence across reload", "result": "nodes/text/edges/collapse state all persisted exactly — pass"},
+    {"area": "Duplicate button", "result": "fresh id, same text — pass"},
+    {"area": "+ Comment button", "result": "comment created ('Your comment'), visible as map-comment, stored in map.comments — pass"},
+    {"area": "file-map rename via map dialog", "result": "#writerDialog prefilled, Apply renames file, sidebar+map update — pass (B280 {title}-furniture staleness for the map route follows the known syncWriterPage gap; recorded as B280 family, not independently recounted)"},
+    {"area": "file-map node drag position persistence", "result": "world position persisted to library.map.positions and restored after reload — pass (initial 'position lost' suspicion was disproven: map open auto-fits the view, which is view-only)"},
+    {"area": "map mode restoration after reload", "result": "mind-map file reopens in map mode automatically — pass"},
+    {"area": "map zoom/fit controls", "result": "zoom ± and Fit render correctly — pass (light check)"}
+  ],
+  "observationsNotCounted": [
+    "Pasted map nodes stack at IDENTICAL coordinates (multiple copies exactly overlapped) — paste adds no visible offset; minor UX, no data corruption.",
+    "Copying a COLLAPSED branch node copies only the visible node (children excluded via displayedMap filter) — plausibly intended projection semantics; contract uncertain, not counted.",
+    "Map view/pan state is re-fit on open; saved view not restored (view-only state)."
+  ],
+  "harnessLimitations": [
+    "agent-browser raw mouse events and click command do NOT carry held modifier keys (shiftKey:false verified via capture-phase diagnostic listener) — shift-click multi-select established via disclosed synthetic PointerEvent pointerdown with shiftKey for selection SETUP only; copy/paste/cut used real keyboard (Ctrl+C/X/V via press).",
+    "Rapid double mouse down/up did not synthesize a dblclick event; inline editing opened via the node's ✎ Edit text button (a real UI route) instead.",
+    "Shift+click selection toggle semantics verified against source (shift+unselected adds, shift+selected removes, plain click solo-selects)."
+  ],
+  "notCovered": [
+    "map Arrange (auto-layout) button",
+    "edge label editing and smoothMapBend path (edges created via + Connected node and verified structurally)",
+    "map Connect tool explicit two-click flow (source-reviewed; edges exercised via other routes)",
+    "mind-map search navigation (nodeId path) — no fixture this run",
+    "very large graphs performance (deferred to F69)"
+  ]
+}

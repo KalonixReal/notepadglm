@@ -1,0 +1,7 @@
+ibraryView==="map"||!!doc.writer?.map);if(!mapMode)decorateWiki()}};
+const nextActivate=activate;activate=function(f){if(inlineMapEdit)finishInlineMapEdit();allObjectsSelected=false;page.classList.remove("all-selected");mapSelected.clear();mapEdgeSelected=null;mapLinkFrom=null;libraryView="list";nextActivate
+ (f);showWorkspace(!!doc.writer?.map);if(!mapMode)decorateWiki();recordVisit(f.id)};
+const nextFlush=flushCommit;flushCommit=function(){if(doc?.writer?.map){doc.markdown=doc.writer.map.nodes.map(n=>n.text).join("\n\n")+"\n"+doc.writer.map.comments.map(n=>n.text).join("\n");return}return nextFlush()};
+function mapChanged(action){if(libraryView==="map"){rememberLibraryMap();action?.();Store.save();saveLibrary();renderSidebar();renderMap();return}flushCommit();action?.();flushCommit();doc.updatedAt=Date.now();Undo.commit(doc.markdown);Stor
+ e.save();renderMap()}
+const editMapMutation=mapChanged;mapChanged=function(action){if(document.body.classList.contains("readmode")){toast("Exit reading vi

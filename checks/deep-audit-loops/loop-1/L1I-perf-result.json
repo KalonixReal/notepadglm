@@ -1,0 +1,106 @@
+{
+  "task": "L1-I performance/optimization assessment (F69) + editor leftovers (F26 case/sort, F31 slash variants, F40 bookmark/citation/symbol)",
+  "session": "l1perf",
+  "date": "loop-1",
+  "environment": "http://localhost:3000/ headless agent-browser; app HTML 15,316,383 bytes (single file); all timings include CLI transport (~30-50ms/command) unless noted",
+  "harness_notes": [
+    "One eval was used mid-run to set editor.innerHTML for the case/sort fixture — immediately undone via Ctrl+Z and the fixture was retyped through real keyboard; all reported results use real-UI input",
+    "Typing used keyboard-type/press with range-placed carets (agent-browser 'type' clicks element center)",
+    "While any writerDialog is open, editor keystrokes do not land (modal) — expected"
+  ],
+  "performance_measurements": {
+    "boot": {
+      "method": "performance.getEntriesByType('navigation') + editor/__np3 readiness evals",
+      "cold_open": {"navDuration_ms": 1376, "domContentLoaded_ms": 1365, "loadEventEnd_ms": 1376, "note": "first load of 15.3MB single HTML over localhost"},
+      "warm_reloads": [{"navDuration_ms": 311}, {"navDuration_ms": 385}, {"reload_cmd_total_ms": 458, "ready_at_ms": 501, "note": "editor isContentEditable + __np3 present; command-level timing includes transport"}],
+      "large_doc_reload": {"navDuration_ms": 385, "ready_at_ms": 501, "paragraphs": 200, "rendered": true, "note": "200-paragraph doc (16,183 md chars) loaded with the same warm-reload profile"}
+    },
+    "typing_latency": {
+      "small_doc": {"method": "3x type commands = 30 chars, bash time", "total_s": 0.226, "per_char_ms": 7.5, "accepted": "30/30"},
+      "large_doc": {"method": "5 individual press keys at end of 200-paragraph doc", "total_s": 0.213, "per_key_ms": 43, "accepted": "5/5", "note": "no measurable lag difference vs small doc; includes CLI transport"}
+    },
+    "save_behavior": {
+      "method": "sampled #autosaveIndicator textContent with timestamps after a single keystroke",
+      "observed": "last edit → indicator 'Autosaved' → 'Saving to browser…' at ~1.5s after edit → 'Autosaved' again within the following ~5s window (between samples at +6.9s bound); quiet-period sampling showed steady 'Autosaved'",
+      "conclusion": "saves are debounced (~1.5s) and complete in background; UR-11 (edits immediate, saves backgrounded) satisfied"
+    },
+    "memory": {
+      "method": "performance.memory.usedJSHeapSize (Chromium)",
+      "fresh_boot": "18MB", "after_typing_session": "19-20MB", "after_import_200_lines": "20MB", "after_reload_with_large_doc": "33MB",
+      "conclusion": "modest heap for a 15.3MB single-file app; no growth anomaly measured in this loop"
+    },
+    "import_200_lines": {"upload_cmd_ms": 45, "content_ready": "200 paragraphs present after 1.5s settle", "note": "real UI import route (sidebar Import → Files… → .md)"}
+  },
+  "source_pass_optimization_items": {
+    "scheduleCommit": "present — 17 call sites + redefinition (commit quiet period)",
+    "layoutPages": "present — multiple successive redefinitions incl. idle-adaptive scheduling: Math.max(180,1200-idle), Math.max(180,1650-age+40), 150ms fallback timeouts",
+    "NotepadPacked": "present — worker-based dedup+compression module",
+    "requestIdleCallback/requestAnimationFrame": "30 occurrences",
+    "font_carrier_growth_C26F": "not re-measured (prior evidence stands; measured, not a bug)"
+  },
+  "editor_leftovers": {
+    "F26_case_sort": {
+      "steps": "typed bravo/alpha/charlie (real keyboard); select-all via Range; Change case → UPPERCASE; → Sentence case; Sort lines",
+      "observed": "UPPERCASE → 'BRAVO\\n\\nALPHA\\n\\nCHARLIE'; Sentence case → restored; Sort lines → 'Alpha\\n\\nBravo\\n\\nCharlie' with matching markdown",
+      "predicate": "PASS"
+    },
+    "F31_slash_variants": {
+      "list_item": "menu opens; Escape closes; residue = the typed '/' text only (normal)",
+      "table_cell": "menu does NOT open; typed '/' remains as text — observation: slash menu unavailable inside table cells (possible intended limitation)",
+      "document_start": "menu opens with full item list; Escape closes cleanly; residue = typed '/' only",
+      "predicate": {"list_item": "PASS", "doc_start": "PASS", "table_cell": "OBSERVATION"}
+    },
+    "F40_bookmark": {
+      "steps": "References → Bookmark 'mark1' on paragraph → Go to bookmark dialog → navigate",
+      "observed": "anchor id + data-bookmark + markdown metadata added; dialog listed entries; navigation moved selection to the bookmarked paragraph",
+      "predicate": "PASS (but see new bug 1: bookmark duplication on Enter-split)"
+    },
+    "F40_citation": {
+      "steps": "Citation dialog (Doe/Study/2020 then Roe/Paper/2021) → in-text link + References bibliography; then Backspace×2 on citation text + Undo×2",
+      "observed": "insert works (in-text '(Roe, 2021)' link + References heading + 'Roe. Paper. 2021' entry); after deleting 2 chars and undoing twice, the in-text link text was fully restored BUT the bibliography (heading + entry paragraph) was gone → dangling citation without bibliography (B285-family NEW trigger: undo of adjacent text edits, not undo of the insert)",
+      "predicate": "FAIL (new variant)"
+    },
+    "F40_symbol": {
+      "steps": "References → Symbols ('Special characters' dialog) → pick © → Insert",
+      "observed": "© inserted at editor selection; after reload the © was absorbed INTO the adjacent citation link (link text '©(Roe, 2021)') — observation: symbol inserted directly before a link can merge into it across save/reload",
+      "predicate": {"insert": "PASS", "link_absorption": "OBSERVATION"}
+    },
+    "persistence": {
+      "observed": "after reload: text, citation link, symbol, triplicated bookmark, 200-line imported doc all persisted",
+      "predicate": "PASS (structures persisted; duplication also persists)"
+    }
+  },
+  "new_findings": [
+    {
+      "title": "Pressing Enter to split a paragraph that carries a bookmark duplicates the bookmark name AND anchor id onto the newly created paragraph (multiplies with each split)",
+      "classification": "CONFIRMED BUG",
+      "repro": "1) Type a paragraph; References → Bookmark → name 'mark1' → Add. 2) Caret at end of that paragraph; press Enter; type new text. 3) Observe new paragraph carries the SAME data-bookmark='mark1' AND same np3-ref-* id. Repeat Enter-splits → 3+ paragraphs all 'mark1' with identical ids; bookmarks dialog lists duplicate entries; state persists across reload.",
+      "expected": "new paragraph from split gets fresh/empty identity; bookmark stays anchored to its original paragraph only",
+      "controls": "paragraphs created by other means (dialog insert, bibliography entry) do not receive ids/bookmarks; duplication strictly follows the Enter-split of a paragraph carrying the attributes (reproduced on 2 consecutive splits)",
+      "source_mechanism": "paragraph split clones the source paragraph element attributes (id, data-bookmark) without regeneration — same mechanism family as L1-G's duplicate heading anchor ids after Enter-split (execCommand/formatBlock & split path; bookmark attrs not stripped)",
+      "impact": "duplicate DOM ids; bookmark list pollution (N identical entries); Go-to-bookmark navigation may land on an arbitrary clone. Fix: on paragraph split, strip/regenerate id and data-bookmark on the new block"
+    },
+    {
+      "title": "Undoing simple adjacent text deletions around a citation removes the References bibliography while leaving the in-text citation link intact (dangling citation)",
+      "classification": "CONFIRMED BUG (B285-family new trigger/variant)",
+      "repro": "1) Caret mid-paragraph; References → Citation (Roe/Paper/2021) → Insert (in-text '(Roe, 2021)' link + References heading + 'Roe. Paper. 2021' entry visible). 2) Caret right after the link; Backspace ×2 (deletes '1)'). 3) Ctrl+Z ×2. Observed: link text fully restored '(Roe, 2021)', but References heading + bibliography entry are GONE.",
+      "expected": "Undo restores exactly the two deleted characters; bibliography unchanged",
+      "controls": "pre-backspace state had bibliography present (paragraph list + data-bibliography heading); post-undo link present + bibliography absent — inconsistent pair not reachable by any single legitimate undo step",
+      "source_mechanism": "citation-synchronization (bibliography rebuild on citation-link edits) runs as a non-undoable side mutation during the backspaces; character-level Undo restores text but not the bibliography block",
+      "impact": "citation points to a bibliography that no longer exists; document exports/reads as broken citation. Fix: make bibliography maintenance undo-consistent or defer it to commit"
+    }
+  ],
+  "observations_enhancement_level": [
+    "Slash command menu does not open inside table cells (typed '/' stays plain text) — possible intended limitation",
+    "Symbol inserted immediately before a citation link gets absorbed into the link text across save/rereload",
+    "Import dialog stays open after a Files… upload until manually cancelled; editor input blocked while open (modal, expected)",
+    "Performance: all measured latencies well within UR-11 'immediate' feel — no contract violations observed"
+  ],
+  "predicate_totals": {"pass": 12, "fail": 2, "observations": 4},
+  "not_covered": [
+    "F69: font-carrier growth re-measurement (prior evidence C26F stands); boot measured over http/localhost only (not file://); no synthetic large-document floods beyond the 200-line import",
+    "F31: slash inside a blockquote (not tested); slash divider/table insertions after lists (B135/B242 known, not re-tested)",
+    "F40: multiple-bookmark navigation ordering; citation with URL field; symbol search/filter",
+    "Editor leftovers: tOGGLE cASE / Capitalize Each Word variants not individually re-verified (menu items confirmed present)"
+  ]
+}

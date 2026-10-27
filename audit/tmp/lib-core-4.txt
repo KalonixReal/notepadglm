@@ -1,0 +1,55 @@
+beafe"};mapChanged(()=>{(comment?data.comments:data.nodes).push(n);if(child&&selected)revealMindMapBranch(data,selected.id);if(child&&selected)data.edges.push({id:uid("edge"),from:selected.id,to:n.id})});mapSelected=new
+  Set([n.id]);renderMap();editMapNode(n)}
+const insertMapNode=addMapNode;addMapNode=function(...args){if(document.body.classList.contains("readmode")){toast("Exit reading view to edit");return}return insertMapNode(...args)};
+function fitMap(){
+const data=mapData(),nodes=[...displayedMap.nodes,...displayedMap.comments];if(!nodes.length)return;
+const minX=Math.min(...nodes.map(n=>n.x)),minY=Math.min(...nodes.map(n=>n.y)),maxX=Math.max(...nodes.map(n=>n.x+190)),maxY=Math.max(...nodes.map(n=>n.y+100)),r=mapSurface.getBoundingClientRect(),z=clamp(Math.min((r.width-100)/(maxX-minX),(r
+ .height-100)/(maxY-minY)),.15,1.5);Object.assign(data.view,{z:z,x:(r.width-(maxX-minX)*z)/2-minX*z,y:(r.height-(maxY-minY)*z)/2-minY*z});applyMapView();if(libraryView==="map")saveLibrary();else Store.save()}
+const mapActions={edit:exitReadMode,add:()=>addMapNode(),child:()=>addMapNode(true),comment:()=>addMapNode(false,true),connect:()=>{mapTool=mapTool==="connect"?"select":"connect";mapLinkFrom=null;renderMap()},color:()=>{
+const colors=["#dbeafe","#dcfce7","#fef3c7","#fce7f3","#e0e7ff"];mapChanged(()=>{for(
+const n of[...mapData().nodes,...mapData().comments])if(mapSelected.has(n.id))n.color=colors[(colors.indexOf(n.color)+1)%colors.length]})},remove:()=>{
+const d=mapData();if(libraryView==="map"){mapChanged(()=>{d.comments=d.comments.filter(n=>!mapSelected.has(n.id));mapSelected.clear()});return}mapChanged(()=>{d.nodes=d.nodes.filter(n=>!mapSelected.has(n.id));d.comments=d.comments.filter(n=
+ >!mapSelected.has(n.id));d.edges=d.edges.filter(e=>!mapSelected.has(e.from)&&!mapSelected.has(e.to));mapSelected.clear()})},duplicate:()=>{if(libraryView==="map")return;
+const d=mapData(),ids=new Map;mapChanged(()=>{for(
+const n of[...d.nodes,...d.comments].filter(n=>mapSelected.has(n.id))){
+const clone={...n,id:uid("node"),x:n.x+30,y:n.y+30};ids.set(n.id,clone.id);(d.comments.includes(n)?d.comments:d.nodes).push(clone)}for(
+const e of[...d.edges])if(ids.has(e.from)&&ids.has(e.to))d.edges.push({...e,id:uid("edge"),from:ids.get(e.from),to:ids.get(e.to)});mapSelected=new Set(ids.values())})},undo:()=>{if(libraryView==="map")undoLibraryMap();else
+  UI.doUndo()},redo:()=>{if(libraryView==="map")undoLibraryMap(true);else UI.doUndo("redo")},arrange:()=>mapChanged(()=>{mapData().nodes.forEach((n,i)=>{n.x=100+i%4*260;n.y=100+Math.floor(i/4)*160})}),fit:fitMap,zoomIn:()=>zoomMap(1.2),zoom
+ Out:()=>zoomMap(1/1.2),files:()=>{libraryView="list";showWorkspace(!!doc.writer?.map);renderSidebar()}};
+function zoomMap(factor,clientX=null,clientY=null){
+const d=mapData(),v=d.view,r=mapSurface.getBoundingClientRect(),x=(clientX??r.left+r.width/2)-r.left,y=(clientY??r.top+r.height/2)-r.top,z=clamp(v.z*factor,.15,3);v.x=x-(x-v.x)*z/v.z;v.y=y-(y-v.y)*z/v.z;v.z=z;applyMapView();if(libraryView==
+ ="map")saveLibrary();else Store.save()}document.addEventListener("click",e=>{
+const b=e.target.closest("[data-map]");if(b)mapActions[b.dataset.map]?.()});mapSurface.onwheel=e=>{e.preventDefault();
+const delta=e.deltaY*(e.deltaMode===1?16:e.deltaMode===2?mapSurface.clientHeight:1);if(delta)zoomMap(Math.exp(-clamp(delta,-240,240)*.0015),e.clientX,e.clientY)};mapSurface.onpointerdown=e=>{if(e.button!==0||e.target.closest("button,input,t
+ extarea,[contenteditable=true]"))return;mapSurface.focus();
+const node=e.target.closest("[data-node-id]"),bend=e.target.closest(".map-bend"),point=mapPoint(e),data=mapData();if(node){mapEdgeSelected=null;for(
+const path of mapEdges.querySelectorAll(".map-edge.selected"))path.classList.remove("selected");
+const id=node.dataset.nodeId;if(mapTool==="connect"){if(!mapLinkFrom)mapLinkFrom=id;else{if(id!==mapLinkFrom&&libraryView==="map")connectFileMapNodes([...displayedMap.nodes,...displayedMap.comments].find(n=>n.id===mapLinkFrom),[...displayed
+ Map.nodes,...displayedMap.comments].find(n=>n.id===id));else if(id!==mapLinkFrom)mapChanged(()=>{if(!data.edges.some(edge=>edge.from===mapLinkFrom&&edge.to===id)){revealMindMapBranch(data,mapLinkFrom);data.edges.push({id:uid("edge"),from:m
+ apLinkFrom,to:id})}});mapLinkFrom=null}renderMap();return}if(!e.shiftKey&&!mapSelected.has(id))mapSelected.clear();e.shiftKey&&mapSelected.has(id)?mapSelected.delete(id):mapSelected.add(id);for(
+const card of mapNodes.children)card.classList.toggle("selected",mapSelected.has(card.dataset.nodeId));syncMapControls();
+const selected=[...displayedMap.nodes,...displayedMap.comments].filter(n=>mapSelected.has(n.id));mapDrag={type:"nodes",point:point,starts:selected.map(n=>({n:n,x:n.x,y:n.y})),changed:false}}else if(bend){
+const edge=displayedMap.edges.find(edge=>edge.id===bend.dataset.edgeId);mapDrag={type:"bend",edge:edge,start:Number(edge.bend)||0,point:point,changed:false}}else{mapSelected.clear();mapEdgeSelected=null;renderMap();mapDrag={type:"pan",x:e.c
+ lientX,y:e.clientY,start:{...data.view},changed:false}}mapDrag.before=libraryMapSnapshot();if(libraryView!=="map")flushCommit();if(!node)mapSurface.setPointerCapture(e.pointerId);e.preventDefault()};mapSurface.onpointermove=e=>{if(!mapDrag
+ )return;
+const p=mapPoint(e),d=mapDrag;if(d.type==="nodes"&&Math.abs(p.x-d.point.x)+Math.abs(p.y-d.point.y)<3)return;mapSurface.setPointerCapture(e.pointerId);d.changed=true;if(d.type==="nodes"){for(
+const item of d.starts){item.n.x=item.x+p.x-d.point.x;item.n.y=item.y+p.y-d.point.y;
+const el=[...mapNodes.children].find(el=>el.dataset.nodeId===item.n.id);if(el){el.style.left=item.n.x+"px";el.style.top=item.n.y+"px"}}cancelAnimationFrame(mapRaf);mapRaf=requestAnimationFrame(renderMapEdges)}else
+  if(d.type==="bend"){d.edge.bend=clamp(d.start+(p.y-d.point.y)/.75,-3e3,3e3);if(libraryView==="map"){library.map.bends=library.map.bends||{};library.map.bends[d.edge.id]=d.edge.bend}cancelAnimationFrame(mapRaf);mapRaf=requestAnimationFrame
+ (renderMapEdges)}else{
+const v=mapData().view;v.x=d.start.x+e.clientX-d.x;v.y=d.start.y+e.clientY-d.y;applyMapView()}};
+function finishMapDrag(){if(!mapDrag)return;
+const d=mapDrag;mapDrag=null;if(!d.changed)return;if(libraryView==="map"){if(d.type!=="pan")rememberLibraryMap(d.before);if(d.type==="nodes")for(const{n:n}of
+  d.starts)if(!library.map.comments.includes(n))library.map.positions[n.id]={x:n.x,y:n.y};saveLibrary()}else{flushCommit();if(d.type!=="pan")Undo.commit(doc.markdown);Store.save()}renderMap()}mapSurface.onpointerup=finishMapDrag;mapSurface.
+ onpointercancel=finishMapDrag;
+const writableMapPointer=mapSurface.onpointerdown;mapSurface.onpointerdown=function(e){if(document.body.classList.contains("readmode")&&e.target.closest("[data-node-id],.map-bend")){
+const node=e.target.closest("[data-node-id]");if(node){mapSelected=new Set([node.dataset.nodeId]);for(
+const card of mapNodes.children)card.classList.toggle("selected",mapSelected.has(card.dataset.nodeId))}syncMapControls();return}return writableMapPointer(e)};
+const mapReadView=Shell.setView;Shell.setView=function(...args){
+const result=mapReadView.apply(this,args);if(mapMode)syncMapControls();return result};
+const writableMapControls=syncMapControls;syncMapControls=function(){for(
+const b of mapRibbon.querySelectorAll("button"))b.disabled=false;writableMapControls();if(document.body.classList.contains("readmode"))for(
+const key of["add","child","connect","comment","color","duplicate","remove","undo","redo","arrange"])mapRibbon.querySelector("[data-map="+key+"]").disabled=true};
+const writableUndo=UI.doUndo;UI.doUndo=function(...args){if(document.body.classList.contains("readmode")){toast("Exit reading view to edit");return}return
+  writableUndo.apply(this,args)};window.addEventListener("keydown",e=>{if(!mapMode||activeDialog||e.target.closest("input,textarea,select,#appContextMenu"))return;if((e.ctrlKey||e.metaKey)&&(e.altKey&&e.key.toLowerCase()==="m"||!e.altKey&&/
+ ^[biu]$/i.test(e.key))){e.preventDefault();e.stopImmediatePropagation()}},true);window.addEventListener("keydown",e=>{if(

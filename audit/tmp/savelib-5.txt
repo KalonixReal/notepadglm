@@ -1,0 +1,12 @@
+erColours843").append(b)}picker.oninput=()=>previewColour(picker.value);hex.oninput=()=>previewColour(hex.value);$("#pageColourReset843").onclick=()=>previewColour("#ffffff");previewColour(current)}
+const paperButton843=notebookToolButton83("view","Page background","pageBackground843",openPageBackground843);document.querySelector(".rpanel[data-panel=view]").prepend(paperButton843);
+const pageColourSave843=saveLibrary;saveLibrary=function(...args){
+const result=pageColourSave843.apply(this,args);applyPageBackground843();return result};
+const pageColourSyncWriter843=syncWriterPage;syncWriterPage=function(...args){
+const result=pageColourSyncWriter843.apply(this,args);applyPageBackground843();return result};applyPageBackground843();
+/* Reuse the real Find action, with a visible title-bar search field affordance. */
+const paperActivate843=activate;activate=function(...args){
+const result=paperActivate843.apply(this,args);applyPageBackground843();return result};
+const autoStatus843=$("#autosaveIndicator");if(autoStatus843)$("#tCenter").append(autoStatus843);
+const findTop843=$("#tSearch");$("#titlebar").append(findTop843);findTop843.setAttribute("aria-label","Find files and text across the notebook");findTop843.title="Find files and text across all collections and
+  tabs";findTop843.querySelector("span").textContent="Find all";sbSearch.hidden=true;sbSearch.tabIndex=-1;sbSearch.value="";sbQuery

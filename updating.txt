@@ -1,0 +1,29 @@
+==========================================================
+ NOTEPAD v9 DEEP-AUDIT BUG HUNT — LIVE STATUS
+==========================================================
+STATUS: STILL WORKING (environment hiccup being recovered)
+UPDATED: 2026-10-27 23:16 NZDT (Pacific/Auckland)
+
+WHAT I'M DOING RIGHT NOW:
+- GitHub upload DONE: entire workspace pushed to KalonixReal/notepadglm
+  commit f0bc39b, author "GLM <GLM@users.noreply.github.com>" (forced update).
+- Starting dev server for Loop 2 -> hit OS-level "fork: Resource
+  temporarily unavailable" (container resource exhaustion).
+- Recovering: waiting for resource pressure to clear, then restarting
+  the app on :3000 and launching Loop 2 batches L2-A..L2-I.
+
+BUG TRACKER:
+- Total confirmed bugs: 89 (highest id B297)
+- New this loop (loop 2 so far): 0
+- Open candidates: 2 (phantom-leading-paragraph-reload, symbol-absorbed-into-citation-link)
+
+LOOP PROGRESS:
+- Clean loops: 0/2  (need 2 consecutive clean loops to stop)
+- Current loop: Loop 2 (full fresh sweep, 70 features x 4 stages)
+- Loop 2 progress: [##--------] ~5%  (env setup; batches pending launch)
+- Loop 1: COMPLETE - not clean (9 new confirmed B289-B297, 4 extensions)
+
+NEXT CHECKPOINT:
+- Next 15-min timer: server restart status + Loop 2 batch launches.
+- If environment stays blocked, status here will say so explicitly.
+==========================================================

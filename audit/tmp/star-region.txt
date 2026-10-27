@@ -1,0 +1,5 @@
+r</label><select id="moveFolder">'+folderOptions(noteMeta(f).folder)+"</select>",()=>{noteMeta(f).folder=$("#moveFolder").value||null;commitLibrary()})};
+const originalDuplicate=duplicateFile;duplicateFile=function(id){originalDuplicate(id);if(doc.writer?.map){renderMap();Store.save()}};for(
+const method of["undo","redo"]){
+const previous=Undo[method];Undo[method]=function(){
+const metadata=doc.writer?.library,result=previous.call(this);return result&&metadata?{...result,writer:{...result.writer,lib

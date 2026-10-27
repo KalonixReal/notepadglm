@@ -1,0 +1,6 @@
+lete cell.dataset.formula;calculateTable(table)})})};writerActions.recalculateTables=()=>withMutation(recalculateTables);editor.addEventListener("beforeinput",e=>{
+const cell=curTableCell();if(cell?.dataset.formula&&/^(insert|delete)/.test(e.inputType))delete cell.dataset.formula});
+const formulaFlushCommit=flushCommit;flushCommit=function(){if(editorComposing)return;if(mode==="wysiwyg"&&editor.querySelector("[data-formula]")&&editor.innerHTML!==renderedHTML)recalculateTables();return formulaFlushCommit()};
+const priorVerifyPortable=verifyPortable;verifyPortable=function(snapshot){priorVerifyPortable(snapshot);
+const records=[...snapshot.files];for(const[key,value]of Object.entries(snapshot.extra||{})){if(!key.startsWith("notepadV3:hist:")&&key!==BKEY)continue;try{
+const data=JSON.parse(value);

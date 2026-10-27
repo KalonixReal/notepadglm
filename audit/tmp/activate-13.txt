@@ -1,0 +1,11 @@
+(editor,{subtree:true,characterData:true,childList:true});editor.addEventListener("input",()=>{harperGeneration85++;harperLayer85.replaceChildren();queueHarperView85()});canvasWrap.addEventListener("scroll",()=>{paintHarperView85();queueHar
+ perView85(350)},{passive:true});window.addEventListener("resize",paintHarperView85);
+const activateHarper85=activate;activate=function(...args){
+const result=activateHarper85.apply(this,args);syncHarperToggle85();resetHarperView85();return result};window.addEventListener("pagehide",()=>{Harper85.stop();clearTimeout(harperTimer85)});
+function addGrammarMenu85(menu,event,record,lint){
+const target=proseTarget85(record,lint.start,lint.end);if(!target)return;
+const section=document.createElement("div");section.className="proof-menu-section";section.dataset.harperGrammar="1";
+const note=document.createElement("div");note.className="proof-menu-note";note.textContent=lint.message;section.append(note);for(
+const replacement of lint.suggestions){
+const button=document.createElement("button");button.type="button";button.setAttribute("role","menuitem");button.textContent=replacement||"Remove";button.onmousedown=e=>e.preventDefault();button.onclick=()=>{if(!validProseRecord85(record)||
+ !proofValidTarget84(target))return;closeContextMenus();withMutation(()=>proofApp

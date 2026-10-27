@@ -1,0 +1,121 @@
+sName="setting-row";importFormats.innerHTML="<div><strong>Offline import formats</strong><p>"+supportedFormatList+"</p><p>PDF imports extract text rather than reproduce page layout. Scanned PDFs need OCR. Editable imports are limited to 25
+  MB input / 50 MB content in the current engine.</p></div>";document.querySelector("[data-bspane=settings] .settings-card").append(importFormats);
+/* Collections scope views, never the canonical notebook arrays. */
+function activeCollectionId(){return library.activeCollectionId||"collection-default"}
+function recordCollectionId(record){return record?.writer?.library?.collectionId||record?.collectionId||"collection-default"}
+function collectionFiles(id=activeCollectionId()){return files.filter(file=>recordCollectionId(file)===id)}
+function collectionFolders(id=activeCollectionId()){return library.folders.filter(folder=>recordCollectionId(folder)===id)}
+function ensureCollections(){if(!Array.isArray(library.collections)||!library.collections.length)library.collections=[{id:"collection-default",name:"My collection"}];for(
+const c of library.collections)if(c.id==="collection-default"&&c.name==="Documents")c.name="My collection";
+const ids=new Set(library.collections.map(c=>c.id));if(!ids.has(library.activeCollectionId))library.activeCollectionId=library.collections[0].id;
+const fallback=ids.has("collection-default")?"collection-default":library.collections[0].id;for(
+const file of files){
+const meta=noteMeta(file);if(!ids.has(meta.collectionId))meta.collectionId=fallback}for(
+const folder of library.folders)if(!ids.has(folder.collectionId))folder.collectionId=fallback;for(
+const comment of library.map.comments||[])if(!ids.has(comment.collectionId))comment.collectionId=fallback;library.collectionViews||={}}
+function stampNewCollectionRecords(){for(
+const folder of library.folders)if(!folder.collectionId)folder.collectionId=activeCollectionId();for(
+const comment of library.map.comments||[])if(!comment.collectionId)comment.collectionId=activeCollectionId()}
+function rememberCollectionView(){ensureCollections();
+const view=library.collectionViews[activeCollectionId()]||{};view.mapView={...library.map.view};if(doc&&recordCollectionId(doc)===activeCollectionId())view.activeFileId=doc.id;library.collectionViews[activeCollectionId()]=view}
+function clearCollectionTransient(){FindRep.close();closePops();selectedFiles.clear();fileSelectionAnchor=null;mapSelected.clear();mapEdgeSelected=null;mapLinkFrom=null;currentFolder=null;sbQuery="";sbSearch.value="";libraryMapPast.length=0
+ ;libraryMapFuture.length=0;sbOrderDirty=true}
+function setCollectionContext(id){ensureCollections();if(!library.collections.some(c=>c.id===id))throw Error("Collection no longer
+  exists");rememberCollectionView();clearCollectionTransient();library.activeCollectionId=id;library.map.view={...library.collectionViews[id]?.mapView||{x:40,y:40,z:1}};libraryView="list";syncCollectionButton()}
+function switchCollection(id){if(editorComposing)return false;if(id===activeCollectionId())return true;flushCommit();Store.save();setCollectionContext(id);
+let file=collectionFiles(id).find(f=>f.id===library.collectionViews[id]?.activeFileId)||collectionFiles(id)[0];if(!file){file=Store.newFileObj("Untitled","");files.push(file)}activate(file);saveLibrary();Store.save();renderSidebar();return
+  true}
+function createCollection(name){name=String(name||"").trim();if(!name||name.length>100)throw Error("Use a collection name between 1 and 100 characters");ensureCollections();if(library.collections.length>=200)throw Error("A notebook can
+  contain at most 200 collections");
+const item={id:uid("collection"),name:name};library.collections.push(item);switchCollection(item.id);return item}
+function renameCollection(id,name){name=String(name||"").trim();
+const item=library.collections.find(c=>c.id===id);if(!item||!name||name.length>100)throw Error("Use a name between 1 and 100 characters");item.name=name;saveLibrary();Store.save();syncCollectionButton()}
+function collectionOptions(selected=activeCollectionId()){return library.collections.map(c=>'<option value="'+escAttr(c.id)+'"'+(c.id===selected?" selected":"")+">"+escHtml(c.name)+"</option>").join("")}
+function moveFilesToCollection(ids,target){if(!library.collections.some(c=>c.id===target))throw Error("Destination collection is missing");flushCommit();libraryMapPast.length=0;libraryMapFuture.length=0;for(
+const file of files)if(ids.includes(file.id)){
+const m=noteMeta(file);m.collectionId=target;m.folder=null}clearFileSelection();saveLibrary();Store.save();
+const next=collectionFiles()[0];if(next&&recordCollectionId(doc)!==activeCollectionId())activate(next);else if(recordCollectionId(doc)!==activeCollectionId()){
+const f=Store.newFileObj("Untitled","");files.push(f);activate(f)}renderSidebar();if(mapMode)renderMap()}async 
+function mergeCollection(id,target){if(id===target||!library.collections.some(c=>c.id===target))throw Error("Choose another destination");await auditGuardedMutation("Before merging collections",()=>{flushCommit();for(
+const file of collectionFiles(id))noteMeta(file).collectionId=target;for(
+const folder of collectionFolders(id))folder.collectionId=target;for(
+const comment of library.map.comments||[])if(recordCollectionId(comment)===id)comment.collectionId=target;library.collections=library.collections.filter(c=>c.id!==id);delete
+  library.collectionViews[id];if(library.activeCollectionId===id)library.activeCollectionId=target;ensureCollections();clearCollectionTransient();
+const file=collectionFiles(target)[0]||Store.newFileObj("Untitled","");if(!files.includes(file))files.push(file);activate(file);saveLibrary();Store.save();renderSidebar()})}
+function syncCollectionButton(){
+const name=library.collections?.find(c=>c.id===activeCollectionId())?.name||"My collection";$("#switchDocuments").textContent="Switch collection ·
+  "+name;$("#switchDocuments").style.borderLeftColor=library.collections?.find(c=>c.id===activeCollectionId())?.color||"";$("#switchDocuments").setAttribute("aria-label","Switch collection. Current collection: "+name)}
+function openCollectionSwitcher(){return openCollectionManager841()}
+function openCollectionSettings(manageId=null){Backstage.close();ensureCollections();
+const id=typeof manageId==="string"&&library.collections.some(c=>c.id===manageId)?manageId:activeCollectionId(),item=library.collections.find(c=>c.id===id),index=library.collections.indexOf(item);showWriterDialog("Collection
+  settings",'<label for="manageCollectionChoice">Collection</label><select id="manageCollectionChoice">'+collectionOptions(id)+'</select><p class="dialog-note">'+collectionFiles(id).length+" file"+(collectionFiles(id).length===1?"":"s")+"
+  · "+collectionFolders(id).length+" folder"+(collectionFolders(id).length===1?"":"s")+" · "+collectionFiles(id).filter(f=>f.writer?.map||f.protectedFile?.kind==="mindmap").length+' mind maps</p><label for="renameCollectionName">Collection
+  name</label><input id="renameCollectionName" maxlength="100" value="'+escAttr(item.name)+'"><label for="collectionDescription">Description</label><textarea id="collectionDescription" maxlength="1000" placeholder="What belongs in this
+  collection?">'+escHtml(item.description||"")+'</textarea><label for="collectionColor">Collection color</label><input id="collectionColor" type="color" value="'+(/^#[0-9a-f]{6}$/i.test(item.color||"")?item.color:"#6366f1")+'"><div
+  class="collection-new"><button class="btn" id="saveCollectionDetails">Save name and details</button><button class="btn" id="collectionEarlier" '+(index===0?"disabled":"")+'>Move earlier</button><button class="btn" id="collectionLater"
+  '+(index===library.collections.length-1?"disabled":"")+'>Move later</button></div><label for="settingsNewCollection">Create collection</label><div class="collection-new"><input id="settingsNewCollection" maxlength="100"
+  placeholder="Collection name"><button class="btn" id="settingsCreateCollection">Create</button><button class="btn" id="settingsImportCollection">Import…</button></div><button class="btn danger" id="deleteCollection">Delete
+  collection…</button><p class="dialog-note">Drag files or folders onto a collection tab to move them. Password protection stays with each
+  file.</p>',null);$("#manageCollectionChoice").onchange=()=>openCollectionSettings($("#manageCollectionChoice").value);$("#deleteCollection").onclick=()=>deleteCollectionDialog83(id);$("#saveCollectionDetails").onclick=()=>{try{
+const name=$("#renameCollectionName").value.trim();if(!name||name.length>100)throw Error("Use a name between 1 and 100
+  characters");item.description=$("#collectionDescription").value;item.color=$("#collectionColor").value;renameCollection(id,name);writerFormFeedback("Collection details saved.")}catch(e){writerFormFeedback(e.message)}};
+function reorder(offset){
+const at=library.collections.indexOf(item),next=at+offset;if(next<0||next>=library.collections.length)return;library.collections.splice(at,1);library.collections.splice(next,0,item);saveLibrary();Store.save();openCollectionSettings(id)}$("#
+ collectionEarlier").onclick=()=>reorder(-1);$("#collectionLater").onclick=()=>reorder(1);$("#settingsCreateCollection").onclick=()=>{try{
+const name=$("#settingsNewCollection").value;createCollection(name);openCollectionSettings()}catch(e){writerFormFeedback(e.message)}};$("#settingsImportCollection").onclick=openCollectionImport}
+const collectionOpenFiles=IO.open;
+function openCollectionImport(){Backstage.close();ensureCollections();showWriterDialog("Import",'<label for="collectionImportDestination">Destination collection</label><select
+  id="collectionImportDestination">'+collectionOptions()+'</select><div class="collection-import-options"><button class="btn" id="collectionImportFiles">Files…</button><button class="btn" id="collectionImportGoogle">Google Docs
+  tabs…</button><button class="btn" id="collectionImportBackup">Notepad backup…</button></div><p class="dialog-note">Google Docs uses a structured export to keep tabs and subtabs.</p>',null);
+const destination=()=>{
+const id=$("#collectionImportDestination").value;closeWriterDialog();switchCollection(id);return id};$("#collectionImportFiles").onclick=()=>{destination();collectionOpenFiles.call(IO)};$("#collectionImportGoogle").onclick=()=>{destination(
+ );openGoogleImport()};$("#collectionImportBackup").onclick=()=>{
+const id=destination();openNotebookExport();$("#exportRestoreInput").dataset.collectionDestination=id;$("#exportRestoreInput").value="";$("#exportRestoreInput").click()}}IO.open=openCollectionImport;
+const collectionButton=document.createElement("button");collectionButton.id="switchDocuments";collectionButton.className="btn";collectionButton.type="button";collectionButton.hidden=true;collectionButton.onclick=openCollectionSwitcher;sideb
+ ar.querySelector(".sb-actions").before(collectionButton);
+const collectionCSS=document.createElement("style");collectionCSS.textContent="#switchDocuments{flex:0 0 auto;display:none;box-sizing:border-box;margin:0 12px 8px;padding:7px 10px;width:calc(100% -
+  24px);height:34px;min-height:34px;max-height:34px;border:1px solid var(--chrome-line);border-radius:8px;background:var(--hover);color:var(--ink);font:12px
+  Lexend;text-align:left;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;cursor:pointer}#switchDocuments:hover{background:var(--sel)}.collection-choices{display:grid;gap:6px;max-height:220px;overflow:auto;margin-bottom:14px}.colle
+ ction-choice{text-align:left!important;min-height:36px}.collection-choice.active{background:var(--sel);color:var(--accent)}.collection-new{display:flex;gap:8px;margin:8px 0;flex-wrap:wrap}.collection-new
+  input{flex:1;min-width:150px}.collection-import-options{display:flex;gap:8px;flex-wrap:wrap;margin:14px 0}.collection-import{margin-top:6px}.collection-choices .btn,.collection-new .btn,.collection-import,.collection-import-options
+  .btn{padding:9px 12px;border:1px solid var(--chrome-line);border-radius:8px;background:var(--hover);color:var(--ink);font:12px Lexend;cursor:pointer}.collection-choices .btn:hover,.collection-new
+  .btn:hover,.collection-import:hover,.collection-import-options .btn:hover{background:var(--sel)}.collection-choices
+  .btn.active{background:var(--sel);color:var(--accent)}.collection-import-options{display:grid;grid-template-columns:1fr}.collection-import-options .btn{text-align:left}#writerDialog
+  #collectionColor{width:72px;height:38px;padding:4px}#deleteCollection{padding:9px 12px;margin-top:8px;border:1px solid var(--chrome-line);border-radius:8px;background:var(--hover);color:var(--danger,#bd3434);font:12px
+  Lexend}";document.head.appendChild(collectionCSS);ensureCollections();
+const collectionNewFile=Store.newFileObj;Store.newFileObj=function(...args){
+const file=collectionNewFile.apply(this,args);noteMeta(file).collectionId=activeCollectionId();return file};
+const collectionSaveLibrary=saveLibrary;saveLibrary=function(){stampNewCollectionRecords();ensureCollections();rememberCollectionView();collectionSaveLibrary()};
+const collectionSnapshot=workspaceSnapshot;workspaceSnapshot=function(...args){stampNewCollectionRecords();ensureCollections();rememberCollectionView();extra[LIBRARY_KEY]=JSON.stringify(library);return collectionSnapshot(...args)};
+const collectionActivate=activate;activate=function(file){ensureCollections();
+const id=recordCollectionId(file);if(id!==activeCollectionId())setCollectionContext(id);
+const result=collectionActivate(file);library.collectionViews[id]||={};library.collectionViews[id].activeFileId=file.id;syncCollectionButton();return result};
+const collectionSidebarFoot=renderSidebarFoot;renderSidebarFoot=function(){collectionSidebarFoot();sbCount.textContent=collectionFiles().length};
+const collectionGraph=mapFiles;mapFiles=function(){stampNewCollectionRecords();
+const graph=collectionGraph(),ids=new Set([...collectionFiles().map(f=>"file:"+f.id),...collectionFolders().map(f=>"folder:"+f.id),...(library.map.comments||[]).filter(c=>recordCollectionId(c)===activeCollectionId()).map(c=>c.id)]);graph.no
+ des=graph.nodes.filter(n=>ids.has(n.id));graph.comments=(graph.comments||[]).filter(n=>ids.has(n.id));graph.edges=graph.edges.filter(e=>ids.has(e.from)&&ids.has(e.to));graph.flow=mapForest(graph,true);return graph};
+const collectionCommit=commitLibrary;commitLibrary=function(){stampNewCollectionRecords();return collectionCommit()};
+const collectionMoveFiles=moveLibraryFiles;moveLibraryFiles=function(ids,parent){if(ids.some(id=>{
+const file=files.find(f=>f.id===id);return!file||recordCollectionId(file)!==activeCollectionId()})||parent&&recordCollectionId(folderById(parent))!==activeCollectionId())return false;return collectionMoveFiles(ids,parent)};
+const collectionFolderMove=canMoveLibraryFolder;canMoveLibraryFolder=function(id,parent){if(recordCollectionId(folderById(id))!==activeCollectionId()||parent&&recordCollectionId(folderById(parent))!==activeCollectionId())return
+  false;return collectionFolderMove(id,parent)};
+const collectionCreateFile=createFile;createFile=function(...args){
+const result=collectionCreateFile(...args);noteMeta(doc).collectionId=activeCollectionId();saveLibrary();Store.save();return result};
+const collectionDeleteFile=deleteFile;deleteFile=async function(id){
+const result=await collectionDeleteFile(id);ensureCollections();if(!collectionFiles().length){
+const file=Store.newFileObj("Untitled","");files.push(file);activate(file);Store.save()}return result};
+function prepareCollectionRestore(snapshot,kind,destinationId){
+const lib=exportLibraryData(snapshot);if(kind!=="replace"){
+const mapping=new Map;if(destinationId){
+const target=library.collections.find(c=>c.id===destinationId);if(!target)throw Error("The destination collection no longer exists");for(
+const c of lib.collections||[{id:"collection-default"}])mapping.set(c.id,destinationId);lib.collections=[{...target}]}else if(Array.isArray(lib.collections)){for(
+const c of lib.collections)mapping.set(c.id,uid("collection"));lib.collections=lib.collections.map(c=>({...c,id:mapping.get(c.id)}))}else{lib.collections=[{id:activeCollectionId(),name:library.collections.find(c=>c.id===activeCollectionId()
+ ).name}];mapping.set("collection-default",activeCollectionId())}for(
+const file of snapshot.files)noteMeta(file).collectionId=mapping.get(recordCollectionId(file))||activeCollectionId();for(
+const folder of lib.folders||[])folder.collectionId=mapping.get(recordCollectionId(folder))||activeCollectionId();for(
+const comment of lib.map?.comments||[])comment.collectionId=mapping.get(recordCollectionId(comment))||activeCollectionId();lib.activeCollectionId=lib.collections[0]?.id;delete
+  lib.collectionViews}snapshot.extra[LIBRARY_KEY]=JSON.stringify(lib);return lib}
+function mergeIncomingCollections(lib){ensureCollections();for(
+const c of lib.collections||[])if(!library.collections.some(existing=>existing.id===c.id))library.collections.push({...c})}
+const collectionSchema=assertWorkspaceSchema;assertWorkspaceSchema=function(snapshot){collectionSchema(snapshot);
+const lib=exportLibraryData(snapshot);if(lib.collections===undefined)return;if(!Array.isArray(

@@ -1,0 +1,15 @@
+d==="family"?"family":"size"]==="mixed"?"Mixed":kind==="family"?s.family:s.size}
+const label=$("#styleGalleryLabel"),r=getRange(),el=r&&(r.startContainer.nodeType===3?r.startContainer.parentElement:r.startContainer);if(label)label.textContent=s.style==="mixed"?"Mixed
+  styles":s.style.startsWith("cs:")?CustomStyles.byId(s.style.slice(3))?.name||"Custom style":s.style==="quote"?"Quote":styleNames[s.style]||"Body
+  Text"};document.addEventListener("focusin",()=>requestAnimationFrame(updateRibbonState));editor.addEventListener("input",()=>requestAnimationFrame(updateRibbonState));
+const selectionRibbonActivate=activate;activate=function(...args){
+const result=selectionRibbonActivate(...args);requestAnimationFrame(updateRibbonState);return result};
+const selectionRibbonMode=setMode;setMode=function(...args){
+const result=selectionRibbonMode(...args);if(result?.then)return result.then(value=>{updateRibbonState();return value});updateRibbonState();return result};
+const selectionRibbonWorkspace=showWorkspace;showWorkspace=function(...args){
+const result=selectionRibbonWorkspace(...args);updateRibbonState();return result};
+/* Manual file order is notebook metadata; dragging never edits document contents. */
+function canonicalFileOrder(){
+const valid=new Set(files.map(f=>f.id)),seen=new Set,out=[],seed=Array.isArray(library.fileOrder)?library.fileOrder:sbSortMode==="name"?[...files].sort((a,b)=>a.name.localeCompare(b.name)).map(f=>f.id):sbOrder;for(
+const id of seed)if(valid.has(id)&&!seen.has(id)){seen.add(id);out.push(id)}for(
+const f of files)if(!seen.has(f.id)){seen.add(f.id);out.push(f.id)}re

@@ -1,0 +1,6 @@
+{importDocuments(incoming);return}if(imgFiles.length)Images.insertFiles(imgFiles,range)}};
+/* ═══════════════ commit / render ═══════════════ */
+function flushCommit(){if(editorComposing)return;updateEmptyHint();clearTimeout(commitTimer);commitTimer=0;if(commitIdle&&window.cancelIdleCallback)cancelIdleCallback(commitIdle);commitIdle=0;clearTimeout(saveTimer);if(mode!=="wysiwyg"){if(
+ doc.markdown!==srcArea.value)delete doc.richHtml;doc.markdown=srcArea.value;Undo.commit(doc.markdown);if(!isBooting){Store.save();updateStatus()}return}if(editor.innerHTML===renderedHTML&&editorMeta()===renderedMeta)return;normalizeDom(edi
+ tor);if(editor.querySelector(".np3-fndef,.np3-fnref"))Footnotes.apply(editor);doc.richHtml=sanitizeRichHtml(editor.innerHTML);// R6-5: live renumbering (Word parity)
+doc.markdow

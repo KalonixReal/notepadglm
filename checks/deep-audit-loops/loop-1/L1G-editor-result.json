@@ -1,0 +1,118 @@
+{
+  "task": "L1-G editor core completion + references + review (F26/F29/F30/F31/F33/F40/F42/F43)",
+  "session": "l1edit",
+  "date": "loop-1",
+  "environment": "http://localhost:3000/, headless agent-browser; fresh storage at start",
+  "note": "One harness slip early on: one eval was used to blank editor.innerText during F33 dialog exploration; state was reset via localStorage.clear()+reload immediately after and all subsequent tests ran from that clean state.",
+  "families": [
+    {
+      "family": "F26 paragraph formatting",
+      "steps": "typed 'one two three four five' + second paragraph; Center/Align right/Justify buttons; Line spacing 1.5 then 2.0; paragraph dialog Indentation level None→Level 1 + OK; Styles gallery Quote tile on selected paragraph",
+      "expected": "alignment/spacing/indent applied to target paragraph only, serialized to markdown (data-a/data-ls/data-in + np3 comment), blockquote created with text in markdown",
+      "observed": [
+        "data-a center→right→justify applied only to para 2; markdown np3 comment 'a=justify'",
+        "data-ls 1.5 then 2 applied; markdown comment 'ls=2'",
+        "data-in=1 via dialog OK; persists after reload with identical html",
+        "Quote tile created <blockquote>Quote me please</blockquote>",
+        "RE-DISCOVERY B233: markdown of the quote is '>' ALONE — the direct paragraph text is dropped (block children only are serialized; bare text node inside blockquote not included); quote TEXT still present in richHtml after reload (rich OK, markdown projection lossy)"
+      ],
+      "controls": "markdown-path files unaffected; quote text persisted in rich after reload",
+      "predicate": {"align": "PASS", "spacing": "PASS", "indent": "PASS", "quote_rich": "PASS", "quote_markdown": "FAIL (B233 rediscovered)"}
+    },
+    {
+      "family": "F29 lists / nesting / checklists",
+      "steps": "caret-at-end list building: 'apple' + Bulleted list + Enter + 'banana'; Tab nest (2 levels); Shift+Tab outdent; re-nest 'deep item'; numbered-list conversion of nested selection; checklist via slash menu; checkbox click",
+      "expected": "nesting/outdenting correct in DOM and markdown each step; checklist markdown - [ ]/- [x]",
+      "observed": [
+        "Tab nesting produced <ul><li>Apple<ul><li>Banana sub<ul...>Deep item</ul></li></ul></ul>, markdown '- Apple\\n  - Banana sub'",
+        "Shift+Tab outdent flattened to '- Apple\\n- Banana sub'",
+        "numbered conversion of nested selection: <ol start=3 style=list-style-type:lower-alpha> applied via List options (a,b,c + Start at 3) — honored in DOM",
+        "checklist: slash → Checklist inserted <li>task alpha<input type=checkbox data-task=1 contenteditable=false>Task</li> (placeholder text 'Task' remains after typing — template placeholder not auto-cleared; observation)",
+        "checkbox click: DOM checked=true immediately, but markdown stayed '- [ ]' until a subsequent keystroke flushed it (then '- [x]') — matches B218's known mechanism (checked state not committed to markdown until next edit); after reload with flushed markdown the checked state persisted"
+      ],
+      "controls": "md flushed only after typed edit in same li; reload control after flush",
+      "predicate": {"nesting": "PASS", "outdent": "PASS", "checklist_dom": "PASS", "checklist_md_commit_delay": "OBSERVED (B218 mechanism)", "checklist_persist_after_flush": "PASS"}
+    },
+    {
+      "family": "F30 list options",
+      "steps": "List options dialog on bulleted (style bullets) and numbered (style 1/a/A/i/I, Start at, Continue previous)",
+      "observed": "numbered options present and functional (a,b,c + start 3 → <ol start=3 list-style-type:lower-alpha>); markdown keeps decimal form with np3 ba= metadata carrying style (documented lossy projection). B254 (continue-previous ignores explicit numbers) not re-tested beyond presence of the checkbox",
+      "predicate": {"style_start": "PASS", "b254": "not re-tested (known)"}
+    },
+    {
+      "family": "F31 slash commands",
+      "steps": "'/' typed at empty paragraph → menu (Heading1/2, Normal, Table, Image, Code, Checklist, Bulleted, Numbered, Quote, Divider, Page break, File reference, Templates); Checklist picked",
+      "observed": "menu appeared and Checklist insertion worked; NOTE: agent-browser 'type' clicks element center so text targeting required keyboard-type/range caret placement (harness note, not app bug). Divider/table inside list/quote variants NOT covered (time budget); B135/B242 not re-tested",
+      "predicate": {"slash_menu_basic": "PASS", "edge_variants": "NOT COVERED"}
+    },
+    {
+      "family": "F33 statistics",
+      "steps": "typed 'one two three four five'; status bar; Word count dialog (Pages/Words/Chars no spaces/with spaces/Paragraphs/Lines)",
+      "observed": "status bar '5 words'; dialog Words 5, Chars no-spaces 19, with-spaces 23, Paragraphs 1, Lines 1 — all correct",
+      "predicate": {"counts": "PASS"}
+    },
+    {
+      "family": "F40 references",
+      "steps": "3 headings (h1 + 2×h2) → Contents insert (TOC div .np3-toc contenteditable=false with links) → heading edits/deletions → Update contents; Bookmark/Go to bookmark and Symbols buttons located (not deep-tested); Footnote insert; citation button located (B285 known, not re-tested)",
+      "expected": "TOC lists all headings; Update Contents refreshes entries without dangling links",
+      "observed": [
+        "TOC inserted with correct 3 entries + anchor links",
+        "heading splits produced DUPLICATE anchor ids on the two resulting headings (np3-ref-mvqegq9d-mpghd on both) — candidate observation (duplicate id after Enter-split of an id-bearing heading)",
+        "NEW FINDING (reproduced 3×, with controls): pressing Delete ONCE with the caret in an empty paragraph directly before the non-editable Contents block DESTROYS the entire TOC (toc:false). Structure: <h1>…</h1><div><br></div><div class=np3-toc contenteditable=false>…</div>; Delete → TOC gone. Control A (native): bare Chromium contenteditable with same structure — Delete leaves BOTH blocks intact (non-editable div survives). Control B (in-app): Backspace in an empty block adjacent to the TOC leaves the TOC intact — asymmetry isolates the app's forward-delete path. Recovery: Contents button re-inserts.",
+        "footnote: <sup class=np3-fnref data-fn=1> inserted in h1 + .np3-fndef definition block; persisted after reload",
+        "B232 variant (delete MIDDLE heading then Update) — not cleanly isolated: my Delete-based heading removal itself triggered the TOC destruction above; recorded as not-covered"
+      ],
+      "predicate": {"toc_insert": "PASS", "footnote": "PASS", "toc_delete_destruction": "FAIL (new bug)", "duplicate_heading_ids": "CANDIDATE observation", "bookmark/citation/symbol_deep": "NOT COVERED (buttons located only)"}
+    },
+    {
+      "family": "F42 track edits",
+      "steps": "Track edits ON (aria-pressed=true) → typed 'TRK ' at paragraph start → paragraph got data-rid revision attr → Review edits pane listed Changed block (baseline 'Last Chapter' vs 'TRK Last Chapter') → Accept → dialog shows accepted; final text kept 'TRK Last Chapter'",
+      "observed": "paragraph-level tracking as designed; accept kept current block; data-rid persisted after reload",
+      "predicate": {"track_type": "PASS", "review_accept": "PASS", "persistence": "PASS"}
+    },
+    {
+      "family": "F43 side-by-side",
+      "steps": "Compare side by side → dialog with Left prefilled current doc text, right paste box → Compare produced diff view → closed via Escape",
+      "observed": "doc innerText identical before/after ('Top Title1\\n\\nTRK Last Chapter\\n\\n1'); no errors; dialog text 'Comparison does not edit your notes'",
+      "predicate": {"sbs_open_compare_close": "PASS", "doc_unchanged": "PASS"}
+    },
+    {
+      "family": "persistence",
+      "steps": "list + heading + footnote + tracked paragraph → autosave → reload",
+      "observed": "headings, footnote marker (np3-fnref), tracked paragraph data-rid, text all persisted exactly",
+      "predicate": {"persistence": "PASS"}
+    }
+  ],
+  "new_findings": [
+    {
+      "title": "A single Delete keystroke in an empty paragraph before the Contents block permanently destroys the whole non-editable table of contents",
+      "classification": "CONFIRMED BUG",
+      "repro": "1) Create h1 'Top Title' + more headings; References → Contents (TOC inserted). 2) Caret at end of the h1 text; press Enter (creates empty block BEFORE the TOC). 3) Press Delete once. Observed: empty block AND the entire .np3-toc (contenteditable=false) Contents block vanish. Update-contents cannot repair (nothing left); recovery only via re-inserting Contents.",
+      "expected": "non-editable protected TOC survives ordinary Delete keystrokes (native contenteditable preserves a following contenteditable=false block)",
+      "controls": [
+        "Native control (about:blank bare contenteditable, same structure): Delete → both blocks intact, non-editable div survives",
+        "In-app Backspace control: empty block adjacent to TOC + Backspace → TOC intact (asymmetry isolates forward-delete path)"
+      ],
+      "source_mechanism": "no dedicated Delete interceptor found for this case (only Images/Ink intercept Delete); damage occurs through the app's post-edit paragraph normalization (preciseParagraph/withMutation/normalizeDom chain, app-js.txt ~line 4790+ writerActions) which merges/removes the empty block together with the following non-editable .np3-toc block; several guards exclude .np3-toc (tree walker filters, updateToc) but the delete/merge normalization path does not",
+      "impact": "silent loss of the generated Contents block from one keystroke; user must re-insert and re-anchor; headings survive so damage is contained to the TOC. Fix direction: guard forward-delete merge when next top-level block is .np3-toc/.np3-fndef/contenteditable=false (skip over it like the tree-walker guards do).",
+      "reproduced": "3/3 attempts; controls 2/2 passed"
+    },
+    {
+      "title": "Splitting a heading that carries a Contents anchor id duplicates the id on both resulting headings",
+      "classification": "CANDIDATE (single clean observation; navigation impact unverified)",
+      "repro": "Insert Contents (assigns ids to headings); caret at start of an id-bearing h2; press Enter → two h2 elements share the same np3-ref-* id",
+    }
+  ],
+  "known_rediscoveries": [
+    "B233 — block quote direct paragraph text dropped from Markdown (verified via Styles gallery Quote on plain paragraph; markdown '>' alone, rich intact)",
+    "B218 mechanism observed — checklist click updates DOM immediately but markdown stays '- [ ]' until next keystroke flush (completion commit delay)"
+  ],
+  "predicate_totals": {"pass": 18, "fail": 2, "observations": 3},
+  "not_covered": [
+    "F26 change case + sort lines (not reached)",
+    "F31 slash variants inside list item / table cell / at doc start + Escape (not reached)",
+    "F40 bookmark navigate, citation insert+edit (B285), symbols insert (buttons located only); B232 middle-heading Update variant not cleanly isolated",
+    "F30 B254 continue-previous deep test",
+    "Multi-tab interactions; undo/redo of TOC destruction not tested"
+  ]
+}

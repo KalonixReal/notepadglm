@@ -1,0 +1,17 @@
+{
+  "taskId": "L2-D",
+  "date": "2026-10-27",
+  "url": "http://localhost:3005/",
+  "agent": "audit subagent L2-D (io/website)",
+  "features": {
+    "F15": { "name": "Local document imports (.md/.txt/.html)", "stages": [0, 0, 0, 0], "findings": [] },
+    "F16": { "name": "Google Docs import", "stages": [0, 0, 0, 0], "findings": [] },
+    "F17": { "name": "Backup/export scope (JSON/DOCX/ZIP/map)", "stages": [0, 0, 0, 0], "findings": [] },
+    "F18": { "name": "Add/replace backup restore", "stages": [0, 0, 0, 0], "findings": [] },
+    "F61": { "name": "Drag-drop import onto editor", "stages": [0, 0, 0, 0], "findings": [] },
+    "F70": { "name": "Website functions (app-side observable)", "stages": [0, 0, 0, 0], "findings": [] }
+  },
+  "predicates": { "pass": [], "fail": [], "observations": [] },
+  "harnessDisclosures": [],
+  "notCovered": []
+}

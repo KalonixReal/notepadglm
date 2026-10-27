@@ -1,0 +1,18 @@
+{
+  "taskId": "L2-A",
+  "date": "2026-10-27",
+  "url": "http://localhost:3005/",
+  "features": {
+    "F01": { "name": "Create/open/rename/duplicate/delete documents", "stages": [0, 0, 0, 0], "findings": [] },
+    "F02": { "name": "Nested document tabs", "stages": [0, 0, 0, 0], "findings": [] },
+    "F03": { "name": "Folders, tags, starred, file organization", "stages": [0, 0, 0, 0], "findings": [] },
+    "F04": { "name": "Collections and collection switching", "stages": [0, 0, 0, 0], "findings": [] },
+    "F19": { "name": "Startup, remembered state, recovery selection", "stages": [0, 0, 0, 0], "findings": [] },
+    "F65": { "name": "Notebook-wide search (Find files/text)", "stages": [0, 0, 0, 0], "findings": [] },
+    "F66": { "name": "Status bar & save indicators", "stages": [0, 0, 0, 0], "findings": [] },
+    "F67": { "name": "Dialogs/modals & focus management", "stages": [0, 0, 0, 0], "findings": [] }
+  },
+  "predicates": { "pass": [], "fail": [], "observations": [] },
+  "harnessDisclosures": [],
+  "notCovered": []
+}

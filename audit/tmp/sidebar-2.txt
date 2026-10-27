@@ -1,0 +1,11 @@
+w.setAttribute("aria-label",file.name+" · "+(fileIsLocked(file)?"locked":"unlocked"));if(!row.querySelector(".file-lock-badge")){
+const badge=document.createElement("span");badge.className="file-lock-badge";badge.textContent="🔒";badge.setAttribute("aria-hidden","true");(row.querySelector(".n,.fname,.doc-name,.file-title")||row).appendChild(badge)}}}
+const protectedSidebar=renderSidebar;renderSidebar=function(...args){
+const value=protectedSidebar.apply(this,args);decorateFileSecurityRows();return value};
+const protectedSidebarItem=refreshSidebarDocument;refreshSidebarDocument=function(...args){
+const value=protectedSidebarItem.apply(this,args);decorateFileSecurityRows();return value};document.addEventListener("click",event=>{if(fileIsLocked()&&event.target.closest("#ribbon
+  .rbody,#mapRibbon,#imgToolbar,#tblBar")){event.preventDefault();event.stopImmediatePropagation()}},true);document.addEventListener("keydown",event=>{if(fileIsLocked()&&event.target===editor&&!event.ctrlKey&&!event.metaKey){event.preventDe
+ fault()}},true);
+const fileDocumentExport=exportDocx;exportDocx=async function(file,...args){if(fileIsLocked(file))throw Error("Unlock “"+file.name+"” before exporting its contents. Source backups can be saved while locked.");return
+  fileDocumentExport.call(this,file,...args)};
+const fileGraphExport=exportGraph;exportGraph=function(file,...args){if(fileIsLocked(file))throw Error("Unl

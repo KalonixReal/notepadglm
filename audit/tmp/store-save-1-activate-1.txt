@@ -1,0 +1,54 @@
+connect)savedEl.textContent="Saved in browser · Reconnect HTML";else if(notebookHandle)savedEl.textContent=fileWriteBusy?"Saving HTML…":htmlDirty?"Autosaved in browser · Updating HTML…":"Autosaved to HTML"};
+const saveWorkingCopy=Store.save;Store.save=function(){
+const before=persistedContent;saveWorkingCopy();if(persistedContent!==before)scheduleFileWrite()};
+const persistWorkingCopy=persistWorkspace;persistWorkspace=function(){
+const before=persistedContent;persistWorkingCopy();if(persistedContent!==before){htmlDirty=true;scheduleFileWrite();updateSaveState()}};
+const downloadNotebook=saveNotebook;saveNotebook=async function(){if(notebookHandle&&!storageConflict){clearTimeout(fileWriteTimer);await writeNotebookFile();if(notebookHandle)toast("Notebook saved to "+notebookHandle.name);return}return
+  downloadNotebook()};
+const fileSettings=document.createElement("div");fileSettings.className="setting-row";fileSettings.innerHTML='<div><strong>Automatic HTML saving</strong><p id="autoFileDescription">Choose a notebook file to update
+  automatically.</p></div><button class="btn" id="connectNotebookFile">Choose file…</button>';document.querySelector("[data-bspane=settings] .settings-card").appendChild(fileSettings);
+function syncFileConnection(){$("#connectNotebookFile").textContent=notebookHandle?"Disconnect":"Choose file…";$("#autoFileDescription").textContent=notebookHandle?"Automatically updating "+notebookHandle.name:"Choose a notebook file to
+  update automatically."}$("#connectNotebookFile").onclick=async()=>{if(notebookHandle){clearTimeout(fileWriteTimer);notebookHandle=null;fileReconnect=false;await
+  fileHandleStore("delete").catch(()=>{});syncFileConnection();updateSaveState();return}if(!window.showSaveFilePicker){toast("This browser saves automatically in its local storage. Use Save notebook for an HTML
+  copy.");return}try{notebookHandle=await showSaveFilePicker({suggestedName:"notepad.html",types:[{description:"Notepad notebook",accept:{"text/html":[".html"]}}]});fileReconnect=false;await writeNotebookFile();if(notebookHandle)await
+  fileHandleStore("put",notebookHandle).catch(()=>{});syncFileConnection();updateSaveState()}catch(err){if(err.name!=="AbortError")toast("Could not connect the HTML file: "+err.message,"warn")}};
+let fileConnectionRestoreComplete=false;embedImageSource=async url=>{if(/^data:image\//i.test(url))return url;throw Error("Replace linked images with pictures from your device before saving")};
+/* Portable notebook: write the chosen HTML, protect externally synced edits. */
+let diskStamp=null,diskConflict=false;async 
+function diskData(text){
+const match=text.match(/<script\b[^>]*\bid=["']notebookData["'][^>]*>([\s\S]*?)<\/script>/i);if(!match){if(!text.length)return null;throw Error("This existing HTML is not a notebook. Choose a new empty file to keep it safe")}
+const data=await NotepadVault.requestOpen(JSON.parse(match[1]),true);if(data.version!==1||!Array.isArray(data.files)||data.files.some(f=>typeof f.id!=="string"||typeof f.name!=="string"||typeof f.markdown!=="string"))throw Error("This file
+  is not a valid notebook");assertWorkspaceSchema({...data,extra:data.extra||{}});return normalizeOwnDisk(data)}
+const stampOf=data=>data?JSON.stringify(data):"empty";async 
+function readDisk(handle=notebookHandle){
+const f=await handle.getFile();if(f.size>NotebookLimits.expanded)throw Error("The notebook file is too large to update safely");return diskData(await f.text())}
+let recoverDisk;
+function verifyPortable(snapshot){assertWorkspaceSchema(snapshot);for(
+const file of snapshot.files)validateExportRich(file.richHtml||MD.render(file.markdown))}async 
+function performNotebookFileWrite(){if(!notebookHandle||!checkDiskRevision())return false;if(fileWriteBusy){fileWriteQueued=true;return false}fileWriteBusy=true;$("#connectNotebookFile").disabled=true;updateSaveState();
+const writingHandle=notebookHandle;try{flushCommit();Store.save();clearTimeout(fileWriteTimer);
+const data=await readDisk(writingHandle),stamp=stampOf(data);if(data&&data.id!==embedded.id&&(data.savedAt||data.files.length))throw Error("Choose this notebook’s HTML or a new
+  file");if(diskStamp===null)diskStamp=stampOf(normalizeOwnDisk(embeddedSourceData));if(stamp!==diskStamp){await recoverDisk(data);diskConflict=true;throw Error("The HTML changed elsewhere. Your versions are preserved. Reconnect the file
+  in Settings to save the combined notebook")}
+const snapshot=workspaceSnapshot(),content=notebookDurableContent(snapshot),savingActivity=lastEditorActivity846;verifyPortable(snapshot);
+const serialized=await serializeNotebook(snapshot);
+const stream=await writingHandle.createWritable({mode:"exclusive"});try{await stream.write(serialized.html);if(!checkDiskRevision()||stampOf(await readDisk(writingHandle))!==diskStamp){await stream.abort();diskConflict=true;await
+  recoverDisk(await readDisk(writingHandle));throw Error("The HTML changed while saving. Reconnect it to keep both versions")}await stream.close()}catch(err){try{await stream.abort()}catch{}throw
+  err}diskStamp=stampOf(serialized.snapshot);diskBaseline=auditClone(serialized.snapshot);downloadedAt=snapshot.savedAt;portableBaseRevision=snapshot.revision;
+const current=notebookDurableContent(workspaceSnapshot(0));
+/* Browser copy already contains these edits; avoid a redundant full rewrite. */if(current===content&&lastEditorActivity846===savingActivity){htmlDirty=false;await
+  clearSavedBrowserCopy(snapshot,content,savingActivity)}else{htmlDirty=true;fileWriteQueued=true}return true}catch(err){notebookHandle=null;fileReconnect=true;toast(err.message+". Your browser copy is retained.","warn");return
+  false}finally{fileWriteBusy=false;$("#connectNotebookFile").disabled=false;syncFileConnection();updateSaveState();if(fileWriteQueued){fileWriteQueued=false;scheduleFileWrite()}}}writeNotebookFile=async
+  function(){if(navigator.locks?.request){try{return await navigator.locks.request("notepad-html:"+embedded.id,()=>performNotebookFileWrite())}catch(error){if(error.name!=="SecurityError")throw error}}return performNotebookFileWrite()};
+const portableSave=saveNotebook;saveNotebook=async function(){if(notebookHandle&&!storageConflict){clearTimeout(fileWriteTimer);
+const name=notebookHandle.name;if(await writeNotebookFile())toast("Notebook saved to "+name);else if(!notebookHandle)await downloadNotebook();return}return
+  downloadNotebook()};document.addEventListener("visibilitychange",()=>{if(document.hidden&&notebookHandle&&htmlDirty){clearTimeout(fileWriteTimer);writeNotebookFile()}});window.addEventListener("beforeunload",e=>{if(fileWriteBusy||htmlDirt
+ y){e.preventDefault();e.returnValue=""}});
+/* Draw tools are active only on Tools. An internal clipboard also works offline. */
+const toolsPanel=document.querySelector(".rpanel[data-panel=help]"),drawPanel=document.querySelector(".rpanel[data-panel=draw]");while(drawPanel.firstChild)toolsPanel.prepend(drawPanel.lastChild);
+const originalShellShow=Shell.show;Shell.show=function(tab){if(tab!=="help"&&Ink.live){if(Ink.drawing||Ink.erasing||Ink.drag)inkUp();Ink.startLive(false);Ink.canvas.style.cursor="default"}originalShellShow(tab)};
+const originalStartLive=Ink.startLive;Ink.startLive=function(on){if(on&&Shell.tab!=="help")Shell.show("help");originalStartLive.call(this,on);if(!on)this.canvas.style.cursor="default"};
+const originalActivate=activate;activate=function(f){if(Ink.live)Ink.startLive(false);originalActivate(f)};
+const originalBackstageOpen=Backstage.open;Backstage.open=function(...args){if(Ink.live)Ink.startLive(false);return originalBackstageOpen.apply(this,args)};
+let objectClipboard=null,objectPasteCount=0;
+function copyObject(){if(Ink.live&&Ink.sel.length){objectClipboard={kind:"ink",strokes:JSON.parse(JSON.stringify(Ink.sel)),height:Ink.pageBox().h};objectPasteCount=0;toast("Drawing copied");return true}if(selecte

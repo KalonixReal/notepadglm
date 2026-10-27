@@ -1,0 +1,36 @@
+));return exportLibraries.get(id)}
+function exportCheck(){if(NotebookExport.cancelled)throw new DOMException("Export cancelled","AbortError")}async 
+function exportYield(message,percent){exportCheck();NotebookExport.progress?.(message,percent);await new Promise(resolve=>setTimeout(resolve,0));exportCheck()}
+function exportSnapshot(){if(inlineMapEdit)finishInlineMapEdit();flushCommit();
+const snapshot=JSON.parse(JSON.stringify(workspaceSnapshot()));snapshot.extra[LIBRARY_KEY]=JSON.stringify(library);
+const graph=mapFiles();exportGraphs.set(snapshot,JSON.parse(JSON.stringify({nodes:graph.nodes,edges:graph.edges,comments:graph.comments,view:graph.view})));return snapshot}
+function exportLibraryData(snapshot){try{return JSON.parse(snapshot.extra?.[LIBRARY_KEY]||"{}")}catch{return{}}}
+function exportSafeName(value){
+let name=String(value||"Untitled").normalize("NFC").replace(/[<>:"/\\|?*\u0000-\u001f]/g,"_").replace(/[.
+  ]+$/g,"").trim();name=Array.from(name).slice(0,100).join("")||"Untitled";if(/^(?:CON|PRN|AUX|NUL|COM[1-9]|LPT[1-9])(?:\.|$)/i.test(name))name="_"+name;return name}
+function exportScopeFiles(snapshot,scope,ids=[],folderId=null){if(scope==="all")return snapshot.files;if(scope==="file")return snapshot.files.filter(file=>file.id===ids[0]);if(scope==="selection")return
+  snapshot.files.filter(file=>ids.includes(file.id));if(scope==="folder"){
+const folders=exportLibraryData(snapshot).folders||[],included=new Set(folderId?[folderId]:[]);
+let changed=true;while(changed){changed=false;for(
+const folder of folders)if(included.has(folder.parent)&&!included.has(folder.id)){included.add(folder.id);changed=true}}return
+  snapshot.files.filter(file=>folderId?included.has(file.writer?.library?.folder):!file.writer?.library?.folder)}return[]}
+function exportSubset(snapshot,records,scope,folderId=null){if(scope==="all")return snapshot;
+const ids=new Set(records.map(file=>file.id)),lib=exportLibraryData(snapshot),folders=lib.folders||[],needed=new Set;if(scope==="folder"&&folderId){needed.add(folderId);
+let changed=true;while(changed){changed=false;for(
+const folder of folders)if(needed.has(folder.parent)&&!needed.has(folder.id)){needed.add(folder.id);changed=true}}}
+const index=new Map(folders.map(folder=>[folder.id,folder]));for(
+const file of records){
+let id=file.writer?.library?.folder;
+const seen=new Set;while(id&&!seen.has(id)){seen.add(id);needed.add(id);id=index.get(id)?.parent}}for(
+const folderId of[...needed]){
+let id=index.get(folderId)?.parent;
+const seen=new Set;while(id&&!seen.has(id)){seen.add(id);needed.add(id);id=index.get(id)?.parent}}
+const extraCopy={};for(const[key,value]of Object.entries(snapshot.extra||{})){if(key===LIBRARY_KEY||key===KEY||key===IDX)continue;if(key.startsWith(PFX)&&!ids.has(key.slice(PFX.length)))continue;if(/^(?:notepadV3:hist:|notepadV3:rmrec:)/.te
+ st(key)&&!ids.has(key.replace(/^notepadV3:(?:hist|rmrec):/,"")))continue;if(key===BKEY){try{if(!ids.has(JSON.parse(value)?.id))continue}catch{continue}}if(key.startsWith("notepad:restore-"))continue;extraCopy[key]=value}
+const nodeIds=new Set([...ids].map(id=>"file:"+id));for(
+const id of needed)nodeIds.add("folder:"+id);
+const linkedCommentIds=new Set,commentIds=new Set((lib.map?.comments||[]).map(comment=>comment.id));for(
+const edge of lib.map?.links||[]){if(nodeIds.has(edge.from)&&commentIds.has(edge.to))linkedCommentIds.add(edge.to);if(nodeIds.has(edge.to)&&commentIds.has(edge.from))linkedCommentIds.add(edge.from)}
+const keptComments=(lib.map?.comments||[]).filter(comment=>linkedCommentIds.has(comment.id));for(
+const comment of keptComments)nodeIds.add(comment.id);extraCopy[LIBRARY_KEY]=JSON.stringify({...lib,fileOrder:(lib.fileOrder||[]).filter(id=>ids.has(id)),folders:folders.filter(folder=>needed.has(folder.id)),expandedFolders:(lib.expandedFol
+ ders||[]).filter(id=>needed.has(id)),map:{...lib.map,positions:Object.fromEntries(Object.entries(lib.map?.positions||{}).filter(([id])=>nodeIds.has(id))),comments:keptComments,colors:Object.fromEntries(Object.entries(lib.map?.colors|

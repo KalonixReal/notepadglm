@@ -1,0 +1,128 @@
+{
+  "task": "L1-F imports/exports/backups audit (F15/F16/F17/F18)",
+  "session": "l1io",
+  "date": "loop-1",
+  "environment": "http://localhost:3000/ over http, headless agent-browser; downloads not observable (per brief: not counted); no network relay for Google import",
+  "fixtures": {
+    "/tmp/l1f-a.md": "heading + list + quote + bold/em",
+    "/tmp/l1f-b.txt": "3 lines with CRLF",
+    "/tmp/l1f-c.html": "h1 + p(strong,em) + table(2x2)",
+    "/tmp/l1f-d.md": "md # Third",
+    "/tmp/l1f-e.md": "md # Fifth",
+    "/tmp/l1f-t.html": "h1 + p(strong) + ul(2) + table(3x2)",
+    "/tmp/l1f-q.md": "two-paragraph blockquote + normal para",
+    "/tmp/l1f-backup.json": "hand-crafted envelope {format:'notepad-backup',schemaVersion:1,scope:'all',notebook:{version:1,id,files[2],extra,activeId}}; file[0] id collides with live l1f-t id, file[1] fresh id"
+  },
+  "families": [
+    {
+      "family": "F15 local imports fidelity",
+      "steps": "sidebar 'Import a document' -> Files… -> upload fixtures to #mdInput; verify rich view (elements) + window.__np3.doc().markdown; reload to verify persistence",
+      "expected": "imported content faithful in rich AND markdown; content persists",
+      "observed": [
+        "l1f-a.md import: h1/ul/blockquote/strong/em all present in rich; markdown exact; persists after reload (PASS)",
+        "l1f-b.txt (CRLF) import: 3 paragraphs correct in rich view; markdown EMPTY immediately and after reload (B226 family)",
+        "l1f-c.html import: h1/strong/em/table(2 rows) all in rich; markdown EMPTY immediately and after reload (B226 family)",
+        "l1f-q.md two-paragraph blockquote: both paragraphs survive import + reload (B233 not reproduced)",
+        "imports land in current (non-empty) collection 'My collection' as new files; each import activates the new file"
+      ],
+      "controls": ".md import keeps markdown populated (74 chars) — discriminates rich-path (.txt/.html) from markdown-path",
+      "predicate": {"rich_fidelity": "PASS", "markdown_fidelity_md_path": "PASS", "markdown_fidelity_rich_path": "FAIL (B226)"}
+    },
+    {
+      "family": "F15 import destination / races",
+      "steps": "upload 2 files in a row; upload then immediately click another file option (no wait); add Tab 2 with pending text then import; import while different tab active",
+      "expected": "both imports land in intended collection, activation correct, pending edits preserved",
+      "observed": "both sequential imports landed + activated; during-upload click on l1f-b: active stayed l1f-b (user click respected), imported file still created correctly; Tab 2 pending 'Tab2 pending content' survived import-away + reload; import while Tab 2 active created new file l1f-e and activated it, l1f-d Tab 2 intact after return",
+      "controls": "compare active doc before/after race click; compare Tab 2 content pre/import/post/reload",
+      "predicate": {"sequential_imports": "PASS", "nav_race_active": "PASS", "pending_edits_preserved": "PASS", "different_tab_import": "PASS"}
+    },
+    {
+      "family": "F15 duplicate import names",
+      "steps": "import same l1f-d.md twice (2nd time without dialog open, direct #mdInput upload)",
+      "expected": "dedupe or renamed copy, or allowed duplicate (unclear contract)",
+      "observed": "two files both named l1f-d coexist in same collection, identical content; no rename/dedupe. #mdInput change handler imports even when Import dialog is closed (hidden input stays armed) — observation only",
+      "predicate": {"duplicate_names": "OBSERVATION (enhancement-level)"}
+    },
+    {
+      "family": "B226 EXTENSION — destructive source-mode wipe of rich-path imports",
+      "repro": "Import any .html/.txt (rich-path) file -> document gets richHtml + markdown:\"\" -> View:Markdown shows EMPTY source -> type one character -> switch back to rich: entire imported document replaced by that character; autosave persists the wipe; after reload content permanently gone (Undo works only before reload)",
+      "expected": "source view reflects imported document; editing source is a normal edit, not document destruction",
+      "observed": [
+        "repro 1 (l1f-c.html): source empty -> typed 'y' -> rich='y'; autosave; reload -> doc permanently 'y' (h1+p+table destroyed)",
+        "repro 2 (l1f-t.html): source empty (len 0) -> typed 'z' -> rich='z', table count 0; Ctrl+Z restored full doc (h1+ul+table)"
+      ],
+      "controls": [
+        ".md-imported l1f-a: source populated (74 chars) — typing in source is a normal edit (control PASS)",
+        "undo control: Ctrl+Z immediately after wipe restores full imported content (recovery exists pre-reload only)"
+      ],
+      "source_mechanism": "importDocuments (~orig line 4797): markdown=\"\" unless ext md/markdown; f=Store.newFileObj(name, markdown); if(html) f.richHtml=html — rich-path files never get markdown generated; source mode binds #sourceText to file.markdown (empty); mode switch renders markdown -> overwrites richHtml",
+      "predicate": {"wipe_reproduced": "FAIL (bug, 2/2 docs)", "md_path_control": "PASS", "undo_recovery_pre_reload": "PASS", "loss_permament_after_reload": "CONFIRMED"}
+    },
+    {
+      "family": "F17 exports",
+      "steps": "File backstage -> Export & restore; routes: One file+DOCX (l1f-e; l1f-t with h1+ul+table), One file+DOCX for NON-active combobox-selected doc (l1f-a while l1f-q active), Everything+JSON, Everything+ZIP, Selected files(2 checked)+ZIP, File map overview+canvas, File map overview+png; compare editor innerText/markdown before/after each; errors checked after each",
+      "expected": "each route triggers, advertises result, leaves document state unchanged, no console errors",
+      "observed": [
+        "DOCX l1f-e: panel shows 'Exported l1f-e.docx'; state unchanged; no errors",
+        "DOCX l1f-t (h1+list+table): 'Exported l1f-t.docx' advertised; format blurb 'Editable text, formatting, tables, pictures and page settings…'; state unchanged; no errors",
+        "DOCX l1f-a selected while l1f-q active: 'Exported l1f-a.docx' (combobox selection respected, no stale-active-doc misdirection); active doc unchanged",
+        "Everything JSON: no visible message; state unchanged; no errors",
+        "Everything ZIP: state unchanged; no errors",
+        "Selected files ZIP: 'Exported Notebook.zip'; state unchanged; no errors",
+        "Map export canvas + png: state unchanged; no errors"
+      ],
+      "controls": "pre/post editor innerText + doc().markdown equality for every route; errors command after every route",
+      "predicate": {"state_unchanged": "PASS 7/7 routes", "advertised_result": "PASS (docx/zip messages present)", "console_errors": "NONE observed", "download_completion": "NOT OBSERVABLE headless (per brief, not counted)"}
+    },
+    {
+      "family": "F18 backup restore",
+      "steps": "schema learned from dialog text ('Choose a Notepad JSON backup or an exported ZIP. Add its files…or restore a full notebook') + source validateExportBackup/assertWorkspaceSchema; backup built from live localStorage workspace snapshot wrapped as {format:'notepad-backup',schemaVersion:1,scope:'all',notebook}; one file id deliberately collides with live l1f-t id; Export&restore -> Choose backup… -> upload #exportRestoreInput -> dialog 'Older backup without a checksum. 2 files in l1f-backup.json' -> mode 'Add files and folders to this notebook' -> Restore",
+      "expected": "ID collisions remapped, existing files untouched, restored content lands, guarded rollback available",
+      "observed": [
+        "Collide A (id = live l1f-t id) remapped to new id file-8f198573…; live l1f-t untouched (id + richHtml intact)",
+        "Fresh B kept its own id; content 'RESTORED-B fresh content' landed and activated",
+        "'Undo last restore' clicked -> full rollback to previous 8-file workspace, active doc l1f-t restored",
+        "observation: after Add-restore the sidebar switched to a NEW collection (same display name 'My collection') containing only the 2 restored files — pre-existing files hidden behind identically-named second tab until user switches; data intact; source-consistent (prepareCollectionRestore remaps collection ids; mergeIncomingCollections merges by id only)"
+      ],
+      "controls": "localStorage workspace file list pre/restore/post-undo; per-file id+content comparison",
+      "predicate": {"id_collision_remap": "PASS", "existing_content_untouched": "PASS", "restore_content_lands": "PASS", "guarded_rollback": "PASS", "collection_switch UX": "OBSERVATION (enhancement-level)"}
+    },
+    {
+      "family": "F16 Google import",
+      "steps": "bounded source check only (no network relay in env)",
+      "observed": "openGoogleImport/exportNotepadGoogle/googleImportColor present in app-js.txt; Import dialog 'Google Docs tabs…' shows instructions 'Google Docs uses a structured export to keep tabs and subtabs' — no runtime network test possible",
+      "predicate": {"coverage": "SOURCE-ONLY (env-limited)"}
+    },
+    {
+      "family": "persistence of imports",
+      "steps": "import -> wait autosave -> reload -> compare",
+      "observed": "l1f-a.md persisted exactly; l1f-b.txt/l1f-c.html richHtml persisted (markdown empty = B226); l1f-q blockquote persisted; Tab 2 pending edit persisted",
+      "predicate": {"rich_persistence": "PASS", "markdown_persistence_rich_path": "FAIL (B226)"}
+    }
+  ],
+  "known_bug_rediscoveries": [
+    "B226 verified on .html and .txt import paths; empty markdown occurs IMMEDIATELY (not only after Save+reopen) — reported as extension with destructive source-edit wipe"
+  ],
+  "new_findings": [
+    {
+      "title": "Rich-path imports (.txt/.html/...) leave the Markdown source empty and a single keystroke in that empty source view permanently destroys the whole imported document after autosave+reload",
+      "classification": "CONFIRMED BUG (B226 extension: immediate-empty + destructive wipe variant)",
+      "reproduced": "2/2 documents (l1f-c.html, l1f-t.html)",
+      "controls": "md-path import source populated; undo recovery pre-reload only"
+    }
+  ],
+  "observations_enhancement_level": [
+    "Importing the same file twice creates identically-named duplicate files (no dedupe/rename)",
+    "Add-mode restore switches sidebar to a new same-named collection containing only restored files (existing docs temporarily hidden; data intact; rollback works)",
+    "#mdInput file input processes uploads even when the Import dialog is closed"
+  ],
+  "predicate_totals": {"pass": 21, "fail": 3, "observations": 3},
+  "not_covered": [
+    "DOCX/DOC/ODT/RTF/PDF/ebook/picture import paths (expandedDocumentImport, localReaderWorker) — not exercised",
+    "Google Docs import runtime (no network relay) — source-only",
+    "ZIP backup restore (readExportRestore zip branch with _notepad/notebook-backup.json) — only JSON branch exercised",
+    "B270 multi-tab DOCX header propagation (known) — no headers authored, not re-tested",
+    "folder-scope export and folder-collision restore (no folders created in fixture notebook)",
+    "native download completion (headless-unobservable by design)"
+  ]
+}

@@ -1,0 +1,4 @@
+ewResolve(button.dataset.reviewAccept||button.dataset.reviewReject,!!button.dataset.reviewAccept);Comments.render();syncReviewState();writerActions.reviewEdits()}};
+const reviewFlushCommit=flushCommit;flushCommit=function(){if(editorComposing)return;
+const review=doc.writer?.review;if(mode==="wysiwyg"&&review&&(editor.innerHTML!==renderedHTML||editorMeta()!==renderedMeta)){normalizeDom(editor);recalculateTables();ensureReviewIds();if(!review.enabled){
+const current=reviewSnapshot();review.baseline=pausedReviewBaseline(review,current);review.moveBa
