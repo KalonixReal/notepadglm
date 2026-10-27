@@ -2001,6 +2001,13 @@
         "L4-D layout/IO/cross (F34-F39,F59,F60,F65,F68)": "0 new; RTL verified first time this env (dir attr + computed); context menu 10 items verified; F39 print byte-identity stands from loop-1; same-name-rename candidate REJECTED (controlled repro: rename-by-design, isolation live+reload)"
       },
       "openCandidates": "0 (both resolved: protect-dialog rejected L4-C, same-name-rename rejected L4-D)"
+    },
+    {
+      "id": 5,
+      "status": "in-progress",
+      "started": "2026-10-28 04:45 NZDT",
+      "clean": null,
+      "note": "Delta sweep. L5-A part 1 done (8 pass, 0 new; word-count punctuation candidate REJECTED as Word-convention). Remaining: L5-A part 2 (fonts/styles/paragraph/source), L5-B review, L5-C files/persistence/tables, L5-D layout/IO/cross."
     }
   ],
   "consecutiveCleanLoops": 1,

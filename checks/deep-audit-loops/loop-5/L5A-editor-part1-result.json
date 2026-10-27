@@ -1,0 +1,34 @@
+{
+  "taskId": "L5-A editor core (partial, tick 1)",
+  "loop": 5,
+  "date": "2026-10-28",
+  "executor": "main agent (session l5a, fresh isolated profile, viewport 1600x1000)",
+  "url": "http://localhost:3000/",
+  "family": "F20-F31, F33 editor core delta sweep",
+  "confirmedNewBugs": [],
+  "candidatesRejected": [
+    {
+      "title": "Status bar counts a standalone punctuation token ('/') as a word",
+      "verdict": "REJECTED (definitional convention, matches Microsoft Word)",
+      "rationale": "Control: body 'A / B' -> status '3 words' ([A][/][B] whitespace tokens). Microsoft Word's word counter is whitespace-token based and also counts standalone punctuation separated by spaces (documented Word behavior); Google Docs differs but this app models Word. No documented contract in the register covers punctuation-only tokens (B287 is source-mode fenced-code specific). Not a defect."
+    }
+  ],
+  "verifiedClean": [
+    "Typing: real-click focus + key presses -> HELLO_L5A renders",
+    "Undo/Redo round-trip: Ctrl+Z -> empty, Ctrl+Y -> HELLO_L5A restored (consistent with corrected B273/B274 handoff)",
+    "Bold: Ctrl+B on selection -> <b>HELLO_L5A</b> (B element, exact text)",
+    "Center alignment via ribbon (aria-label='Center'; icon buttons carry aria-label not title — harness selector lesson): computed textAlign=center",
+    "Bulleted list: ribbon toggle -> ul>li; caret-in-li + type appends to li; Enter creates second li, ul intact (continuation correct)",
+    "Slash menu: opens ONLY at word start (fresh empty li; mid-word '/' types literally — word-start trigger contract, Notion/Word-style); menu renders Heading 1/2/Normal text etc.",
+    "Slash menu Escape: menu closes cleanly, no ghost popup, '/' remains as literal text (consistent with cancel semantics)",
+    "Ribbon tabs all present at 1600px: File/Home/Insert/Draw/Table Design/Layout/References/Review/View/Tools"
+  ],
+  "harnessLessons": [
+    "Icon-only ribbon buttons match aria-label, not title/text",
+    "Default viewport in fresh sessions may be 1280 — set viewport 1600x1000 to expose all ribbon groups (l4d2 worked at wider default)",
+    "agent-browser press <key> types uppercase for letters",
+    "Do NOT double-stringify in eval JSON dumps (phantom quotes)"
+  ],
+  "predicates": { "pass": 8, "fail": 0 },
+  "status": "L5-A PARTIAL — remaining: font size/color controls, styles gallery, numbered lists with start attr, paragraph dialog, markdown source view, F66 dark/ink spot-checks; then L5-B/C/D batches"
+}

@@ -467,3 +467,18 @@ Work Log:
 Stage Summary:
 - Loop 4 COMPLETE, NOT clean (B301). 93 confirmed bugs. Open candidates: 0 (both resolved this loop). Clean streak 1/2 — LOOP 5 REQUIRED.
 - Evidence: checks/deep-audit-loops/loop-4/L4C-tables-detail-result.json + this log; loop-state.json Loop 4 closed with batch details.
+
+---
+Task ID: 5-a
+Agent: main
+Task: Loop 5 batch L5-A part 1 — editor core delta sweep (session l5a)
+
+Work Log:
+- Typing/undo/redo round-trip clean; Bold Ctrl+B -> <b>; Center via aria-label -> textAlign=center; bullet list + Enter continuation clean.
+- Slash menu: word-start trigger contract confirmed (mid-word '/' literal; fresh-li '/' opens 14-item menu); Escape closes cleanly, no ghost.
+- Candidate REJECTED: status bar counts standalone '/' as word — matches Microsoft Word whitespace-token convention (control 'A / B' -> '3 words'); no register contract violated (B287 is source-mode-specific).
+- Harness: icon ribbon buttons keyed by aria-label; set viewport 1600 to expose groups; press types uppercase; avoid double-stringify.
+
+Stage Summary:
+- 0 new bugs. L5-A part 1: 8 pass / 0 fail. Loop 5 in progress (needs full clean sweep to stop).
+- Evidence: checks/deep-audit-loops/loop-5/L5A-editor-part1-result.json
