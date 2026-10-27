@@ -4,14 +4,14 @@
     "blankSHA256": "278122b3849866875436693afe638503e25e5dd7d3f2c0ca3d39da675ce66218",
     "rootSHA256": "5d0436ca867496de06cd3c9a5f00ffc8951e9c628ea5c92b3ee4d7cbd8ea358f (unavailable this env)",
     "servedCopy": "public/notepad.html byte-identical to upload/notepad-bare.html",
-    "confirmedCurrentBugs": 93,
+    "confirmedCurrentBugs": 94,
     "possibleLeads": [
       "S10",
       "S13",
       "S17",
       "S28"
     ],
-    "highestConfirmedId": "B301"
+    "highestConfirmedId": "B302"
   },
   "stoppingRule": "Two consecutive complete deep-audit loops (all 70 feature groups, 4 stages each: inventory/source/runtime/independent-review) with no additional confirmed/reopened bugs or material new failure variants. Rediscovery of a documented trigger does not reset. Current user instruction allows multiple testing browsers + subagents (supersedes UR-04 serial-browser constraint); app code remains read-only.",
   "environment": {
@@ -2006,8 +2006,11 @@
       "id": 5,
       "status": "in-progress",
       "started": "2026-10-28 04:45 NZDT",
-      "clean": null,
-      "note": "Delta sweep. L5-A part 1 done (8 pass, 0 new; word-count punctuation candidate REJECTED as Word-convention). Remaining: L5-A part 2 (fonts/styles/paragraph/source), L5-B review, L5-C files/persistence/tables, L5-D layout/IO/cross."
+      "clean": false,
+      "note": "L5-A part 1 (8 pass, 0 new) + part 2 (7 pass, B302: list-on-heading nests ul/ol inside h2 and source view serializes it as empty heading marker). Loop 5 NOT clean; streak stays 1/2. Remaining batches continue for coverage.",
+      "newBugs": [
+        "B302"
+      ]
     }
   ],
   "consecutiveCleanLoops": 1,

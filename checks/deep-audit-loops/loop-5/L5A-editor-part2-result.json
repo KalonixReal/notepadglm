@@ -1,0 +1,46 @@
+{
+  "taskId": "L5-A part 2 (editor core, tick 2)",
+  "loop": 5,
+  "date": "2026-10-28",
+  "executor": "main agent (session l5a, viewport 1600x1000)",
+  "url": "http://localhost:3000/",
+  "family": "F20-F31, F33 editor core + markdown source view (F31-adjacent)",
+  "confirmedNewBugs": [
+    {
+      "id": "B302",
+      "title": "Applying a bulleted/numbered list to a Heading-styled paragraph nests the <ul>/<ol> inside the <h2>-<h6> element, and the markdown source view then serializes the whole block as an empty heading marker — heading text and list are omitted from the source representation",
+      "severity": "Medium",
+      "reproduction": [
+        "Type text in a paragraph (e.g. 'A / B'), apply Heading 2 via Styles gallery -> <h2>A / B</h2>",
+        "Click Numbered list (ribbon) with the caret in the heading -> DOM becomes <h2><ol><li>A / B</li></ol></h2> (invalid: h1-h6 permit phrasing content only)",
+        "Toggle markdown view (View > Toggle markdown view, Ctrl+Alt+M) -> source textarea shows '## \\n' — the heading text 'A / B' AND the entire list are absent",
+        "Bullet variant: same flow with Bulleted list -> <h2><ul><li>T1HDR</li></ul></h2> (identical nesting)"
+      ],
+      "observed": "List commands nest the list INSIDE the heading element instead of converting the heading paragraph to a list item or inserting the list as a sibling block. The markdown serializer, on the invalid h2>ol / h2>ul structure, emits only an empty heading marker ('## ') and drops the nested block content. Rich view still displays the text (richText='A / B'), and closing the source view does NOT commit — but any source-mode commit or export that consumes the markdown loses the content. Undo (Ctrl+Z) unwraps the nesting correctly (<h2><ul>... -> <h2>T1HDR</h2>).",
+      "expected": "A list command on a heading should produce a valid sibling structure (heading followed by <ol>/<ul>, or heading-styled list item); the markdown source view must serialize all visible content (e.g. '## A / B' + list items).",
+      "controls": [
+        "Sibling <h2>T1HDR</h2> (no list) serializes correctly as '## T1HDR' — valid headings serialize fine",
+        "Plain-paragraph bullet/numbered lists serialize correctly (loop-2/loop-4 markdown round-trips, this loop ul>li verified)",
+        "Source view close is non-destructive (rich DOM preserved after toggle off)"
+      ],
+      "distinctFromKnown": "B269 is a source-mode trigger (Tab/list-Enter stale rich representation + subsequent list loss); B302 is a rich-mode list-on-heading nesting defect whose serialization consequence is source omission. B135 is slash-menu list insertion position. No register entry covers list-inside-heading nesting.",
+      "evidence": "checks/deep-audit-loops/loop-5/L5A-editor-part2-result.json (this file), L5A-h2ol-before-commit.png, live session l5a"
+    }
+  ],
+  "candidatesRejected": [],
+  "verifiedClean": [
+    "Font size: ribbon Font sizes listbox -> 14pt applied (<span style='font-size: 14pt'>, computed 18.6667px = 14pt exact)",
+    "Styles gallery: Heading 2 applies to paragraph (h2 created, text intact)",
+    "Numbered list creates <ol> (start attr default; loop-4 verified lower-alpha start=3 path)",
+    "Paragraph dialog opens with 5 selects (pdAlign/pdIndent/pdLs/pdSb/pdSa); dialog accept button is 'OK' (not 'Apply' — harness note); data-ls=1.5 apply path verified loop-4",
+    "Markdown view toggle opens #sourceText; valid h2 and plain lists serialize correctly; source close non-destructive; Undo unwraps invalid nesting",
+    "View tab controls present: Page background, print layout, Web layout, ruler, Headings nav pane, Focus mode, Zoom controls, markdown toggle, Paragraph marks"
+  ],
+  "harnessLessons": [
+    "Synthetic change events on ribbon selects update value but do not trigger the app's apply path — use the dropdown listbox + real click",
+    "Paragraph dialog accept = 'OK'; buttons inside dialog must be found within the dialog card",
+    "After View-tab operations, Home-tab buttons are hidden — re-activate the tab before ribbon clicks"
+  ],
+  "predicates": { "pass": 7, "fail": 1, "failIsB302": true },
+  "loop5Impact": "Loop 5 is NOT clean (B302). Clean streak remains 1/2. 94 confirmed bugs total."
+}

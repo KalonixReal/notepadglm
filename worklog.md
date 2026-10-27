@@ -482,3 +482,19 @@ Work Log:
 Stage Summary:
 - 0 new bugs. L5-A part 1: 8 pass / 0 fail. Loop 5 in progress (needs full clean sweep to stop).
 - Evidence: checks/deep-audit-loops/loop-5/L5A-editor-part1-result.json
+
+---
+Task ID: 5-b
+Agent: main
+Task: Loop 5 batch L5-A part 2 — fonts/styles/paragraph/source view (session l5a)
+
+Work Log:
+- Font size 14pt applied via Font sizes listbox (real click; synthetic change events don't trigger apply path) — computed 18.6667px exact.
+- Styles gallery H2 applied; numbered list -> <ol> created.
+- NEW B302 CONFIRMED: numbered/bulleted list applied to a Heading paragraph nests <ol>/<ul> INSIDE the <h2> (invalid HTML: <h2><ol><li>A / B</li></ol></h2>; ul variant identical). Markdown source view serializes the malformed block as EMPTY heading marker '## ' — heading text + list omitted from source (rich view intact; source close non-destructive; source commit/export would lose content). Controls: sibling h2 serializes '## T1HDR' correctly; plain-para lists serialize fine; Ctrl+Z unwraps nesting. Distinct from B269 (source-mode trigger) and B135 (slash insertion position).
+- Paragraph dialog: 5 selects verified (pdAlign/pdIndent/pdLs/pdSb/pdSa); accept='OK'; apply path data-ls=1.5 verified loop-4.
+- Harness: synthetic change on ribbon select updates value but not apply path; View-tab ops hide Home buttons; paragraph accept button is OK not Apply.
+
+Stage Summary:
+- Loop 5 NOT clean: B302 confirmed. 94 total bugs, streak 1/2. L5-A COMPLETE (parts 1+2). Next: L5-B review surfaces.
+- Evidence: checks/deep-audit-loops/loop-5/L5A-editor-part2-result.json, L5A-h2ol-before-commit.png
