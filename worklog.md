@@ -416,3 +416,19 @@ Work Log:
 Stage Summary:
 - 0 new bugs. L4-C COMPLETE (parts 1+2): F01/F11/F14/F12/F09/F17 verified; open candidate #1 rejected. Remaining Loop 4 work: F03/F04, F15, images (F45-F48), tables (F50-F54), then L4-D (layout/IO/cross-cutting + same-name-rename candidate + final baseline verify).
 - Evidence: checks/deep-audit-loops/loop-4/L4C-history-export-result.json
+
+---
+Task ID: 4-e
+Agent: main
+Task: Loop 4 batch L4-C part 3 — organization, collections, import, images, tables (F03/F04/F15/F45/F46/F50)
+
+Work Log:
+- F03: New folder -> 'L4C Folder' created (writerDialog name+Apply); Move to folder... on Untitled (dialog select Notebook root/L4C Folder) -> folder scope shows 'Documents 1'; star/tags absence re-confirmed per standing loop-1/2 adjudication (enhancement absence, data-model only).
+- F04: Collections dialog -> Create 'L4C Collection B' -> auto-switch (empty collection auto-creates fresh Untitled = documented B299-adjacent mechanism, expected) -> switch back to My collection -> folder + Untitled intact. Round-trip clean with saved state (B299 trigger avoided).
+- F15: .md fixture imported via #mdInput -> sidebar row + <h1> + bullet list rendered (md path sets both representations; B300 is .txt-specific).
+- F45: 74-byte PNG uploaded via #imgInput -> <img> rendered 603px. F46: eval .click() does NOT select; real CDP click -> figure.img-fig.selected (harness nuance; toolbar visibility is B292-known territory).
+- F50: Insert table grid picker (80 cells, data-r/data-c) -> picked 2x2 cell -> exact 2x2 table inserted.
+
+Stage Summary:
+- 0 new bugs. L4-C batch COMPLETE (all file/persistence/org/import/image/table groups). Remaining: F51-F54 table ops detail + L4-D full batch + same-name-rename candidate + final baseline verify.
+- Evidence: checks/deep-audit-loops/loop-4/L4C-files-result.json, L4C-history-export-result.json (+ this log; part-3 JSON to be folded into L4D evidence or standalone next turn)

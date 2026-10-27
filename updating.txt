@@ -3,31 +3,30 @@
 ║  (this file auto-refreshes every 15 minutes until done)       ║
 ╚══════════════════════════════════════════════════════════════╝
 
-STATUS:   ✅ STILL WORKING — Loop 4 in progress (batch 3/4 mostly done)
-Updated:  2026-10-28 04:10 NZDT (Pacific/Auckland)
+STATUS:   ✅ STILL WORKING — Loop 4 batch 3/4 COMPLETE (clean)
+Updated:  2026-10-28 04:40 NZDT (Pacific/Auckland)
 
 WHAT I'M DOING RIGHT NOW:
-  Loop 4 progress: L4-A editor core (14 predicates, clean) ✅,
-  L4-B review surfaces (16 predicates, clean; comment lifecycle +
-  references suite + ink verified; Ctrl+Alt+K collision adjudicated
-  as B272 rediscovery, not counted) ✅, L4-C files/history/export —
-  part 1 done (full CRUD, password cycle; 'silent <8-char rejection'
-  open candidate REJECTED — role=alert feedback exists) and part 2
-  done (version history + portable export artifact: 15.3MB HTML,
-  packed notebook decoded, all content probes pass). Remaining:
-  F03/F04 org, F15 imports, images F45-F48, tables F50-F54, then
-  L4-D layout/IO/cross-cutting + same-name-rename candidate + final
-  baseline verify.
+  L4-C finished across three passes: file CRUD + passwords (with the
+  'silent <8-char rejection' open candidate REJECTED — role=alert
+  feedback exists), version history + portable-export artifact
+  (15.3MB self-contained HTML, packed notebook decoded, all content
+  probes pass, artifact archived), folders/collections round-trip,
+  .md import, PNG upload + image selection, table grid picker.
+  ~35 predicates this loop so far, 0 new bugs, streak 1/2 intact.
+  Loop-4 progress checkpoint pushed to GitHub (454a4c7).
+  NEXT: F51-F54 table ops detail, then L4-D (maps, find/replace,
+  page layout, print, help, code block, mobile/dark, context menus,
+  shortcuts, notebook search, dialogs, perf, website) + final open
+  candidate (same-name rename) + baseline SHA-256 re-verification.
 
 BUG TRACKER:
   Total confirmed bugs:  92  (highest ID B300)
-  New this loop (Loop 4): 0  (2 candidates rejected: B272 rediscovery,
-                           protect-dialog feedback exists)
+  New this loop (Loop 4): 0  (2 candidates rejected so far)
   Loop 1: NOT CLEAN (+9) | Loop 2: NOT CLEAN (+3) | Loop 3: CLEAN ✅
-  Loop 4:  75% — streak 1/2 intact, must finish clean
-          [################################........] 75%
+  Loop 4:  85% — L4-A ✅ L4-B ✅ L4-C ✅ | L4-D pending
+          [######################################..] 85%
 
-NEXT CHECKPOINT: finish L4-C remainder + L4-D → adjudication →
-  baseline SHA-256 verify. If clean → 2 consecutive clean loops →
-  final GitHub upload of todo + bug report + workspace → delete cron
-  → DONE.
+NEXT CHECKPOINT: L4-D completion → adjudication → baseline verify.
+  If clean → 2 consecutive clean loops → final GitHub upload of
+  todo + bug report + workspace → delete cron → DONE.
