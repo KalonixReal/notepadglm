@@ -3,35 +3,38 @@ NOTEPAD v9 DEEP-AUDIT BUG HUNT — LIVE STATUS
 ==============================================================
 STATUS: STILL WORKING
 
-TIMESTAMP (Pacific/Auckland): 2026-10-28 04:35 NZDT
+TIMESTAMP (Pacific/Auckland): 2026-10-28 04:55 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-- LOOP 4 COMPLETE (closed just now). Not clean: B301 confirmed during
-  tables detail (sort relocates aggregate formula -> correct =SUM
-  becomes #CYCLE!; distinct from B283's #REF! mechanism).
-- All open candidates resolved: protect-dialog rejected (L4-C),
-  same-name-rename rejected (L4-D controlled repro: rename-by-design,
-  content isolation holds live + after reload).
-- Baseline SHA-256 re-verified intact (read-only audit confirmed).
-- NEXT: push Loop 4 checkpoint to GitHub, then start LOOP 5 (required:
-  clean streak is 1/2 after Loop 3; Loop 5 must be clean to stop).
+- LOOP 5 RUNNING (delta sweep, must finish CLEAN to stop the hunt).
+- L5-A part 1 (editor core) done: 8 pass / 0 new bugs. Typing,
+  undo/redo, bold, center, list continuation, slash-menu word-start
+  contract + Escape cleanliness all verified fresh.
+- 1 candidate rejected this loop: '/' counts as a word in status bar
+  (matches Microsoft Word whitespace-token convention — not a defect).
+- NEXT: L5-A part 2 (font size/color, styles gallery, paragraph
+  dialog, markdown source view), then L5-B review surfaces,
+  L5-C files/persistence/tables, L5-D layout/IO/cross-cutting.
 
 BUG TRACKER:
-- Total confirmed bugs: 93 (highest ID B301 — NEW in Loop 4)
-- New bugs this loop (Loop 4): 1 (B301)
+- Total confirmed bugs: 93 (highest ID B301, found in Loop 4)
+- New bugs this loop (Loop 5): 0
 - Open candidates: 0
 - Known-bug register: audit/known-bug-titles.txt (93 titles)
 
 LOOP PROGRESS:
-- Clean loops: 1/2 (Loop 3 CLEAN; Loop 4 NOT clean via B301)
-- Loop 4 progress: 100% [██████████████████████████████] COMPLETE
-- Current loop: LOOP 5 — starting next (delta sweep over all 70 groups)
+- Clean loops: 1/2 (Loop 3 clean; Loop 4 not clean via B301)
+- Current loop: Loop 5 — progress ~15%
+- [████░░░░░░░░░░░░░░░░░░░░░░░░░] 15%
+  (L5-A part 1 done | remaining: L5-A pt2, L5-B, L5-C, L5-D,
+   final baseline verify + close)
 
 NEXT CHECKPOINT:
-- Loop 4 GitHub checkpoint push (KalonixReal/notepadglm, GLM identity)
-- Loop 5: fresh delta sweep; must find ZERO new bugs to reach 2
-  consecutive clean loops -> final DONE + report upload + cron 477065
-  delete. Any new finding resets the streak again.
+- Continue Loop 5 batches; if ALL complete with ZERO new bugs ->
+  2 consecutive clean loops -> final DONE + bug report upload +
+  cron job 477065 deleted.
+- All checkpoints pushed: latest commit e338327 on
+  github.com/KalonixReal/notepadglm (GLM identity).
 
 DATA SOURCES: checks/deep-audit-loops/loop-state.json, worklog.md
 ==============================================================
