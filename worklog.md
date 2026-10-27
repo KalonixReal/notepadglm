@@ -538,3 +538,19 @@ Stage Summary:
 - Loop 5 totals: L5-A (15 passes, B302) + L5-B (13 passes, B272 rediscovery) + L5-CD (14 passes, 0 new).
 - Streak stays 1/2 (Loop 3 clean). LOOP 6 REQUIRED (must be fully clean) + Loop 7 (must be clean) to stop.
 - Evidence: checks/deep-audit-loops/loop-5/L5CD-imgexport-persist-result.json + l5-export.docx
+
+---
+Task ID: 6-a
+Agent: main
+Task: Loop 6 batch L6-A — editor core clean sweep (session l6a)
+
+Work Log:
+- Fresh session l6a (isolated profile). Typing + Enter block split clean; word count debounce (0 -> 9 words after settle, matches L5-B).
+- Ctrl+B/Ctrl+I real keys -> <b><i> nesting exact; bullet list on NORMAL paragraph -> <ul><li> (no B302 nesting on non-heading); trailing <p><br></p> Word-conventional; undo/redo round trip byte-identical; center -> ul[data-a=center].
+- Font size DELTA discrimination: collapsed caret + 14pt does NOT restyle existing text but DOES apply to subsequent typing (typed ' tail' -> span 14pt, computed 18.6667px exact — Word apply-at-caret semantics); range selection wraps exactly selected text in span. Apply path CLEAN.
+- Slash menu opens 14-item 'Insert into document' on fresh paragraph; Escape closes; literal '/' retained. Styles gallery H2 with tracked caret -> <h2> preserving inline <b><i> + span formatting.
+- Harness: synthetic element.click() does NOT register caret (H2 was silent no-op until real click — do not misread as bug); font-size dialog has inert option duplicates (use fresh refs / offsetWidth filter).
+
+Stage Summary:
+- 0 new bugs. 10/10 pass. No page errors. L6-A COMPLETE — Loop 6 clean so far.
+- Evidence: checks/deep-audit-loops/loop-6/L6A-editor-result.json

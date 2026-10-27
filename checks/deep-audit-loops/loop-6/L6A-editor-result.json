@@ -1,0 +1,27 @@
+{
+  "taskId": "L6-A",
+  "loop": 6,
+  "date": "2026-10-28",
+  "executor": "main agent (session l6a)",
+  "family": "Editor core clean sweep (typing/formatting/lists/alignment/font-size/slash/styles)",
+  "predicates": { "pass": 10, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "Typing + Enter block split; word count updates on debounce ('0 words' during 1s window, '9 words' correct after settle — matches L5-B behavior, not a bug)",
+    "Ctrl+B + Ctrl+I via real keys -> <b><i>Loop six</i></b> nesting exact",
+    "Bulleted list via ribbon aria-label click on NORMAL paragraph -> <ul><li>Second line content here</li></ul> (no B302-style nesting on non-heading blocks)",
+    "Trailing <p><br></p> after list conversion — Word-conventional exit paragraph",
+    "Undo unwraps list + removes trailing p; redo restores all 3 blocks byte-identical",
+    "Center alignment via ribbon -> ul[data-a=center], computed textAlign center",
+    "Font size DELTA discrimination: collapsed caret + 14pt -> NO restyle of existing text (Word-correct); subsequent typed ' tail' gets span font-size:14pt, computed 18.6667px exact (apply-at-caret path)",
+    "Font size DELTA: range selection ('Second') + 14pt -> span wraps exactly the selected text",
+    "Slash menu on fresh paragraph opens 'Insert into document' (14 items); Escape closes; literal '/' retained in paragraph",
+    "Styles gallery Heading 2 with tracked caret -> <h2><b><i>Loop six</i></b> core check one<span style=14pt> tail</span></h2> (H2 conversion preserves inline formatting + spans)"
+  ],
+  "harnessNotes": [
+    "CONFIRMED AGAIN: element.click() synthetic clicks do NOT register with app caret tracking — a styles-gallery H2 apply was a silent no-op after a synthetic p.click(); real agent-browser click on text makes apply work. Must not be misread as a bug.",
+    "Font size dialog option elements have inert duplicates — click by a11y ref (fresh snapshot) or filter by offsetWidth before eval-click.",
+    "Ribbon font-size label follows caret context (14 after apply, back to 11 when caret moves to 11pt block)."
+  ],
+  "noPageErrors": true
+}

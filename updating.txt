@@ -1,21 +1,20 @@
 STATUS: STILL WORKING
-TIMESTAMP (Pacific/Auckland): 2026-10-28 04:52 NZDT
+TIMESTAMP (Pacific/Auckland): 2026-10-28 04:58 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-Loop 5 delta-runtime sweep (main agent; subagent dispatch infra unstable so batches run directly).
-L5-A editor core COMPLETE (B302 found: list-on-heading nests <ol> inside <h2>; source view serializes it as empty heading '## ').
-L5-B review surfaces COMPLETE: 13/13 predicates pass, 0 new bugs (B272 rediscovery only) — comments full lifecycle, track-edits Reject delta, compare diff engine, find/replace literal-$ + match-case, proofing language es<->en, context menu full set. Pushed to GitHub.
-Next: L5-CD images/export/persistence + probe matrix + baseline re-verify, then loop-5 close.
+LOOP 5 CLOSED (not clean — B302 found in L5-A). Loop 5 totals: L5-A editor core (15 passes, B302), L5-B review surfaces (13/13, 0 new, B272 rediscovery), L5-CD images/tables/export/persistence (14/14, 0 new, .docx artifact validated, baseline SHA re-verified unchanged).
+All evidence + worklog + loop-state pushed to GitHub.
+LOOP 6 NOW OPENING — must be fully clean (streak 1/2 from Loop 3; Loop 6 and Loop 7 both clean required to stop).
 
 BUG TRACKER:
 Total confirmed bugs: 94 (highest ID B302)
-New bugs this loop (Loop 5): 1 (B302)
+New bugs this loop (Loop 5, now closed): 1 (B302)
 
 LOOP PROGRESS:
-Clean loops: 1/2 (Loop 3 clean; Loop 4 NOT clean — B301; Loop 5 already NOT clean — B302, continuing for coverage)
-Current loop: Loop 5 — progress: L5-A + L5-B done of 3 batches (L5-A, L5-B, L5-CD)
-[================.....] 67% of Loop 5
+Clean loops: 1/2 (Loop 3 clean; Loops 4, 5 not clean)
+Current loop: Loop 6 — progress: opening batch L6-A
+[....................] 0% of Loop 6
 
 NEXT CHECKPOINT:
-L5-CD images/export/persistence + probe matrix + baseline SHA re-verify -> loop-5 close -> loop-state.json + known-bug-titles -> GitHub push (identity GLM) -> Loop 6 opens (streak needs 2 consecutive clean loops).
-Stopping rule: still needs 2 consecutive clean loops (streak 1/2, Loop 3) -> Loop 6 + 7 required after Loop 5 closes.
+L6-A editor core sweep (0 new bugs required) -> L6-B review surfaces -> L6-CD images/export/persistence + probe matrix -> loop-6 close -> GitHub push (identity GLM).
+Stopping rule: need Loop 6 AND Loop 7 both fully clean (streak 1/2, Loop 3).
