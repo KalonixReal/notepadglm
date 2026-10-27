@@ -4,19 +4,19 @@
     "blankSHA256": "278122b3849866875436693afe638503e25e5dd7d3f2c0ca3d39da675ce66218",
     "rootSHA256": "5d0436ca867496de06cd3c9a5f00ffc8951e9c628ea5c92b3ee4d7cbd8ea358f (unavailable this env)",
     "servedCopy": "public/notepad.html byte-identical to upload/notepad-bare.html",
-    "confirmedCurrentBugs": 92,
+    "confirmedCurrentBugs": 93,
     "possibleLeads": [
       "S10",
       "S13",
       "S17",
       "S28"
     ],
-    "highestConfirmedId": "B300"
+    "highestConfirmedId": "B301"
   },
   "stoppingRule": "Two consecutive complete deep-audit loops (all 70 feature groups, 4 stages each: inventory/source/runtime/independent-review) with no additional confirmed/reopened bugs or material new failure variants. Rediscovery of a documented trigger does not reset. Current user instruction allows multiple testing browsers + subagents (supersedes UR-04 serial-browser constraint); app code remains read-only.",
   "environment": {
     "appUrl": "http://localhost:3000/",
-    "websiteSource": "ABSENT (sites/notepad-studio not present this session) \u2014 F70 limited to app-side observable behavior; recorded as environment limitation",
+    "websiteSource": "ABSENT (sites/notepad-studio not present this session) — F70 limited to app-side observable behavior; recorded as environment limitation",
     "notes": "Fresh environment reconstructed 27 Oct. Prior loop-1 in-session state (12/70 rows, 34.3%) was lost with prior machine; reconstructed below from the 26-Oct evidence ledger in BUG-HUNT-REPORT/TODO. Prior evidence retained as reference but loop completion requires this-session fresh execution (per loop rules)."
   },
   "loops": [
@@ -25,7 +25,7 @@
       "status": "complete",
       "started": "reconstructed 2026-10-27",
       "clean": false,
-      "note": "Loop 1 already found new bugs in its original window (B284-B288 and earlier B262-B283 v9 additions during loop-1 phase) \u2014 cannot be clean; must still be completed 100% before loop 2.",
+      "note": "Loop 1 already found new bugs in its original window (B284-B288 and earlier B262-B283 v9 additions during loop-1 phase) — cannot be clean; must still be completed 100% before loop 2.",
       "features": {
         "F01": {
           "name": "Create/open/rename/duplicate/delete documents",
@@ -105,7 +105,7 @@
             0.5,
             1
           ],
-          "note": "C26AA bounded; fresh pending \u2014 env-limited closure"
+          "note": "C26AA bounded; fresh pending — env-limited closure"
         },
         "F09": {
           "name": "Portable single-HTML download",
@@ -115,7 +115,7 @@
             0.5,
             1
           ],
-          "note": "native-download evidence prior phases \u2014 env-limited closure"
+          "note": "native-download evidence prior phases — env-limited closure"
         },
         "F10": {
           "name": "Clear app-owned browser copies",
@@ -185,7 +185,7 @@
             0.5,
             1
           ],
-          "note": "network-assisted; env-limited; bounded check pending \u2014 env-limited closure"
+          "note": "network-assisted; env-limited; bounded check pending — env-limited closure"
         },
         "F17": {
           "name": "Backup/export scope (JSON/DOCX/ZIP/map)",
@@ -635,7 +635,7 @@
             0.5,
             1
           ],
-          "note": "fresh pending \u2014 env-limited closure"
+          "note": "fresh pending — env-limited closure"
         },
         "F62": {
           "name": "Context menus",
@@ -725,7 +725,7 @@
             0.5,
             1
           ],
-          "note": "website source ABSENT this env; app-side connected-save/feedback-status behavior only; env-limited closure \u2014 env-limited closure"
+          "note": "website source ABSENT this env; app-side connected-save/feedback-status behavior only; env-limited closure — env-limited closure"
         }
       },
       "completed": "2026-10-27 loop-1 close (main)",
@@ -775,10 +775,10 @@
     {
       "id": 2,
       "status": "complete",
-      "started": "2026-10-27 (reconstructed env) \u2014 executed 2026-10-27/28",
+      "started": "2026-10-27 (reconstructed env) — executed 2026-10-27/28",
       "completed": "2026-10-28 loop-2 close (main)",
       "clean": false,
-      "note": "Fresh full sweep of all 70 feature groups in 9 batches (L2-A..L2-I). Executed by MAIN agent directly (subagent dispatch infrastructure unstable \u2014 Task backend timeouts; orphaned dispatches quarantined to checks/deep-audit-loops/loop-2/abandoned/). All 70 features covered; 5 env-limited closures as in loop 1.",
+      "note": "Fresh full sweep of all 70 feature groups in 9 batches (L2-A..L2-I). Executed by MAIN agent directly (subagent dispatch infrastructure unstable — Task backend timeouts; orphaned dispatches quarantined to checks/deep-audit-loops/loop-2/abandoned/). All 70 features covered; 5 env-limited closures as in loop 1.",
       "features": {
         "F01": {
           "stages": [
@@ -1358,7 +1358,7 @@
           "rename-to-existing-name allowed (indistinguishable rows; contract uncertain)"
         ],
         "candidatesRejected": [
-          "phantom leading paragraph after reload with leading page break (4 variants incl. literal leading-comment trigger \u2014 not reproduced; L1C observation stands unreproducible this loop)",
+          "phantom leading paragraph after reload with leading page break (4 variants incl. literal leading-comment trigger — not reproduced; L1C observation stands unreproducible this loop)",
           "symbol absorbed into citation link across save/reload (not reproduced; boundary preserved with '@')",
           "Tab from body-row last cell escapes table (activeElement harness artifact; Selection API shows correct behavior)"
         ],
@@ -1968,10 +1968,10 @@
           "same-name rename allowed"
         ],
         "candidatesRejected": [
-          "Track-edits 'vanishing button' \u2014 ribbon re-render race (harness); controls verified via a11y refs"
+          "Track-edits 'vanishing button' — ribbon re-render race (harness); controls verified via a11y refs"
         ],
         "notableDiscoveries": [
-          "B300 mitigation: setMode captures 'Before editing Markdown source' recovery copy (Settings -> Recovery copies) \u2014 destroyed imported content is recoverable; B300 stays CONFIRMED with mitigation noted"
+          "B300 mitigation: setMode captures 'Before editing Markdown source' recovery copy (Settings -> Recovery copies) — destroyed imported content is recoverable; B300 stays CONFIRMED with mitigation noted"
         ],
         "confirmedTotal": 92,
         "batches": [
@@ -1985,16 +1985,29 @@
     },
     {
       "id": 4,
-      "status": "not-started",
-      "clean": null,
-      "note": "required: with loop 3 clean, loop 4 must also complete clean to reach 2 consecutive clean loops"
+      "status": "complete",
+      "clean": false,
+      "note": "Loop 4 NOT clean: B301 confirmed during tables detail (2 reproductions incl. clean real-input re-run). Clean streak remains 1/2 (Loop 3). LOOP 5 REQUIRED. Baseline SHA-256 re-verified intact at close.",
+      "started": "2026-10-28 (loop-3 clean verified)",
+      "completed": "2026-10-28",
+      "newBugs": [
+        "B301"
+      ],
+      "batches": {
+        "L4-A editor core (F20-F31,F33,F66p)": "0 new; 14 pass; 2 loop-3 harness-limited items UPGRADED to observable (F24 palette, F31 slash)",
+        "L4-B review surfaces (F40-F43,F55-F58)": "0 new; Ctrl+Alt+K candidate adjudicated EXACT B272 rediscovery",
+        "L4-C files/persistence/org/import (F01,F03,F04,F09,F11,F12,F14,F15,F17,F45,F46,F50)": "0 new; protect-dialog candidate REJECTED (role=alert feedback IS accessible)",
+        "L4-C tables detail (F51-F54)": "1 NEW B301 (sort relocates aggregate formula -> #CYCLE!); picker/row/col/Tab/formula guards verified",
+        "L4-D layout/IO/cross (F34-F39,F59,F60,F65,F68)": "0 new; RTL verified first time this env (dir attr + computed); context menu 10 items verified; F39 print byte-identity stands from loop-1; same-name-rename candidate REJECTED (controlled repro: rename-by-design, isolation live+reload)"
+      },
+      "openCandidates": "0 (both resolved: protect-dialog rejected L4-C, same-name-rename rejected L4-D)"
     }
   ],
   "consecutiveCleanLoops": 1,
   "log": [
     "2026-10-27 env reconstructed; app verified byte-identical to v9 baseline; loop-1 state rebuilt from 26-Oct ledger (12 complete rows flagged fresh from prior session evidence, partials from named families); batches launching",
-    "2026-10-27 loop 1 COMPLETE \u2014 not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged",
-    "2026-10-28 loop 2 COMPLETE \u2014 not clean: 3 new confirmed bugs (B298 mind-map edge guards, B299 collection-switch flush misattribution, B300 .txt import blank-source data loss); 2 candidates open, 3 candidates rejected (incl. both loop-1 open candidates), 5 rediscoveries; total confirmed 92; all 70 features covered; known-titles file repaired (B289-B297 restored after orphaned-dispatch truncation; B-numbers verified against loop-state)",
-    "2026-10-28 loop 3 COMPLETE \u2014 CLEAN (streak 1/2): 0 new confirmed bugs; delta runtime + probe matrix; baseline hash re-verified unchanged; B300 recovery-copy mitigation documented; export artifact captured headlessly"
+    "2026-10-27 loop 1 COMPLETE — not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged",
+    "2026-10-28 loop 2 COMPLETE — not clean: 3 new confirmed bugs (B298 mind-map edge guards, B299 collection-switch flush misattribution, B300 .txt import blank-source data loss); 2 candidates open, 3 candidates rejected (incl. both loop-1 open candidates), 5 rediscoveries; total confirmed 92; all 70 features covered; known-titles file repaired (B289-B297 restored after orphaned-dispatch truncation; B-numbers verified against loop-state)",
+    "2026-10-28 loop 3 COMPLETE — CLEAN (streak 1/2): 0 new confirmed bugs; delta runtime + probe matrix; baseline hash re-verified unchanged; B300 recovery-copy mitigation documented; export artifact captured headlessly"
   ]
 }

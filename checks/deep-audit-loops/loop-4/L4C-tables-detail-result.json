@@ -1,0 +1,57 @@
+{
+  "taskId": "L4-C tables detail (F51-F54)",
+  "loop": 4,
+  "date": "2026-10-28",
+  "executor": "main agent (session l4d, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F51-F54 table operations detail (row/col ops, Tab navigation, formulas, merge/sort)",
+  "confirmedNewBugs": [
+    {
+      "id": "B301",
+      "title": "Sorting rows re-evaluates a relocated aggregate formula against its absolute range at the new position: a correct =SUM result becomes #CYCLE! after the formula's row moves",
+      "severity": "Medium",
+      "reproduction": [
+        "Fresh 3x3 table via Insert > Table grid picker (header TH row + 2 body rows)",
+        "A1(TH)=12, A2=4 seeded; C2=9, C3=3 seeded as sort keys",
+        "Real click into A3 (body row 2, col A) > Insert > Table formula > =SUM(A1:A2) > Apply -> displays 16 (correct)",
+        "Real click into C2 (body cell of sort-key column) > right-click cell > 'Sort by this column'",
+        "Rows reorder correctly by C (3-row before 9-row; header excluded) — but the formula cell relocates from body row 2 to body row 1 and is re-evaluated there"
+      ],
+      "observed": "After the sort the previously correct A-cell result 16 becomes #CYCLE!: the formula's range A1:A2 is absolute, and at its new address (A2) the range includes the formula's own cell, so the cycle detector fires. Plain values in the moved rows are preserved; only the aggregate result is corrupted. Two independent reproductions (first exploratory probe + clean re-run with real-input-only formula creation). Sorting from a header caret is a silent no-op (header excluded by design; no feedback).",
+      "expected": "Sorting should preserve the correctness of existing formula results (range set translation per B283's fix direction, or relative re-anchoring); a normal row reorder must not corrupt a previously correct aggregate into an error state.",
+      "distinctFromB283": "B283 (documented): formula in the NON-moving header row; sortByColumn rewrites the range endpoints (=SUM(A2:A4) -> =SUM(A4:A2)) and calculateTable rejects the reversed range -> #REF!. B301: formula in a MOVING body row; no range rewrite required for the failure — the row relocation makes the unchanged absolute range self-inclusive and the cycle detector fires -> #CYCLE!. Different code path (cycle detection vs token rewriter), different precondition (formula inside vs outside sorted rows — B283's evidence explicitly lists 'formulas inside/outside the sorted rows' as NOT established), different error state (#REF! vs #CYCLE!).",
+      "evidence": "checks/deep-audit-loops/loop-4/L4C-tables-detail-result.json (this file); live session l4d"
+    }
+  ],
+  "candidatesRejected": [
+    {
+      "title": "'Sort by this column from a header caret is a silent no-op'",
+      "verdict": "REJECTED (no documented contract)",
+      "rationale": "Header row is excluded from sorting by design (consistent with B283's documented repro which clicks a body cell); the body-caret route works. Absence of a 'cannot sort from header' toast is a UX nicety, not a defect."
+    },
+    {
+      "title": "C3 stale-field value change after first exploratory sort (textContent-seeded cell)",
+      "verdict": "REJECTED (harness artifact)",
+      "rationale": "The cell had been seeded via textContent over a live formula field, bypassing input pipelines that normally clear field bindings; the sort's re-evaluation then surfaced the stale binding. Re-run with real-keyboard input only reproduced nothing of the sort — lesson recorded: never seed contenteditable cells via textContent when field state matters."
+    }
+  ],
+  "verifiedClean": [
+    "F50 picker semantics: [data-r][data-c] values are literal row/col counts (2/2 -> 2x2, 3/3 -> 3x3)",
+    "F51 insert row below (caret A2): 2->3 rows, content intact; insert row above in new empty row -> 4 rows; delete row (caret in it) removes exactly that row, neighbors intact",
+    "F52 insert column right (caret B1): 2->3 cols, new empty col; delete column removes it; header stays TH, body TD",
+    "F53 Tab navigation via Selection API: A2->Tab->B2, Shift+Tab->A2 (matches L2-D); caret assertions must use Selection API (activeElement stays editor root — documented harness lesson)",
+    "F54 formula engine: =SUM(A1:A2)=16 correct; genuine self-reference =SUM(B1:B3) in B3 -> #CYCLE! (correct guard); text-in-range =SUM(C1:C2) with C2='txt' -> 100 (text skipped, correct sum semantics)",
+    "F54 sort core (formula-free): rows reorder by key column ascending, header row excluded, plain values move with rows intact",
+    "#tblMenu context menu items: Insert row above/below, Delete row, Insert column left/right, Delete column, Shading…, Table styles…, AutoFit columns, Sort by this column, Merge cells, Split cell, Delete table (13 items; opens on contextmenu dispatch at cell point)",
+    "'Table formula' control location: Insert ribbon tab (contextual, visible only with caret inside a table); dialog field #tableExpression placeholder '=SUM(A1:B3)'"
+  ],
+  "harnessLessons": [
+    "Grid picker data-r/data-c = literal counts, not 0-indexed positions",
+    "document.querySelectorAll('table') includes UI tables (about-card); scope to [contenteditable=true]",
+    "textContent seeding over formula cells leaves stale field bindings that surface on re-evaluation — seed plain values only, or re-type via real keys",
+    "CDP mouse click needs dwell between down/up (~150ms) for contenteditable caret placement",
+    "Selection cell assertions must accept both td and th (header row is TH)"
+  ],
+  "predicates": { "pass": 18, "fail": 1, "failIsB301": true },
+  "loop4Impact": "Loop 4 is NOT clean (1 new confirmed bug B301). Streak resets: clean loops remain 1/2 (Loop 3)."
+}

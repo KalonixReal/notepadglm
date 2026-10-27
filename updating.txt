@@ -1,32 +1,37 @@
-╔══════════════════════════════════════════════════════════════╗
-║  NOTEPAD v9 BUG HUNT — LIVE STATUS                            ║
-║  (this file auto-refreshes every 15 minutes until done)       ║
-╚══════════════════════════════════════════════════════════════╝
+==============================================================
+NOTEPAD v9 DEEP-AUDIT BUG HUNT — LIVE STATUS
+==============================================================
+STATUS: STILL WORKING
 
-STATUS:   ✅ STILL WORKING — Loop 4 batch 3/4 COMPLETE (clean)
-Updated:  2026-10-28 04:40 NZDT (Pacific/Auckland)
+TIMESTAMP (Pacific/Auckland): 2026-10-28 04:35 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-  L4-C finished across three passes: file CRUD + passwords (with the
-  'silent <8-char rejection' open candidate REJECTED — role=alert
-  feedback exists), version history + portable-export artifact
-  (15.3MB self-contained HTML, packed notebook decoded, all content
-  probes pass, artifact archived), folders/collections round-trip,
-  .md import, PNG upload + image selection, table grid picker.
-  ~35 predicates this loop so far, 0 new bugs, streak 1/2 intact.
-  Loop-4 progress checkpoint pushed to GitHub (454a4c7).
-  NEXT: F51-F54 table ops detail, then L4-D (maps, find/replace,
-  page layout, print, help, code block, mobile/dark, context menus,
-  shortcuts, notebook search, dialogs, perf, website) + final open
-  candidate (same-name rename) + baseline SHA-256 re-verification.
+- LOOP 4 COMPLETE (closed just now). Not clean: B301 confirmed during
+  tables detail (sort relocates aggregate formula -> correct =SUM
+  becomes #CYCLE!; distinct from B283's #REF! mechanism).
+- All open candidates resolved: protect-dialog rejected (L4-C),
+  same-name-rename rejected (L4-D controlled repro: rename-by-design,
+  content isolation holds live + after reload).
+- Baseline SHA-256 re-verified intact (read-only audit confirmed).
+- NEXT: push Loop 4 checkpoint to GitHub, then start LOOP 5 (required:
+  clean streak is 1/2 after Loop 3; Loop 5 must be clean to stop).
 
 BUG TRACKER:
-  Total confirmed bugs:  92  (highest ID B300)
-  New this loop (Loop 4): 0  (2 candidates rejected so far)
-  Loop 1: NOT CLEAN (+9) | Loop 2: NOT CLEAN (+3) | Loop 3: CLEAN ✅
-  Loop 4:  85% — L4-A ✅ L4-B ✅ L4-C ✅ | L4-D pending
-          [######################################..] 85%
+- Total confirmed bugs: 93 (highest ID B301 — NEW in Loop 4)
+- New bugs this loop (Loop 4): 1 (B301)
+- Open candidates: 0
+- Known-bug register: audit/known-bug-titles.txt (93 titles)
 
-NEXT CHECKPOINT: L4-D completion → adjudication → baseline verify.
-  If clean → 2 consecutive clean loops → final GitHub upload of
-  todo + bug report + workspace → delete cron → DONE.
+LOOP PROGRESS:
+- Clean loops: 1/2 (Loop 3 CLEAN; Loop 4 NOT clean via B301)
+- Loop 4 progress: 100% [██████████████████████████████] COMPLETE
+- Current loop: LOOP 5 — starting next (delta sweep over all 70 groups)
+
+NEXT CHECKPOINT:
+- Loop 4 GitHub checkpoint push (KalonixReal/notepadglm, GLM identity)
+- Loop 5: fresh delta sweep; must find ZERO new bugs to reach 2
+  consecutive clean loops -> final DONE + report upload + cron 477065
+  delete. Any new finding resets the streak again.
+
+DATA SOURCES: checks/deep-audit-loops/loop-state.json, worklog.md
+==============================================================

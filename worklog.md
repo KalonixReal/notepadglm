@@ -432,3 +432,38 @@ Work Log:
 Stage Summary:
 - 0 new bugs. L4-C batch COMPLETE (all file/persistence/org/import/image/table groups). Remaining: F51-F54 table ops detail + L4-D full batch + same-name-rename candidate + final baseline verify.
 - Evidence: checks/deep-audit-loops/loop-4/L4C-files-result.json, L4C-history-export-result.json (+ this log; part-3 JSON to be folded into L4D evidence or standalone next turn)
+
+---
+Task ID: 4-f
+Agent: main
+Task: Loop 4 L4-C tables detail — F51-F54 row/col ops, Tab navigation, formulas, sort (session l4d)
+
+Work Log:
+- F50/F51/F52: picker [data-r][data-c] = literal counts (2/2 -> 2x2, 3/3 -> 3x3); insert row below/above mid-table -> content intact; delete row removes exactly caret row; insert/delete column round-trip clean.
+- F53: Tab A2->B2, Shift+Tab back via Selection API (activeElement lesson re-confirmed).
+- F54 formulas: =SUM(A1:A2)=16 correct; genuine self-ref =SUM(B1:B3) -> #CYCLE! (guard correct); text-in-range skips text correctly.
+- F54 sort: header-caret sort is silent no-op (REJECTED candidate — header excluded by design, body route documented); body-caret sort reorders rows correctly, plain values intact.
+- NEW B301 CONFIRMED (2 reproductions, incl. clean real-input-only re-run): body-row aggregate formula =SUM(A1:A2)=16 -> after sort by another column the formula's row relocates and the formula re-evaluates at the new position against its ABSOLUTE range -> self-inclusive -> #CYCLE!. Distinct from B283 (stationary header formula, range REWRITTEN -> #REF! via token rewriter; B301 is calculateTable cycle detection on relocation, precondition 'formula inside sorted rows' explicitly NOT established by B283's evidence).
+- Harness lessons: textContent seeding over formula cells leaves stale field bindings (sort re-eval surfaced it — first anomaly explained as artifact); CDP click needs ~150ms down/up dwell; cell assertions must match td AND th; scope table queries to [contenteditable=true].
+
+Stage Summary:
+- Loop 4 NOT clean: B301 confirmed. Clean streak remains 1/2 (Loop 3). 93 confirmed bugs total. Loop 4 remaining: L4-D (layout/IO/cross-cutting), same-name-rename candidate, baseline verify, close.
+- Evidence: checks/deep-audit-loops/loop-4/L4C-tables-detail-result.json
+
+---
+Task ID: 4-g
+Agent: main
+Task: Loop 4 L4-D — same-name-rename candidate adjudication + layout/IO/cross-cutting (F34-F39/F59/F60/F68) + baseline verify (sessions l4d, l4d2)
+
+Work Log:
+- SAME-NAME-RENAME candidate adjudicated REJECTED. Source: renameActive() has no uniqueness guard by design; data model id-keyed (files.find by id); Duplicate ("name copy") and imports also produce same-name files. Controlled runtime repro (fresh session l4d2, real input only, markers AAA_/BBB_MARKER): create doc2, type marker, rename doc2 to doc1's exact name via row menu -> both rows coexist; live switching shows isolated contents both ways; RELOAD persistence correct (BBB in renamed doc2, AAA in original). No merge, no loss.
+- l4d-session anomaly (table content appearing in wrong file post-reload) attributed to harness confounds (synthetic docTitle events + Enter-in-title + ghost dialogs from errored evals); NOT reproducible in controlled flow; recorded as rejected observation, not a bug.
+- RTL (F38 gap — never before probed this env): Layout > Text direction button applies dir="rtl" to caret paragraph (computed rtl), toggles back to ltr cleanly. Earlier failures were caret-registration artifacts (synthetic Range does not register with app caret tracking — real click required).
+- F68 editor context menu: real right-click shows Cut/Copy/Paste/Bold/Italic/Underline/Highlight/Center/Hyperlink/Insert footnote/New comment (full documented set).
+- F39 print: backstage Print control present; window.print override hook does not intercept (app captures reference at load — same as blob-hook lesson); byte-identity stands from loop-1 verification.
+- Harness lessons: agent-browser `type` takes a REF not raw text (use press per key or fill @ref); app-dialog-overlay is fixed-position so offsetParent is null when open (L4-A lesson re-confirmed in dialog flows); errored evals mid-dialog leave ghost overlays that block real clicks at their coordinates — press Escape to clear.
+- Baseline SHA-256 re-verified at Loop 4 close: public/notepad.html == upload/notepad-bare.html == 278122b3... (read-only audit intact).
+
+Stage Summary:
+- Loop 4 COMPLETE, NOT clean (B301). 93 confirmed bugs. Open candidates: 0 (both resolved this loop). Clean streak 1/2 — LOOP 5 REQUIRED.
+- Evidence: checks/deep-audit-loops/loop-4/L4C-tables-detail-result.json + this log; loop-state.json Loop 4 closed with batch details.
