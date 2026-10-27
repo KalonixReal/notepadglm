@@ -1,0 +1,28 @@
+{
+  "taskId": "L7-A",
+  "loop": 7,
+  "date": "2026-10-28",
+  "executor": "main agent (session l7a)",
+  "family": "Editor core clean sweep — fresh angles (strikethrough, highlight, clear formatting, numbered list, justify, mixed undo chain)",
+  "predicates": { "pass": 9, "fail": 0, "unreproducedObservations": 1 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "Strikethrough: ribbon button applies <strike> to exact selection ('Seventh loop'); Ctrl+Shift+S unbound — no tooltip shortcut promised, no contract violation",
+    "Text highlight color (default yellow): background-color span applies across strike boundary (both spans covered per selection)",
+    "Numbered list on normal paragraph creates <ol><li>; trailing <p><br></p> Word-conventional; ol data-a attributes carry alignment",
+    "Justify alignment: computed textAlign=justify + data-a=justify on ol",
+    "Clear formatting: removes strike AND highlight ONLY within selection — highlight on adjacent ' final' outside selection correctly retained (per-range semantics exact)",
+    "Mixed undo chain: 3x Ctrl+Z steps back through clear-format/justify/list mutations in correct order, restoring strike+highlight spans",
+    "Word count verified across multiple paths: type 9->13 correct; list-creation UNDO keeps 13 correct at 0.6s and 2.6s; backspaces ->8 correct; further undo ->9 correct",
+    "Autocapitalize on new-line typing ('alpha'->'Alpha') consistent with documented harness/app autocorrect behavior (B296/B297 territory known; no new variant)",
+    "No page errors"
+  ],
+  "unreproducedObservations": [
+    "OBS-L7A-1 (NOT CONFIRMED): after a 3-undo mixed chain (clear-format/justify/list-undo), word count read '3 words' for >2s while the doc held 8 words. Focused repros all CLEAN: list-undo keeps count correct (13 at 0.6s+2.6s), backspace recount correct (8), undo recount correct (9). Value '3' unexplainable from any doc state (possible transient of the specific interleaving); audit standard requires 2 reproductions incl. clean re-run — NOT MET. Recorded for future loops; not counted as a bug."
+  ],
+  "harnessNotes": [
+    "press Control+Shift+s does not trigger strikethrough (unbound) — ribbon button path required",
+    "undo chain stepping verified via block dumps between presses"
+  ],
+  "noPageErrors": true
+}

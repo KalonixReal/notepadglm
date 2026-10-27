@@ -1,20 +1,21 @@
 STATUS: STILL WORKING
-TIMESTAMP (Pacific/Auckland): 2026-10-28 04:58 NZDT
+TIMESTAMP (Pacific/Auckland): 2026-10-28 06:12 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-LOOP 5 CLOSED (not clean — B302 found in L5-A). Loop 5 totals: L5-A editor core (15 passes, B302), L5-B review surfaces (13/13, 0 new, B272 rediscovery), L5-CD images/tables/export/persistence (14/14, 0 new, .docx artifact validated, baseline SHA re-verified unchanged).
-All evidence + worklog + loop-state pushed to GitHub.
-LOOP 6 NOW OPENING — must be fully clean (streak 1/2 from Loop 3; Loop 6 and Loop 7 both clean required to stop).
+LOOP 6 CLOSED — FULLY CLEAN! All 3 batches passed with zero new bugs and zero rediscoveries:
+L6-A editor core 10/10 (formatting, lists, alignment, font-size apply-at-caret + selection, slash menu, styles H2).
+L6-B review surfaces 6/6 (heading-anchor comments, per-block Accept, identical compare, whole-word find, heading context menu).
+L6-CD images/tables/export/persistence 10/10 (align+width+alt deltas, MERGE VERIFIED CORRECT after false-alarm post-mortem, .json packed export lossless, dark theme survives reload, baseline SHA unchanged).
+All evidence + worklog pushed to GitHub. LOOP 7 NOW OPENING — it must also be clean to reach the stopping rule.
 
 BUG TRACKER:
 Total confirmed bugs: 94 (highest ID B302)
-New bugs this loop (Loop 5, now closed): 1 (B302)
+New bugs this loop (Loop 6): 0
 
 LOOP PROGRESS:
-Clean loops: 1/2 (Loop 3 clean; Loops 4, 5 not clean)
-Current loop: Loop 6 — progress: opening batch L6-A
-[....................] 0% of Loop 6
+Clean loops: 1/2 (Loop 3 clean, then Loop 4/5 broke streak; Loop 6 clean = new streak of 1)
+Current loop: Loop 7 — progress: opening
+[....................] 0% of Loop 7
 
 NEXT CHECKPOINT:
-L6-A editor core sweep (0 new bugs required) -> L6-B review surfaces -> L6-CD images/export/persistence + probe matrix -> loop-6 close -> GitHub push (identity GLM).
-Stopping rule: need Loop 6 AND Loop 7 both fully clean (streak 1/2, Loop 3).
+Loop 7 three batches (L7-A editor / L7-B review / L7-CD images-export-persistence + baseline) — ALL must find zero new bugs -> loop-7 close -> GitHub push -> if clean: stopping rule reached (2 consecutive clean loops), produce final todo + bug report, final upload, updating.txt DONE, delete cron job 477065.

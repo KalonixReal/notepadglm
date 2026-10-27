@@ -591,3 +591,17 @@ Stage Summary:
 - LOOP 6 CLOSED — FULLY CLEAN (L6-A 10/10 + L6-B 6/6 + L6-CD 10/10, 0 new bugs, 0 rediscoveries).
 - Clean streak now 1/2 (Loop 6; Loop 3's streak was broken by Loop 4 B301). LOOP 7 REQUIRED (must be clean to stop).
 - Evidence: checks/deep-audit-loops/loop-6/L6CD-imgtable-export-result.json + l6-export.json
+
+---
+Task ID: 7-a
+Agent: main
+Task: Loop 7 batch L7-A — editor core clean sweep, fresh angles (session l7a)
+
+Work Log:
+- Strikethrough via ribbon (Ctrl+Shift+S unbound, no contract breach); highlight color spans strike boundary; numbered list + justify (data-a=justify); clear formatting EXACT per-range (adjacent out-of-selection highlight retained); mixed 3-undo chain steps correctly.
+- Word count across paths: type 9->13, list-undo stable 13 (0.6s+2.6s), backspace->8, undo->9 — all correct.
+- OBS-L7A-1 NOT CONFIRMED: one-off '3 words' stale read after earlier mixed undo chain; value unexplainable from any doc state; all focused repros clean; 2-reproduction standard NOT met -> not a bug, recorded for future loops.
+
+Stage Summary:
+- 0 new bugs, 1 unreproduced observation. 9/9 pass. No page errors. L7-A COMPLETE — Loop 7 clean so far.
+- Evidence: checks/deep-audit-loops/loop-7/L7A-editor-result.json
