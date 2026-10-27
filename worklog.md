@@ -554,3 +554,20 @@ Work Log:
 Stage Summary:
 - 0 new bugs. 10/10 pass. No page errors. L6-A COMPLETE — Loop 6 clean so far.
 - Evidence: checks/deep-audit-loops/loop-6/L6A-editor-result.json
+
+---
+Task ID: 6-b
+Agent: main
+Task: Loop 6 batch L6-B — review surfaces clean sweep, new angles (session l6a)
+
+Work Log:
+- F41 heading-anchor comments: anchor nests correctly inside <b><i> wrappers of h2; full lifecycle (body/resolve/delete) clean; h2 outerHTML byte-identical after delete.
+- F42 per-block ACCEPT (delta over L5-B Reject + L3-B Accept-all): typed tracked text retained, pendingLeft=0. Contract holds.
+- F43 identical-compare path: 'Text is identical in all tabs' (L5-B covered the 1-change path).
+- F44 Whole words only toggle: 'in' OFF 1/1 / ON 0/0; 'line' ON 1/1 — discriminates both polarities.
+- F62 context menu on heading: same full 11-item set as paragraph.
+- Structure re-trace: '/' slash-probe paragraph carried H2 from L6-A — first gallery apply went to the app's TRACKED caret ('/' block), not a no-op; no bug (synthetic clicks never move tracked caret).
+
+Stage Summary:
+- 0 new bugs. 6/6 pass. No page errors. L6-B COMPLETE — Loop 6 clean so far (L6-A + L6-B).
+- Evidence: checks/deep-audit-loops/loop-6/L6B-review-result.json

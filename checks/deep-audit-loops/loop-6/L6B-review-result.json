@@ -1,0 +1,22 @@
+{
+  "taskId": "L6-B",
+  "loop": 6,
+  "date": "2026-10-28",
+  "executor": "main agent (session l6a)",
+  "family": "Review surfaces clean sweep — new angles over L5-B (heading anchors, per-block Accept, identical compare, whole-word find, heading context menu)",
+  "predicates": { "pass": 6, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F41: comment anchored on 4-char heading selection — anchor span.np3-cmt nests correctly INSIDE <b><i> inline wrappers of the h2; body typed; resolve (card.resolved + anchor.is-resolved); delete removes thread + anchor, h2 outerHTML byte-identical to pre-comment state",
+    "F42 DELTA: per-block ACCEPT keeps current block (typed ' Accepted probe' retained in paragraph, pendingLeft=0) — L5-B verified Reject, L3-B verified Accept-all; per-block Accept now covered. Contract text 'Accept keeps the current block' holds",
+    "F43 DELTA: compare with byte-identical inputs -> 'Text is identical in all tabs' (diff engine zero-change path verified; L5-B verified the 1-change path)",
+    "F44 DELTA: Whole words only toggle ('ab│') discriminates: 'in' OFF->1/1 (inside 'line'), ON->0/0; 'line' ON->1/1. Match case verified L5-B; whole-word now covered both polarities",
+    "F62 DELTA: context menu on HEADING block shows same full 11-item set as paragraph (L5-B/Loop-4 verified paragraph) — no heading-specific menu regression",
+    "No page errors"
+  ],
+  "harnessNotes": [
+    "Structure explain: after L6-A the '/' slash-probe paragraph carried an H2 — re-traced and CONFIRMED NOT A BUG: the first styles-gallery H2 apply (judged 'no-op') actually applied to the app's tracked caret which was still in the '/' block from real typing; second apply hit p1. Both applies consistent with tracked caret — synthetic element.click() never moves the app's tracked caret.",
+    "Compare dialog status element query must target the dialog's result line ('Text is identical in all tabs' / 'N changed groups · M aligned lines'), not other page status elements."
+  ],
+  "noPageErrors": true
+}
