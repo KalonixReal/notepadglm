@@ -1,10 +1,11 @@
 STATUS: STILL WORKING
-TIMESTAMP (Pacific/Auckland): 2026-10-28 04:27 NZDT
+TIMESTAMP (Pacific/Auckland): 2026-10-28 04:52 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-Loop 5 delta-runtime sweep in progress (main agent; subagent dispatch infra unstable so batches run directly).
-L5-A editor core COMPLETE in 2 parts (8+7 passes) — found B302 (list-on-heading nests <ol> inside <h2>; source view serializes it as empty heading '## ').
-Next: L5-B review surfaces (comments/footnotes/find/word count/print), then L5-CD images/export/persistence + probe matrix + baseline re-verify, then loop-5 close.
+Loop 5 delta-runtime sweep (main agent; subagent dispatch infra unstable so batches run directly).
+L5-A editor core COMPLETE (B302 found: list-on-heading nests <ol> inside <h2>; source view serializes it as empty heading '## ').
+L5-B review surfaces COMPLETE: 13/13 predicates pass, 0 new bugs (B272 rediscovery only) — comments full lifecycle, track-edits Reject delta, compare diff engine, find/replace literal-$ + match-case, proofing language es<->en, context menu full set. Pushed to GitHub.
+Next: L5-CD images/export/persistence + probe matrix + baseline re-verify, then loop-5 close.
 
 BUG TRACKER:
 Total confirmed bugs: 94 (highest ID B302)
@@ -12,9 +13,9 @@ New bugs this loop (Loop 5): 1 (B302)
 
 LOOP PROGRESS:
 Clean loops: 1/2 (Loop 3 clean; Loop 4 NOT clean — B301; Loop 5 already NOT clean — B302, continuing for coverage)
-Current loop: Loop 5 — progress: L5-A done of 3 batches (L5-A, L5-B, L5-CD)
-[===========.........] 33% of Loop 5
+Current loop: Loop 5 — progress: L5-A + L5-B done of 3 batches (L5-A, L5-B, L5-CD)
+[================.....] 67% of Loop 5
 
 NEXT CHECKPOINT:
-L5-B review-surface sweep -> evidence JSON in checks/deep-audit-loops/loop-5/ + worklog append -> L5-CD -> loop-5 close -> loop-state.json update -> GitHub push (identity GLM).
+L5-CD images/export/persistence + probe matrix + baseline SHA re-verify -> loop-5 close -> loop-state.json + known-bug-titles -> GitHub push (identity GLM) -> Loop 6 opens (streak needs 2 consecutive clean loops).
 Stopping rule: still needs 2 consecutive clean loops (streak 1/2, Loop 3) -> Loop 6 + 7 required after Loop 5 closes.

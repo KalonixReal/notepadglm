@@ -1,0 +1,31 @@
+{
+  "taskId": "L5-CD",
+  "loop": 5,
+  "date": "2026-10-28",
+  "executor": "main agent (session l5b)",
+  "family": "Images/table deltas, .docx export artifact, reload persistence + per-doc isolation, baseline re-verify",
+  "predicates": { "pass": 14, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F68 baseline: SHA-256 re-verified UNCHANGED — public/notepad.html == upload/notepad-bare.html == 278122b384986687... (read-only audit intact)",
+    "F45: image upload via real file input (#imgInput, 10px PNG) -> figure.img-fig + img with data:image/png URL, alt='l5test' from filename",
+    "F45 DELTA: Ctrl+Z removes inserted figure (0 left); Ctrl+Y restores it (1, img src intact) — image block participates correctly in undo stack",
+    "F45 DELTA: figure click-select (class 'img-fig selected') + Delete key removes image; 0 empty leftover blocks; editor back to 3 clean paragraphs",
+    "F50: Insert table via size picker ('2 rows by 3 columns') -> table rows=2 cols=3",
+    "F50 DELTA: cell typing + Tab navigation work (cellA1/cellB1 written to correct cells)",
+    "F54: table context menu shows full documented 13-item set (row/col ops, Shading, Table styles, AutoFit, Sort, Merge/Split, Delete table)",
+    "F51: Insert row below (2->3) + Delete row (3->2) via context menu both clean",
+    "F51: Delete table removes block (0 tables left); +1 trailing empty paragraph is Word-conventional (tables require trailing paragraph), not a defect",
+    "F17 DELTA: .docx export artifact captured headlessly (l5-export.docx, 8791 bytes) — valid OOXML zip (22 entries, word/document.xml present), ALL 3 seeded paragraphs present verbatim; format picker default .docx with .json option",
+    "F19/F07 DELTA: full page reload restores everything — 4 paragraphs byte-identical, 14 words, doc name 'Untitled', theme class intact",
+    "F01/F03 DELTA: sidebar 'New document' creates second doc (editor cleared, 0 words); switching via .sb-item rows shows per-doc content isolation both directions (doc1 keeps fox/14 words; doc2 empty)",
+    "F14 DELTA: .more file menu full set (Open/Rename/Duplicate/Export/Move/Delete/Protect/Unlock/Change password/Remove password/Lock); Delete -> 'Delete \"Untitled 2\"? This cannot be undone.' confirm -> library back to 1 doc, remaining doc intact",
+    "No page errors across image, table, export, reload, and deletion flows (errors command clean)"
+  ],
+  "notes": [
+    "document .document-tab elements are SECTION tabs within a document (Excel-like), not document switchers — document switching is the sidebar .sb-item rows",
+    "keyboard type capitalizes first letter ('cellA1' -> 'CellA1') — app autocapitalize/harness artifact consistent with documented 'press types uppercase' lesson; content otherwise exact",
+    "blank-state storage wipe intentionally NOT performed (read-only audit; blankSHA256 already recorded in baseline)"
+  ],
+  "exportArtifact": "checks/deep-audit-loops/loop-5/l5-export.docx"
+}

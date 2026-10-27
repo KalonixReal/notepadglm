@@ -2004,13 +2004,14 @@
     },
     {
       "id": 5,
-      "status": "in-progress",
+      "status": "complete",
       "started": "2026-10-28 04:45 NZDT",
       "clean": false,
-      "note": "L5-A (2 parts, B302: list-on-heading nests ul/ol inside h2; source view serializes empty heading) + L5-B review surfaces (13/13 pass, 0 new, B272 rediscovery only) complete. Loop 5 NOT clean; streak stays 1/2. Remaining: L5-CD images/export/persistence + probe matrix + baseline re-verify.",
+      "note": "Full 3-batch delta sweep: L5-A editor core 2 parts (8+7 pass, B302: list-on-heading nests ul/ol inside h2; source view serializes empty heading) + L5-B review surfaces (13/13, 0 new, B272 rediscovery) + L5-CD images/tables/export/persistence (14/14, 0 new, .docx artifact captured, baseline SHA re-verified). Loop 5 NOT clean; streak stays 1/2 (Loop 3). LOOP 6 + 7 REQUIRED.",
       "newBugs": [
         "B302"
-      ]
+      ],
+      "completed": "2026-10-28 loop-5 close (main)"
     }
   ],
   "consecutiveCleanLoops": 1,

@@ -518,3 +518,23 @@ Stage Summary:
 - 0 new bugs, 1 rediscovery (B272). 13/13 predicates pass. L5-B COMPLETE.
 - Evidence: checks/deep-audit-loops/loop-5/L5B-review-result.json
 - Loop 5 status: L5-A + L5-B done; L5-CD (images/export/persistence + probe matrix + baseline re-verify) remaining; Loop 5 already NOT clean (B302) — remaining batches for coverage.
+
+---
+Task ID: 5-d
+Agent: main
+Task: Loop 5 batch L5-CD — images/table deltas, .docx export, reload persistence + per-doc isolation + baseline re-verify (session l5b)
+
+Work Log:
+- Baseline SHA-256 re-verified UNCHANGED: public/notepad.html == upload/notepad-bare.html == 278122b384986687... (read-only audit intact).
+- F45 image flow with real file upload: figure.img-fig + data-URL + alt from filename. DELTA: Ctrl+Z removes figure / Ctrl+Y restores (undo stack covers image blocks); click-select + Delete removes image with 0 empty leftover blocks.
+- F50/F51/F54 table ops: 2x3 insert via size picker; Tab navigation + cell typing; context menu full 13-item set; Insert row below + Delete row clean; Delete table clean (+1 trailing paragraph is Word convention, not a defect).
+- F17 DELTA: .docx export artifact captured headlessly (l5-export.docx, 8791 bytes) — valid OOXML zip, all 3 seeded paragraphs verbatim in word/document.xml.
+- F19/F07 DELTA: full page reload restores content byte-identical (4 paras, 14 words, doc name, theme).
+- F01/F03/F14 DELTA: sidebar New document -> per-doc content isolation verified both directions; .more file menu full 11-item set; Delete with confirm dialog removes only target doc; remaining doc intact.
+- Harness lessons: .document-tab elements are SECTION tabs (Excel-like) not document switchers (sidebar .sb-item rows switch docs); keyboard type capitalizes first letter (consistent with documented press-uppercase artifact).
+
+Stage Summary:
+- 0 new bugs. 14/14 predicates pass. L5-CD COMPLETE -> LOOP 5 CLOSED, NOT clean (B302 from L5-A).
+- Loop 5 totals: L5-A (15 passes, B302) + L5-B (13 passes, B272 rediscovery) + L5-CD (14 passes, 0 new).
+- Streak stays 1/2 (Loop 3 clean). LOOP 6 REQUIRED (must be fully clean) + Loop 7 (must be clean) to stop.
+- Evidence: checks/deep-audit-loops/loop-5/L5CD-imgexport-persist-result.json + l5-export.docx
