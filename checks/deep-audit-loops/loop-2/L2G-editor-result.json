@@ -1,0 +1,39 @@
+{
+  "taskId": "L2-G",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2g, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F20-F25 editing/formatting, F26-F33 paragraph/lists/stats, F49 code",
+  "predicates": { "pass": 12, "fail": 0, "observations": 1, "stateMuddlesDisclosed": 2 },
+  "confirmedNewBugs": [],
+  "observationsNotPromoted": [
+    {
+      "title": "Clear formatting (Ctrl+Space) after a select-all bold leaves a stray <b> wrapping a line-break element (<p>two<b><br></b>three</p>) — visible text is unformatted, and typing adjacent does NOT inherit bold (verified: insertion lands outside the b, renders plain). Cosmetic markup residue only.",
+      "why": "No user-facing formatting error; markup hygiene note."
+    }
+  ],
+  "verifiedClean": [
+    "F22: undo depth across typed words (2x Ctrl+Z -> empty), redo restores exact text 'Type words'",
+    "F23: select-all Ctrl+B + Ctrl+I produces nested <b><i>; undo removes both cleanly",
+    "F32: find counts correct (1/1 for 'words'); Replace-all with 'term$&[[' handled LITERALLY ($& not interpreted as replacement pattern; & HTML-escaped correctly)",
+    "F29: numbered list applied via ribbon (ol/li created, block split at br boundary — design semantics)",
+    "F33: stats dialog counts ALL CORRECT for 'One/two/three': Words 3, Chars(no spaces) 11, Chars(with spaces) 13, Paragraphs 2, Lines 3, Pages 1/1",
+    "F28: Styles gallery popup opens; 'Save selection as a new style' affordance present (custom styles entry)",
+    "F25: Ctrl+Space clear formatting removes bold from visible text",
+    "F21 (partial): source-mode Enter -> \\n; switching rich converts to <br> within one paragraph (soft-break semantics, defensible)",
+    "No page errors in any flow"
+  ],
+  "harnessDisclosures": [
+    "Two eval-driven state setups (selectNodeContents selection; one innerHTML reset that was immediately superseded by a full real-key retype after a mode confusion). All asserted results come from real-key input.",
+    "Slash menu on '/' mid-paragraph did not open in this session state (caret context); L1G covered F31 slash commands fresh — carried."
+  ],
+  "notCovered": [
+    "F24 font family/size/color/highlight/grow-shrink runtime (L1G/L1I fresh carried)",
+    "F26 alignment/spacing/indent/quotes/dividers/case/sort runtime (L1G fresh carried)",
+    "F27 precise paragraph geometry (L1G carried)",
+    "F30 numbering style/start-at/continuation (L1G fresh carried; List options popup did not surface items in this state)",
+    "F31 slash-command variants (L1G fresh carried)",
+    "F49 code block/highlighting toolbar (L1G/L1I carried)"
+  ]
+}

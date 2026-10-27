@@ -3,37 +3,29 @@
 ║  (this file auto-refreshes every 15 minutes until done)      ║
 ╚══════════════════════════════════════════════════════════════╝
 
-STATUS:   ✅ STILL WORKING — Loop 2 batch execution in progress
-Updated:  2026-10-28 02:45 NZDT
+STATUS:   ✅ STILL WORKING — Loop 2 complete; Loop 3 starting
+Updated:  2026-10-28 03:40 NZDT
 
-WHAT I'M DOING RIGHT NOW:
-  Executing Loop 2 myself, batch by batch (subagent infra was unstable,
-  so the main agent runs every batch with a real browser session).
-  DONE: L2-A maps (1 new bug: unguarded mind-map edges — self-loops +
-  duplicates), L2-B library (1 new bug: pending edit flushed into the
-  WRONG file when switching collections), L2-C layout (phantom-paragraph
-  candidate REJECTED — not reproducible in 4 variants).
-  NEXT: L2-D images/tables, then L2-E..L2-I.
+LOOP 2 RESULT (just closed):
+  Loop 2 is COMPLETE and NOT CLEAN — 3 new confirmed bugs found:
+    B298  mind-map connect-drag creates self-loops + parallel
+          duplicate edges (no guards, persist across reload)
+    B299  pending edit flushed into the WRONG FILE when switching
+          collections (source file left empty; data misattribution)
+    B300  .txt import leaves Markdown source blank; first source-mode
+          edit silently destroys the imported text (data loss)
+  Also: 2 candidates open, 3 candidates rejected (both loop-1 open
+  candidates NOT reproduced), 5 exact rediscoveries. All 70 feature
+  groups covered fresh in 9 batches. Report + TODO updated.
 
 BUG TRACKER:
-  Bugs found (total confirmed):  91   (89 from Loop 1 + 2 new in Loop 2)
-  New in Loop 2 so far:          2    (mind-map edge guards; collection-
-                                       switch content misattribution)
-  Open candidates:               1    (phantom paragraph REJECTED this
-                                       loop; citation-link candidate still
-                                       open for L2-I)
+  Total confirmed bugs:  92  (B207-B300 + 4 reopened historical)
+  Clean loops:           0 / 2
+  Loop 1: 100% — NOT CLEAN (9 new)
+  Loop 2: 100% — NOT CLEAN (3 new)
+  Loop 3:   0% — starting now (fresh sweep of all 70 groups)
+          [........................................] 0%
+  Streak rule: loop 3 AND loop 4 must both be clean to stop.
 
-LOOP PROGRESS:
-  Clean loops: 0 / 2   ← need 2 CONSECUTIVE clean loops to stop
-  Loop 1: 100% — NOT CLEAN (9 new bugs)
-  Loop 2:  33% — 3 of 9 batches done (A,B,C)
-          [█████████████.........................] 33%
-  Loop 3:   — (only runs if Loop 2 is clean)
-
-NEXT CHECKPOINT: L2-D images/tables → L2-E persistence → ... → loop-2
-  close → GitHub re-upload of the entire workspace.
-
-─ Background ─────────────────────────────────────────────────────
-  App under audit: Notepad v9 (single 15MB HTML Word-like editor) at
-  the root route. READ-ONLY audit: bugs documented, never fixed.
-  Stopping rule: two consecutive complete clean full-loop sweeps.
+NEXT CHECKPOINT: full workspace (incl. Loop-2 evidence + updated
+  report/TODO) uploading to GitHub NOW as GLM; then Loop 3 batches.

@@ -1,0 +1,51 @@
+{
+  "taskId": "L2-E",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (sessions l2e/l2e2 — first daemon wedged and was replaced)",
+  "url": "http://localhost:3000/",
+  "family": "F07 autosave, F08/F09 env-bounded, F10 (carried), F11 passwords, F12 versions (carried), F13 notebook history, F14 deletion, F19 startup, F68 integrity",
+  "predicates": { "pass": 17, "fail": 0, "candidates": 1, "rediscoveries": ["B293 exact"], "criticalCandidatesRejected": 1 },
+  "confirmedNewBugs": [],
+  "candidatesNotPromoted": [
+    {
+      "title": "Protect-file dialog rejects passwords shorter than 8 characters silently: label says 'Password (at least 8 characters)', but a 5-char submission just leaves the dialog open with NO error text, no aria-invalid, and input.validity.valid===true (no minlength attribute) — zero feedback",
+      "why": "UX feedback gap only; protection is NOT falsely applied (no vault key written), so no data risk. Recorded per brief rule 7."
+    }
+  ],
+  "criticalCandidatesRejected": [
+    {
+      "title": "REJECTED (harness artifact): 'Change-file-password corrupts the vault — neither old nor new password unlocks'. Root cause: the unlock UI has BOTH an inline locked-view password input AND a dialog flow; my typing landed in the inline input while submit ('Unlock') read the dialog field, and Enter submissions hit unverified field pairings. With verified field values and the correct submit button, OLD password unlocked fine (change had simply never submitted), and after a properly-submitted change the NEW password unlocked the reloaded file (content 'Hi' intact)."
+    }
+  ],
+  "rediscoveries": [
+    "B293 exact: deleting 'Untitled 2' removes it from every notebook-version-history snapshot (snapshot list drops from 3 entries to 2; removed file cannot be restored). Known, documented, not re-counted."
+  ],
+  "verifiedClean": [
+    "F07: type -> 'Saving to browser…' -> 'Autosaved in browser' -> reload -> content byte-intact",
+    "F11 protect: 8+ char pw + 'Protect files' button creates notepad:file-protection key; padlock badge on sidebar row",
+    "F11 mismatch: dialog stays open (rejected)",
+    "F11 short-pw: rejected silently (candidate above)",
+    "F11 lock: 'Lock protected files' locks; editor shows 'This document is password protected. Unlock file' placeholder",
+    "F11 unlock wrong pw: 'Incorrect password or damaged encrypted data.' shown clearly; file stays locked",
+    "F11 unlock correct pw: content restored exactly",
+    "F11 change pw: applies on proper submit (verified end-to-end across reload; old rejected, new works)",
+    "F11 remove pw: padlock gone, vault files:[] empty container remains (legitimate design), persists across reload",
+    "F19: active document persists across reload; theme (dark) and zoom persisted (verified in L2-C); 3 files listed consistently",
+    "F13: notebook version history UI reachable (File backstage -> Info -> Notebook version history…) and functional for existing files",
+    "F68: markdown/richHtml byte-comparisons across reload intact in this and prior batches",
+    "No page errors in any flow"
+  ],
+  "harnessNotes": [
+    "First daemon (l2e) wedged ('Resource temporarily unavailable'); replaced with fresh session l2e2.",
+    "Unlock flow dual-field pairing caused a false critical; lesson: verify field value AND locate the actual submit button before asserting.",
+    "Dialog submit buttons have generic labels ('Protect files' even in Change flow) — enumerate dialog-local buttons, not text-greps across the page."
+  ],
+  "notCovered": [
+    "F08/F09 connected save + portable download (headless-bounded; L1E carried)",
+    "F10 clear browser copies (L1E fresh carried)",
+    "F12 document-version snapshots/restore runtime (L1E fresh carried; entry path + UI health verified this loop)",
+    "F14 deep cleanup audit (tags/folders/map-node leftovers — L1E/L1A carried)",
+    "Recovery-selection dialog at startup with multiple sessions"
+  ]
+}

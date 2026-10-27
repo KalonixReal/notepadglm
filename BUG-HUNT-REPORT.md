@@ -1,6 +1,37 @@
 # Document Editor Bug Hunt
 
 
+<!-- LOOP2_20261028_START -->
+## Loop 2 completion — 28 October 2026 (fresh full-loop execution, main-agent batches)
+
+**Loop 2 is COMPLETE and NOT CLEAN: 3 new confirmed bugs (B298–B300), 2 open candidates, 3 rejected candidates, 5 rediscoveries. Confirmed current total: 92. Consecutive clean loops: 0/2.** All 70 feature groups re-covered fresh in 9 batches (L2-A..L2-I) with real browser sessions; evidence in `checks/deep-audit-loops/loop-2/`. Subagent dispatch infrastructure was unstable (backend timeouts); the main agent executed every batch directly.
+
+### B298 — Mind-map connect-drag lacks the same-node and same-direction duplicate guards that the file-map connect path has
+Repro: mind-map document → drag from a node's "Connect node" port → drop back on the SAME node → a self-loop edge is created; or connect two already-connected nodes again → a second, parallel edge (same direction) is pushed. Verified at data level via `__np3.doc().writer.map` (two Central→Kid edges with different toSide; one Central→Central self-loop); edges persist across save/reload. Control: the file-map `connectFileMapNodes` guard chain explicitly rejects `from.id===to.id` and same-direction duplicates — the mind-map drag-end handler (app-js extract L1269, original ~L4837) pushes edges unconditionally. Impact: silent graph-data hygiene corruption, ambiguous undo/delete. Fix: port both guards into the drag-end path.
+
+### B299 — Pending editor content typed immediately before a collection switch is flushed into the wrong file
+Repro: with file "Beta" open in "My collection", type real text ("Pending"); within the autosave flush window click the empty "Projects" collection tab → the app activates a NEW "Untitled" file in Projects and `__np3.doc().markdown === 'Pending\n'` — the typed content landed in the NEW file; switching back shows Beta EMPTY (`markdown ''`). Control: type "AfterSave", WAIT 3s (autosave commits to Beta), then switch — Beta keeps "AfterSave", no leak. The leak is exactly the unflushed pending window. Class-adjacent to B221 (async boundary) but a new trigger surface. Impact: silent misattribution/data loss from the user's perspective. Fix: commit pending edits to the current (file, tab) synchronously at the start of the collection-switch handler before re-pointing the active file.
+
+### B300 — Importing a plain-text (.txt) file leaves the Markdown source blank and the first source-mode edit discards the imported text
+Repro: Import → Files… → a .txt file (LF or CRLF; both reproduce) → rich view shows the paragraphs, `richHtml` populated, `markdown` EMPTY → View → Markdown source: `#sourceText` is completely blank (imported content invisible) → type one character → switch back: `richHtml ''`, document contains only the typed character; imported text unrecoverable. Controls: .md import sets BOTH representations (byte-identical), proving the gap is specific to the .txt/rich-only path; same-session .html import shows the same lazy-serialization gap (rich-only). Impact: silent data loss on first source-mode use of imported plain text. Fix: serialize richHtml→markdown when entering source mode if markdown is empty (or on import); guard the source→rich commit against replacing non-empty rich content.
+
+### Open candidates (not promoted)
+- Protect-file dialog rejects passwords shorter than 8 characters silently (no error, no aria-invalid, `validity.valid===true`).
+- Renaming a file to an existing file's name is allowed → two indistinguishable sidebar rows (contract uncertain).
+
+### Rejected candidates (this loop)
+- Phantom leading paragraph after reload with a leading page break (L1C): NOT REPRODUCED — 4 variants including the literal leading-comment-only markdown; byte-identical pre/post in all.
+- Symbol absorbed into citation link across save/reload (L1I): NOT REPRODUCED — '@' typed directly before the citation link stays outside it after save/reload.
+- Tab from a body-row last cell "escaping" the table: harness artifact (activeElement vs Selection API); actual Tab navigation correct.
+
+### Rediscoveries (exact, not re-counted)
+B290 ×2 (first keystrokes after page break land pre-insert), B292 live (image toolbar Align under doc-tabs sidebar at 1280px after scroll), B293 exact (deleted file vanishes from all notebook-version snapshots), B289 (title-field rename stale aria; File-menu rename path updates aria correctly), B291 ×2 (mind-map ghost editor on unchanged-text commit/cancel).
+
+### Environment/method notes
+Subagent dispatch failed repeatedly (Task backend "context deadline exceeded"); orphaned dispatch artifacts quarantined under `checks/deep-audit-loops/loop-2/abandoned/`. Two browser daemons wedged mid-batch (l2e→l2e2, l2i→l2i2). `audit/known-bug-titles.txt` was truncated by an orphaned dispatch (B289–B297 lost) and repaired from git HEAD + loop-state cross-check (92 titles verified).
+
+<!-- LOOP2_20261028_END -->
+
 <!-- LOOP1_20261027_START -->
 ## Loop 1 completion — 27 October 2026 (environment reconstruction + full-loop execution)
 

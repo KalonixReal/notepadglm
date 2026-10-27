@@ -1,3 +1,24 @@
+<!-- LOOP2_TODO_20261028_START -->
+## Loop 2 TODO delta — 28 October 2026
+
+**Status: Loop 2 complete, NOT CLEAN. 0/2 consecutive clean loops. Confirmed total: 92 (B207–B300 + 4 reopened).**
+
+New this loop (todo entries):
+- [ ] B298 — add same-node + same-direction duplicate guards to the mind-map connect-drag end handler (mirror connectFileMapNodes).
+- [ ] B299 — commit pending editor content to the source (file, tab) at the START of the collection-switch handler, before creating/activating placeholder files.
+- [ ] B300 — serialize richHtml→markdown when entering source mode if markdown is empty; guard source→rich commit from clobbering non-empty rich content on first edit.
+
+Candidates to adjudicate next loop:
+- [ ] Protect dialog silent rejection of <8-char passwords (feedback gap).
+- [ ] Same-name file rename allowed (dedupe contract).
+
+Verification queue for Loop 3 (fresh sweep of all 70 groups; loop 3 + loop 4 must both be clean to stop):
+- [ ] Re-verify B289–B297 remain exactly as documented (no drift).
+- [ ] Re-run the 3 rejected candidates once more with alternative repro shapes before final close.
+- [ ] S10/S13/S17 leads re-probe; S28 needs a legacy-format storage fixture.
+
+<!-- LOOP2_TODO_20261028_END -->
+
 # Notepad bug audit — live TODO and resumption runbook
 
 <!-- LIVE_RESUMPTION_20261027_START -->

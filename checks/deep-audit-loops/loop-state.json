@@ -4,14 +4,14 @@
     "blankSHA256": "278122b3849866875436693afe638503e25e5dd7d3f2c0ca3d39da675ce66218",
     "rootSHA256": "5d0436ca867496de06cd3c9a5f00ffc8951e9c628ea5c92b3ee4d7cbd8ea358f (unavailable this env)",
     "servedCopy": "public/notepad.html byte-identical to upload/notepad-bare.html",
-    "confirmedCurrentBugs": 89,
+    "confirmedCurrentBugs": 92,
     "possibleLeads": [
       "S10",
       "S13",
       "S17",
       "S28"
     ],
-    "highestConfirmedId": "B297"
+    "highestConfirmedId": "B300"
   },
   "stoppingRule": "Two consecutive complete deep-audit loops (all 70 feature groups, 4 stages each: inventory/source/runtime/independent-review) with no additional confirmed/reopened bugs or material new failure variants. Rediscovery of a documented trigger does not reset. Current user instruction allows multiple testing browsers + subagents (supersedes UR-04 serial-browser constraint); app code remains read-only.",
   "environment": {
@@ -774,20 +774,640 @@
     },
     {
       "id": 2,
-      "status": "not-started",
-      "clean": null,
-      "note": "full fresh sweep of all 70 features required"
+      "status": "complete",
+      "started": "2026-10-27 (reconstructed env) \u2014 executed 2026-10-27/28",
+      "completed": "2026-10-28 loop-2 close (main)",
+      "clean": false,
+      "note": "Fresh full sweep of all 70 feature groups in 9 batches (L2-A..L2-I). Executed by MAIN agent directly (subagent dispatch infrastructure unstable \u2014 Task backend timeouts; orphaned dispatches quarantined to checks/deep-audit-loops/loop-2/abandoned/). All 70 features covered; 5 env-limited closures as in loop 1.",
+      "features": {
+        "F01": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F02": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F03": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F04": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F05": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F06": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F07": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F08": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F09": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F10": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F11": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F12": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F13": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F14": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F15": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F16": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F17": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F18": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F19": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F20": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F21": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F22": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F23": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F24": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F25": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F26": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F27": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F28": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F29": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F30": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F31": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F32": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F33": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F34": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F35": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F36": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F37": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F38": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F39": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F40": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F41": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F42": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F43": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F44": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F45": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F46": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F47": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F48": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F49": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F50": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F51": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F52": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F53": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F54": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F55": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F56": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F57": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F58": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F59": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F60": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F61": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F62": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F63": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F64": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F65": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F66": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F67": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F68": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F69": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F70": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      "result": {
+        "newConfirmedBugs": 3,
+        "newIds": [
+          "B298",
+          "B299",
+          "B300"
+        ],
+        "newTitles": [
+          "B298 mind-map connect-drag lacks same-node + same-direction duplicate guards (self-loops + parallel edges persist)",
+          "B299 pending edit flushed into wrong file on collection switch (source file left empty)",
+          "B300 .txt import blank Markdown source + destructive first source-mode edit (data loss)"
+        ],
+        "candidatesOpen": [
+          "protect-dialog rejects <8-char passwords silently (no feedback; validity.valid=true)",
+          "rename-to-existing-name allowed (indistinguishable rows; contract uncertain)"
+        ],
+        "candidatesRejected": [
+          "phantom leading paragraph after reload with leading page break (4 variants incl. literal leading-comment trigger \u2014 not reproduced; L1C observation stands unreproducible this loop)",
+          "symbol absorbed into citation link across save/reload (not reproduced; boundary preserved with '@')",
+          "Tab from body-row last cell escapes table (activeElement harness artifact; Selection API shows correct behavior)"
+        ],
+        "rediscoveries": [
+          "B290 x2",
+          "B292 live (underSidebar=true at 1280px after scroll)",
+          "B293 exact",
+          "B289",
+          "B291 x2 flows"
+        ],
+        "confirmedTotal": 92,
+        "batches": [
+          "L2-A map",
+          "L2-B library",
+          "L2-C layout",
+          "L2-D img/table",
+          "L2-E persistence",
+          "L2-F io",
+          "L2-G editor",
+          "L2-H review/citation",
+          "L2-I cross-cutting"
+        ],
+        "envLimitedClosures": [
+          "F08/F09 headless download",
+          "F16 google relay",
+          "F61 OS file drop",
+          "F70 website source absent",
+          "F17 export artifacts (download observation)"
+        ],
+        "evidenceDir": "checks/deep-audit-loops/loop-2/"
+      }
     },
     {
       "id": 3,
       "status": "not-started",
       "clean": null,
       "note": "run only if loop 2 clean; stopping requires 2 consecutive clean loops"
+    },
+    {
+      "id": 3,
+      "status": "not-started",
+      "clean": null,
+      "note": "run next \u2014 loop 2 NOT clean, so loop 3 starts a fresh streak attempt; stopping still requires 2 consecutive clean complete loops (3 AND 4 if 3 is clean)"
     }
   ],
   "consecutiveCleanLoops": 0,
   "log": [
     "2026-10-27 env reconstructed; app verified byte-identical to v9 baseline; loop-1 state rebuilt from 26-Oct ledger (12 complete rows flagged fresh from prior session evidence, partials from named families); batches launching",
-    "2026-10-27 loop 1 COMPLETE \u2014 not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged"
+    "2026-10-27 loop 1 COMPLETE \u2014 not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged",
+    "2026-10-28 loop 2 COMPLETE \u2014 not clean: 3 new confirmed bugs (B298 mind-map edge guards, B299 collection-switch flush misattribution, B300 .txt import blank-source data loss); 2 candidates open, 3 candidates rejected (incl. both loop-1 open candidates), 5 rediscoveries; total confirmed 92; all 70 features covered; known-titles file repaired (B289-B297 restored after orphaned-dispatch truncation; B-numbers verified against loop-state)"
   ]
 }

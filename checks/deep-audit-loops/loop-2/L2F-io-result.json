@@ -1,0 +1,54 @@
+{
+  "taskId": "L2-F",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2f, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F15 local imports, F16 Google (env-limited), F17 exports (env-limited), F18 backup restore, F61 drag-drop (carried), F70 website (env-limited)",
+  "predicates": { "pass": 13, "fail": 1, "envLimited": 3 },
+  "confirmedNewBugs": [
+    {
+      "title": "Importing a plain-text (.txt) file populates only the rich representation: the Markdown source view of the imported document is completely blank (imported content invisible), and the first source-mode edit silently discards the imported text entirely",
+      "feature": "F15 local imports x F21 markdown/source gutter",
+      "repro": [
+        "1. Import a .txt file via Import dialog > Files… (e.g. 3 lines 'line one/line two/line three'; reproduced with BOTH CRLF and LF line endings).",
+        "2. Doc created; rich view shows the paragraphs; __np3.doc().richHtml = '<p>line one</p>…'; __np3.doc().markdown = '' (EMPTY).",
+        "3. Switch View > Markdown source: #sourceText textarea is EMPTY — none of the imported content is visible.",
+        "4. Type a single character in source mode and switch back to rich view.",
+        "5. Observed: richHtml = '', document now contains ONLY the typed character; the imported paragraphs are gone."
+      ],
+      "expected": "Source view shows the serialized text of the imported document (or at minimum refuses to commit an empty source over non-empty rich content); a mode switch must not make imported content invisible, and an edit must not destroy it.",
+      "observed": "Blank source view for a content-bearing document; destructive first edit with no warning.",
+      "controls": [
+        ".md import sets BOTH representations (l2d-a.md: markdown byte-identical to fixture) — proves the importer CAN fill both and the gap is specific to the .txt path.",
+        "LF-only and CRLF .txt both reproduce — line endings are not the trigger.",
+        "Same-session .html import (l2d-table.html) created table + rich content (markdown also initially empty — same lazy-serialization gap applies to rich-only imports; the demonstrated loss used the .txt path)."
+      ],
+      "sourceMechanism": "Import IO path (original ~L4797) writes richHtml for plain-text inputs without serializing markdown; source-mode activation binds #sourceText.value to doc.markdown directly (setMode ~L4550) — empty markdown renders as empty source; the source->rich commit replaces richHtml wholesale.",
+      "classification": "CONFIRMED",
+      "impact": "Silent data loss for imported plain-text documents on first source-mode use; user cannot even see their content in source mode to know it exists.",
+      "fixDirection": "Serialize richHtml to markdown when entering source mode if markdown is empty (or on import completion); guard the source->rich commit against replacing non-empty rich content with a first-edit empty/short source without confirmation."
+    }
+  ],
+  "verifiedClean": [
+    "F15 .md import: markdown byte-identical to fixture (heading/list/quote/bold/em)",
+    "F15 .html import: table (2x2) + h1/p structure created",
+    "F15 empty .md import: accepted, empty doc created",
+    "F15 CRLF .txt: content imported correctly into rich view (CRLF normalized to paragraphs) — the DATA is right; the representation gap is the finding above",
+    "F15 unknown extension (.xyz): graceful rejection toast 'Choose a supported document…', no import, no crash",
+    "F15 fake .docx: graceful rejection ('Can't find end of central directory…'), no crash",
+    "F18 malformed JSON backup: 'Could not restore backup: Expected property name…' clear error, notebook unchanged",
+    "F18 wrong-schema JSON (valid JSON, not a backup): rejected 'Choose a Notepad source backup…', notebook unchanged",
+    "F18 wrong-format marker: rejected, notebook unchanged",
+    "F18 restore inputs: #exportRestoreInput (.json/.zip) and #mdInput (docx/doc/odt/rtf/html/txt/md/json/zip) accept-maps match advertised scopes",
+    "F16 entry point present (Google Docs tabs… subflow with structured-export note) — relay-dependent, env-limited",
+    "F17 export controls present (Export section, Save notebook HTML) — downloads not observable headless",
+    "No page errors in any flow"
+  ],
+  "notCovered": [
+    "F17 actual export artifacts (JSON/DOCX/ZIP/map downloads — headless-bounded; L1F fresh coverage carried)",
+    "F61 drag-drop import onto editor (source handlers verified in L1F; OS drops not runtime-testable)",
+    "F70 website functions (website source absent this environment; app-side observables only)",
+    "Google Docs relay round-trip (no network relay)"
+  ]
+}

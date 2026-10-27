@@ -1,0 +1,44 @@
+{
+  "taskId": "L2-H",
+  "loop": 2,
+  "date": "2026-10-28",
+  "executor": "main agent (session l2h, fresh isolated profile)",
+  "url": "http://localhost:3000/",
+  "family": "F40 TOC/bookmarks/footnotes/citations/symbols, F41 comments (carried), F42 track edits (partial), F43 compare (carried), F44 help (carried), F55-F57 proofing (carried), F58 ink, F62 context menus (carried), F67 dialogs (carried) + citation-candidate adjudication",
+  "predicates": { "pass": 9, "fail": 0, "candidatesRejected": 1, "rediscoveries": [] },
+  "confirmedNewBugs": [],
+  "candidateAdjudication": {
+    "candidate": "symbol inserted directly before a citation link is absorbed into the link text across save/reload (loop-1 L1I observation, open candidate)",
+    "verdict": "REJECTED — NOT REPRODUCED",
+    "evidence": [
+      "Inserted citation via Citation dialog (Author Smith / Year 2020 / Title) -> <a href='#np3-ref-…'>(Smith, 2020)</a> directly after text node.",
+      "Placed caret at the text node position IMMEDIATELY before the <a> and typed '@' (real key).",
+      "htmlNow: 'Cite2@<a href=\"#np3-ref-…\">(Smith, 2020)</a>…' — '@' is OUTSIDE the link.",
+      "Ctrl+S -> reload -> htmlAfter byte-equivalent: 'Cite2@<a …>(Smith, 2020)</a>'; absorbed=false. No digit-vs-symbol ambiguity: '@' itself was used.",
+      "Also verified with digit '2' in the same position earlier — boundary preserved."
+    ]
+  },
+  "verifiedClean": [
+    "F40 footnote: Insert footnote creates <sup class='np3-fnref' data-fn='1'> + np3-fndef block with marks",
+    "F40 citation: dialog (Author/Year/Title/URL) inserts anchored link '(Smith, 2020)' at caret; link boundary robust across save/reload (see adjudication)",
+    "F40 controls present: Contents, Update contents, Bookmark, Go to bookmark, Insert symbol (References ribbon)",
+    "F41 partial: comment anchor (.np3-cmt data-cid) created on selection; comments pane toggles (Ctrl+Alt+K flow opens pane)",
+    "F42 partial: Track edits / Review edits / Compare side by side / Compare-this-version controls EXIST in the DOM (Review surfaces)",
+    "F58: Tools ribbon exposes full ink suite (Select Objects, Lasso, Eraser, Pen/Pencil/Highlighter, 7 ink colors, Thin/Medium/Thick, Start inking)",
+    "F67 partial: dialogs open/close via Escape cleanly (citation dialog dismissed repeatedly without residue)",
+    "No page errors in any flow"
+  ],
+  "harnessNotes": [
+    "Comment thread composer (Reply textarea) never became visible in this session's pane state; L1H covered the comment lifecycle fresh (create/anchor/persist) — carried.",
+    "Track-edits toggle button appears/disappears between queries (ribbon re-render churn); runtime toggle not pinned this loop — L1G fresh coverage carried.",
+    "Keyboard '@' via press works; Shift+2 produced '2' in headless layout — use explicit key names for symbols."
+  ],
+  "notCovered": [
+    "F42 accept/reject runtime (L1G fresh carried)",
+    "F43 side-by-side compare runtime (L1G fresh carried)",
+    "F44 help/tool finder/shortcuts dialog (L1H carried)",
+    "F55-F57 proofing runtime (L1H fresh carried; B296/B297 known and not re-verified)",
+    "F62 custom context menus runtime (L1H carried; agent-browser lacks rightclick)",
+    "F58 inking strokes runtime (L1H fresh carried)"
+  ]
+}

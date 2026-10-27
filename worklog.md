@@ -244,3 +244,76 @@ Work Log:
 Stage Summary:
 - 0 new bugs (F53 candidate rejected as harness artifact). B292 rediscovered. 16 pass / 0 fail / 1 rejected candidate.
 - Evidence: checks/deep-audit-loops/loop-2/L2D-imgtable-result.json (+ 2 screenshots)
+
+---
+Task ID: 2-e
+Agent: main (L2-E batch)
+Task: Loop 2 batch L2-E — F07/F11/F13/F14/F19/F68 persistence & protection deep audit
+
+Work Log:
+- Autosave cycle verified; F11 password flows verified end-to-end (protect/lock/unlock/change/remove, wrong-pw error clarity, mismatch rejection).
+- CRITICAL candidate (change-pw vault corruption) investigated and REJECTED — harness field-pairing artifact; change verified working across reload.
+- 1 minor candidate recorded: short-password rejection is silent (no feedback, validity.valid=true).
+- B293 rediscovered exactly (deleted file vanishes from all notebook-version snapshots).
+- F19 active-doc/theme/zoom persistence verified. Daemon wedge replaced with fresh session.
+
+Stage Summary:
+- 0 new confirmed bugs; 1 candidate (silent short-pw rejection); B293 rediscovered. 17 pass / 0 fail.
+- Evidence: checks/deep-audit-loops/loop-2/L2E-persistence-result.json
+
+---
+Task ID: 2-f
+Agent: main (L2-F batch)
+Task: Loop 2 batch L2-F — F15/F16/F17/F18/F61/F70 imports/exports/backups deep audit
+
+Work Log:
+- Used stable hidden file inputs (#mdInput/#exportRestoreInput/#imgInput) with agent-browser upload for real file IO.
+- .md import byte-identical; .html table import OK; empty/unknown-ext/fake-docx/malformed-backup/wrong-schema/wrong-format all handled gracefully with clear toasts.
+- FOUND + CONFIRMED: .txt imports (LF and CRLF) populate richHtml only (markdown empty); source mode shows a BLANK editor for the imported content; first source-mode edit silently discards the imported text (richHtml -> ''). Data-loss path demonstrated. .md control sets both representations.
+- F16/F17/F61/F70 env-limited as in loop 1.
+
+Stage Summary:
+- 1 NEW CONFIRMED bug (.txt import blank-source + destructive source-mode edit). 13 pass / 1 fail / 3 env-limited.
+- Evidence: checks/deep-audit-loops/loop-2/L2F-io-result.json
+
+---
+Task ID: 2-g
+Agent: main (L2-G batch)
+Task: Loop 2 batch L2-G — F20-F33/F49 editor core deep audit
+
+Work Log:
+- Undo/redo depth, bold/italic nesting + clean undo, find/replace-all literal handling ($& uninterpreted), numbered list apply, stats dialog exact-count verification, styles gallery open + custom-style affordance, clear-formatting residue check (stray b-on-br, NO propagation — observation only).
+- Two harness state-muddles disclosed (mode toggle confusion; eval selection setup); all assertions from real-key input.
+
+Stage Summary:
+- 0 new confirmed bugs; 1 cosmetic observation. 12 pass / 0 fail. L1G fresh coverage carried for F24/F26/F27/F30/F31/F49.
+- Evidence: checks/deep-audit-loops/loop-2/L2G-editor-result.json
+
+---
+Task ID: 2-h
+Agent: main (L2-H batch)
+Task: Loop 2 batch L2-H — F40 citation/footnote + review surfaces + citation-candidate adjudication
+
+Work Log:
+- Citation dialog end-to-end (Author/Year/Title -> anchored link at caret); footnote insertion verified; symbol '@' typed directly before citation link -> save -> reload: boundary preserved, candidate REJECTED.
+- Comments: anchor creation + pane toggle verified; thread composer not surfaced this session (L1H carried).
+- Track edits/Review edits/Compare controls verified to exist; runtime toggle not pinned (ribbon re-render churn) — L1G carried.
+- Ink suite controls verified present (Tools ribbon).
+
+Stage Summary:
+- 0 new bugs; citation-link candidate REJECTED (not reproduced). 9 pass / 0 fail.
+- Evidence: checks/deep-audit-loops/loop-2/L2H-misc-result.json
+
+---
+Task ID: 2-i / loop-2 close
+Agent: main
+Task: Loop 2 close — adjudication, state update, GitHub checkpoint
+
+Work Log:
+- L2-I cross-cutting closed (status bar live counts correct; clipboard byte-clean, S13 NBSP not reproduced; S10/S17 not observed; S28 untested-needs-legacy-fixture; F69 carried from L1I fresh).
+- Adjudication: 3 new confirmed (B298/B299/B300); 2 candidates open; 3 candidates rejected (phantom-paragraph, citation-absorb, tab-escape); 5 rediscoveries (B290/B292/B293/B289/B291).
+- loop-state.json updated (loop 2 complete, NOT clean, confirmedTotal 92, all 70 features, consecutiveCleanLoops 0).
+- Repaired audit/known-bug-titles.txt (orphaned dispatches had truncated B289-B297; restored from git HEAD and re-appended B289-B300 in order; 92 titles verified).
+
+Stage Summary:
+- Loop 2: 100% complete, NOT CLEAN. Streak 0/2. Loop 3 next (fresh sweep; if clean, loop 4 also required).

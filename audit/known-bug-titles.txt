@@ -78,3 +78,15 @@ B285 — Undo of Insert citation leaves an orphaned citation link
 B286 — Rapid Find-a-tool invocation loses the selected text and redirects the next edit
 B287 — Source-mode status word count collapses fenced code while the statistics dialog includes it
 B288 — A delayed obsolete spelling check can discard the replacement scan until another edit
+B289 — Renaming via the title field leaves the sidebar row's accessible name (aria-label) stale while its visible label updates
+B290 — The first keystrokes typed right after inserting a page break land at the pre-insert caret, on the old page
+B291 — Canceling mind-map inline editing (Escape or blur with unchanged text) orphans the editor textarea as a live ghost editor that can never be closed
+B292 — Image toolbar Align left/center buttons render under the document-tabs sidebar at ≤~1345px viewports; clicks land on tab-tree UI
+B293 — Deleting a document removes it from every notebook-version-history snapshot, so "Earlier notebook states, including removed files" can never restore a removed file
+B294 — A single Delete keystroke in an empty paragraph placed before the Contents block destroys the entire non-editable table of contents
+B295 — Splitting a paragraph that carries a bookmark (or a Contents anchor id) duplicates the name/id onto every newly created paragraph and multiplies with each split
+B296 — Autocorrect correction-chip Undo at a sentence start restores the capitalized form instead of the typed text
+B297 — The autocorrect correction chip keeps offering Undo after further typing, but clicking it silently does nothing
+B298 — Mind-map connect-drag lacks the same-node and same-direction duplicate guards that the file-map connect path has: dropping a connect-drag back on the same node creates a self-loop edge, and repeating a connect-drag between two already-connected nodes creates additional parallel duplicate edges (same direction) that persist across save/reload
+B299 — Pending editor content typed immediately before a collection switch is flushed into the wrong file: switching to an (empty) collection auto-creates/activates a new 'Untitled' file and the pre-switch typing lands in that file instead of the file it was typed in (source file left empty; flush-window dependent)
+B300 — Importing a plain-text (.txt) file populates only the rich representation: the Markdown source view of the imported document is completely blank (imported content invisible) and the first source-mode edit silently discards the imported text entirely
