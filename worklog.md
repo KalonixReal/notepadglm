@@ -498,3 +498,23 @@ Work Log:
 Stage Summary:
 - Loop 5 NOT clean: B302 confirmed. 94 total bugs, streak 1/2. L5-A COMPLETE (parts 1+2). Next: L5-B review surfaces.
 - Evidence: checks/deep-audit-loops/loop-5/L5A-editor-part2-result.json, L5A-h2ol-before-commit.png
+
+---
+Task ID: 5-c
+Agent: main
+Task: Loop 5 batch L5-B — review surfaces delta sweep (session l5b)
+
+Work Log:
+- F41 comments full lifecycle: button-path create anchors span.np3-cmt[data-cid=c1] on selection; body = .cm-text contenteditable (typed body persists); Reply button reveals textarea, reply registered with 'Reply (1)' counter; Resolve sets card.resolved + anchor is-resolved; Delete removes thread + anchor span, paragraph HTML byte-clean after.
+- B272 rediscovered incidentally (Ctrl+Alt+K opens Insert link with editor focus) — documented trigger, does not reset clean rule.
+- F42 delta: Track edits -> pending change registered (data-rid on paragraph); Review edits panel lists block; per-block REJECT restores original exactly (Accept-all was L3-B's path). pendingLeft=0 after.
+- F43 delta: compare dialog diff engine '1 changed groups · 3 aligned lines' for single-line edit; Next change nav '1 / 1 changed groups'; Escape closes; document NOT modified (contract holds).
+- F44 delta: Replace all with 'a$b' inserts literal $ (no regex expansion); live match count 1/1; Match case toggle discriminates both directions (alpha 0/0 case-on vs 1/1 case-off).
+- F55-57: proofing language es <-> en round trip updates editor lang attr + status label; spellcheck=true maintained.
+- F62/F68: editor context menu full documented set (11 items incl. Insert footnote / New comment) — matches Loop 4.
+- Harness: a11y refs die on every ribbon re-render (text-keyed eval clicks stable); press uppercases keys; empty contenteditable=plaintext-only invisible to a11y tree; contextmenu MouseEvent dispatch works (no isTrusted gate on editor branch). No page errors across all probes.
+
+Stage Summary:
+- 0 new bugs, 1 rediscovery (B272). 13/13 predicates pass. L5-B COMPLETE.
+- Evidence: checks/deep-audit-loops/loop-5/L5B-review-result.json
+- Loop 5 status: L5-A + L5-B done; L5-CD (images/export/persistence + probe matrix + baseline re-verify) remaining; Loop 5 already NOT clean (B302) — remaining batches for coverage.

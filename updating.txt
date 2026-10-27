@@ -1,40 +1,20 @@
-==============================================================
-NOTEPAD v9 DEEP-AUDIT BUG HUNT — LIVE STATUS
-==============================================================
 STATUS: STILL WORKING
-
-TIMESTAMP (Pacific/Auckland): 2026-10-28 04:35 NZDT
+TIMESTAMP (Pacific/Auckland): 2026-10-28 04:27 NZDT
 
 WHAT I'M DOING RIGHT NOW:
-- LOOP 5 RUNNING — found NEW BUG B302 in L5-A part 2:
-  applying a bulleted/numbered list to a Heading paragraph nests
-  <ul>/<ol> INSIDE the <h2> (invalid HTML), and the markdown source
-  view then serializes the block as an EMPTY heading marker — the
-  heading text and list disappear from the source representation
-  (rich view intact; Undo unwraps correctly).
-- Loop 5 is NOT clean; streak stays 1/2. L5-A (editor core) is now
-  COMPLETE (parts 1+2).
-- NEXT: L5-B review surfaces (F40-F43, F55-F58), then L5-C
-  files/persistence/tables, L5-D layout/IO/cross-cutting — coverage
-  continues despite the streak reset.
+Loop 5 delta-runtime sweep in progress (main agent; subagent dispatch infra unstable so batches run directly).
+L5-A editor core COMPLETE in 2 parts (8+7 passes) — found B302 (list-on-heading nests <ol> inside <h2>; source view serializes it as empty heading '## ').
+Next: L5-B review surfaces (comments/footnotes/find/word count/print), then L5-CD images/export/persistence + probe matrix + baseline re-verify, then loop-5 close.
 
 BUG TRACKER:
-- Total confirmed bugs: 94 (highest ID B302 — NEW this loop)
-- New bugs this loop (Loop 5): 1 (B302)
-- Open candidates: 0
-- Known-bug register: audit/known-bug-titles.txt (94 titles)
+Total confirmed bugs: 94 (highest ID B302)
+New bugs this loop (Loop 5): 1 (B302)
 
 LOOP PROGRESS:
-- Clean loops: 1/2 (Loop 3 clean; Loops 4+5 not clean)
-- Current loop: Loop 5 — progress ~30%
-- [█████████░░░░░░░░░░░░░░░░░░░░] 30%
-  (L5-A done | remaining: L5-B, L5-C, L5-D, baseline verify, close)
+Clean loops: 1/2 (Loop 3 clean; Loop 4 NOT clean — B301; Loop 5 already NOT clean — B302, continuing for coverage)
+Current loop: Loop 5 — progress: L5-A done of 3 batches (L5-A, L5-B, L5-CD)
+[===========.........] 33% of Loop 5
 
 NEXT CHECKPOINT:
-- Continue Loop 5 batches, then loop close + GitHub push.
-- Stop rule unchanged: 2 consecutive clean full loops -> final DONE
-  + report upload + cron job 477065 deleted.
-- Latest GitHub checkpoint: 67087e0 (B302 evidence pushed, GLM).
-
-DATA SOURCES: checks/deep-audit-loops/loop-state.json, worklog.md
-==============================================================
+L5-B review-surface sweep -> evidence JSON in checks/deep-audit-loops/loop-5/ + worklog append -> L5-CD -> loop-5 close -> loop-state.json update -> GitHub push (identity GLM).
+Stopping rule: still needs 2 consecutive clean loops (streak 1/2, Loop 3) -> Loop 6 + 7 required after Loop 5 closes.

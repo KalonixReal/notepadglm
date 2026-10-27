@@ -1,0 +1,35 @@
+{
+  "taskId": "L5-B",
+  "loop": 5,
+  "date": "2026-10-28",
+  "executor": "main agent (session l5b)",
+  "family": "Review surfaces runtime delta (F41/F42/F43/F44/F55-F57/F62/F68)",
+  "predicates": { "pass": 13, "fail": 0, "rediscoveries": 1 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F41: New comment (button path) creates anchor span.np3-cmt[data-cid=c1] around selected text 'jumps here'; card shows author 'me' + timestamp",
+    "F41: comment body is .cm-text contenteditable=plaintext-only — typed 'Review note: reword this sentence' persists in card (a11y tree hides empty plaintext-only divs; not a bug)",
+    "F41: Reply flow — card Reply button reveals .cm-newreply textarea (h=46), typed + sent; thread shows body + reply with 'Reply (1)' counter",
+    "F41: Resolve sets card.resolved + anchor is-resolved; Go-to scrolls anchor visible (caret semantics unspecified — anchor already in view, no contract violation)",
+    "F41: Delete removes thread card AND anchor span; paragraph HTML restored byte-clean (<p>The quick brown fox jumps here</p>)",
+    "F42: Track edits toggle -> typed ' tracked addition' registers pending change with paragraph data-rid=rv-mvqullwd-i1zydyu; Review edits panel lists the block",
+    "F42 DELTA: per-block Reject restores original content exactly ('Second paragraph target text'); pendingLeft=0 (L3-B had only verified Accept all)",
+    "F43: Compare side by side dialog opens; diff engine reports '1 changed groups · 3 aligned lines' for fox->hawk single-line edit",
+    "F43 DELTA: Next change navigation shows '1 / 1 changed groups'; Escape closes; document NOT modified by comparison (contract holds)",
+    "F44 DELTA: Find 'fox' live count 1/1; Replace all with 'a$b' inserts LITERAL $ (no regex-pattern expansion); round-trip restore exact",
+    "F44 DELTA: Match case ON -> 'alpha' finds 0/0 (doc has 'Alpha'); OFF -> 1/1 — toggle discriminates correctly both directions",
+    "F55-57: Proofing language menu (7 options); Español sets editor lang=es + status label; English (US) round-trips lang=en; spellcheck=true maintained",
+    "F62/F68: editor right-click context menu shows full documented set (Cut/Copy/Paste/Bold/Italic/Underline/Highlight/Center/Hyperlink/Insert footnote/New comment) — matches Loop 4 verification"
+  ],
+  "rediscoveries": [
+    "B272 (known): Ctrl+Alt+K with editor focus opens Insert-link dialog instead of New comment — reproduced incidentally during probe 1; documented trigger, does not reset clean rule"
+  ],
+  "harnessNotes": [
+    "a11y refs die on every ribbon/panel re-render — text-keyed eval clicks (find button by textContent) are the stable path",
+    "agent-browser press Control+Alt+k opened link dialog: consistent with B272 mechanism (app treats modifier combo as Ctrl+K path); press also uppercases keys",
+    "empty contenteditable=plaintext-only divs do not surface as textbox in a11y snapshot — comment body must be found via DOM query",
+    "click --button right did not surface context menu in snapshot; dispatched MouseEvent('contextmenu') works (no isTrusted gate on editor branch)",
+    "errors command returned clean (no page errors across all probes)"
+  ],
+  "finalState": "track edits off (aria-pressed=false), p2 byte-identical to seed, 0 comment cards, find bar closed, lang=en, compare dialog closed"
+}
