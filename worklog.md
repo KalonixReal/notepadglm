@@ -317,3 +317,41 @@ Work Log:
 
 Stage Summary:
 - Loop 2: 100% complete, NOT CLEAN. Streak 0/2. Loop 3 next (fresh sweep; if clean, loop 4 also required).
+
+---
+Task ID: 3-a
+Agent: main (L3-A batch)
+Task: Loop 3 batch L3-A — editor core runtime delta
+
+Work Log:
+- Align-right (ribbon) applied + markdown annotation written; paragraph dialog inspected (5 controls + preview); code block <pre> with 14 languages; slash-trigger '/' consumption semantics confirmed (menu population harness-limited, L1G carried).
+- Harness: type-without-ref does not reach contenteditable (press/type@ref only) — documented.
+
+Stage Summary:
+- 0 new bugs. 7 pass. Evidence: checks/deep-audit-loops/loop-3/L3A-editor-result.json
+
+---
+Task ID: 3-b
+Agent: main (L3-B batch)
+Task: Loop 3 batch L3-B — review surfaces runtime delta
+
+Work Log:
+- Track edits toggled via snapshot ref; typed edits gain data-rid revision IDs; Review edits panel (Accept/Reject/All) executes; data-rid persistence after Accept-all noted as design (paragraph identity).
+- Compare side by side opens. Ribbon re-render race documented as the root of all 'vanishing button' false alarms.
+
+Stage Summary:
+- 0 new bugs. 5 pass / 2 notes. Evidence: checks/deep-audit-loops/loop-3/L3B-review-result.json
+
+---
+Task ID: 3-c/loop-3 close
+Agent: main
+Task: Loop 3 close — evidence, state, baseline verification
+
+Work Log:
+- L3-C: F45 device upload verified (first runtime coverage); F46 image align annotation; F17 export ARTIFACT captured (3086B valid backup JSON, archived); F12/F14 source-audit confirmations; B300 recovery-copy mitigation discovered (setMode override) — documented in report.
+- L3-D probe matrix: map/files/search/theme/zoom re-verified; backstage-overlay false alarm resolved.
+- Baseline SHA-256 re-verified UNCHANGED (278122b3…) for both copies.
+- loop-state.json: loop 3 COMPLETE — CLEAN (streak 1/2). confirmedTotal 92.
+
+Stage Summary:
+- Loop 3 CLEAN. Loop 4 required for stopping. Evidence: checks/deep-audit-loops/loop-3/

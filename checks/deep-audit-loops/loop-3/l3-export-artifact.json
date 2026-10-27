@@ -1,0 +1,46 @@
+{
+  "format": "notepad-backup",
+  "schemaVersion": 1,
+  "scope": "file",
+  "createdAt": "2026-10-27T13:33:24.121Z",
+  "checksum": "ee1d521ec198e68c4328176d98be99957faac535c52b692900f431729556e137",
+  "notebook": {
+    "version": 1,
+    "id": "notepad-studio-portable-v1",
+    "savedAt": 1793108004111,
+    "revision": "5qlxo8rcg2v:1793108004111",
+    "activeId": "blank",
+    "baseRevision": "v9-20261023",
+    "prefs": {
+      "zoom": 100,
+      "theme": "light",
+      "sbHidden": false,
+      "activeId": "blank"
+    },
+    "files": [
+      {
+        "id": "blank",
+        "name": "Untitled",
+        "markdown": "<!-- np3:ba=W3sicGF0aCI6W10sInRhZyI6IkZJR1VSRSIsInRleHQiOiIiLCJzaWJsaW5ncyI6MiwiYXR0cnMiOltbInN0eWxlIiwid2lkdGg6MTAwJSJdXSwibGVhZGluZ1BhcmFncmFwaCI6ZmFsc2UsImxlYWRpbmdFbXB0eSI6MH1d -->\n![l3|100%|right](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGMwaNgARwzEcQA0UhYB682a5QAAAABJRU5ErkJggg==)\n",
+        "writer": {
+          "library": {
+            "folder": null,
+            "tags": [],
+            "star": false,
+            "collectionId": "collection-default"
+          }
+        },
+        "richHtml": "<figure class=\"img-fig\" contenteditable=\"false\" data-align=\"right\" data-w=\"100%\" style=\"width:100%\"><img src=\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGMwaNgARwzEcQA0UhYB682a5QAAAABJRU5ErkJggg==\" alt=\"l3\" draggable=\"false\"></figure><p><br></p>",
+        "updatedAt": 1793107927634
+      }
+    ],
+    "extra": {
+      "notepadV3:ui": "{\"zoom\":100,\"theme\":\"light\",\"sbHidden\":false,\"activeId\":\"blank\"}",
+      "notepadV3:hist:blank": "[{\"t\":1793107990725,\"md\":\"<!-- np3:ba=W3sicGF0aCI6W10sInRhZyI6IkZJR1VSRSIsInRleHQiOiIiLCJzaWJsaW5ncyI6MiwiYXR0cnMiOltbInN0eWxlIiwid2lkdGg6MTAwJSJdXSwibGVhZGluZ1BhcmFncmFwaCI6ZmFsc2UsImxlYWRpbmdFbXB0eSI6MH1d -->\\n![l3|100%|right](data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGMwaNgARwzEcQA0UhYB682a5QAAAABJRU5ErkJggg==)\\n\",\"richHtml\":\"<figure class=\\\"img-fig\\\" contenteditable=\\\"false\\\" data-align=\\\"right\\\" data-w=\\\"100%\\\" style=\\\"width:100%\\\"><img src=\\\"data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAEElEQVR4nGMwaNgARwzEcQA0UhYB682a5QAAAABJRU5ErkJggg==\\\" alt=\\\"l3\\\" draggable=\\\"false\\\"></figure><p><br></p>\",\"writer\":{\"library\":{\"folder\":null,\"tags\":[],\"star\":false,\"collectionId\":\"collection-default\"}},\"automatic\":true,\"words\":4}]",
+      "notepad:library:v2": "{\"folders\":[],\"expandedFolders\":[],\"map\":{\"positions\":{},\"comments\":[],\"view\":{\"x\":40,\"y\":40,\"z\":1},\"colors\":{},\"bends\":{},\"links\":[],\"spatialAnchors\":[]},\"collections\":[{\"id\":\"collection-default\",\"name\":\"My collection\"}],\"activeCollectionId\":\"collection-default\",\"collectionViews\":{\"collection-default\":{\"mapView\":{\"x\":40,\"y\":40,\"z\":1},\"activeFileId\":\"blank\"}},\"fileOrder\":[]}"
+    },
+    "editAcks": {
+      "5qlxo8rcg2v:blank": "2b0ef30b-7eca-4c93-a1df-ceb268ff83a0"
+    }
+  }
+}

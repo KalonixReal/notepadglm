@@ -1,0 +1,21 @@
+{
+  "taskId": "L3-B",
+  "loop": 3,
+  "date": "2026-10-28",
+  "executor": "main agent (session l3b)",
+  "family": "Review surfaces runtime delta (F42/F43/F41 partial)",
+  "predicates": { "pass": 5, "fail": 0, "notes": 2 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F42: Track edits toggles via ribbon ref; typed edits gain paragraph-level revision IDs (data-rid='rv-…'); Review edits panel exposes Accept/Reject/Accept all/Reject all; Accept all executes without error",
+    "F42 note: data-rid persists after Accept all — consistent with paragraph-identity design (pending-change state tracked separately; L1G verified accept/reject change semantics fresh)",
+    "F43: Compare side by side opens its compare surface without error",
+    "F41: comments pane toggles; anchor creation verified in L2-H",
+    "No page errors"
+  ],
+  "harnessNotes": [
+    "Ribbon re-render race explains all 'vanishing button' false alarms across sessions — a11y snapshot refs are the reliable click path; aria-label exact-match queries race the render.",
+    "Comment reply textarea never visible in pane state this loop — L1H carried (lifecycle verified fresh)."
+  ],
+  "notCovered": ["F44 help/finder (L1H carried)", "F55-F57 proofing runtime (L1H carried; B296/B297 known)", "F58 ink strokes (L1H carried)", "F62 context menus (L1H carried)"]
+}

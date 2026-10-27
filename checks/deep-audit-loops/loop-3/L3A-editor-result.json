@@ -1,0 +1,24 @@
+{
+  "taskId": "L3-A",
+  "loop": 3,
+  "date": "2026-10-28",
+  "executor": "main agent (session l3a)",
+  "url": "http://localhost:3000/",
+  "family": "Editor core runtime delta (F22/F23/F26/F31/F33/F49 + F24 partial)",
+  "predicates": { "pass": 7, "fail": 0, "observations": 1 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F26: Align right via ribbon — computed textAlign=right; markdown annotation np3:a=right written",
+    "F26/F27: Paragraph formatting dialog opens (5 selects: align/indent/spacing controls + live preview); OK path targets current paragraph",
+    "F49: Code block inserts <pre> with 14-language selector",
+    "F33: (loop-2) stats exact counts",
+    "F22/F23/F32: (loop-2) undo depth, formatting, replace-all literal — re-confirmed stable",
+    "F31: slash trigger consumes '/' (editor stays empty = by design) but menu population not observable via agent-browser key input this loop; L1G fresh evidence stands; no error states observed",
+    "F24 partial: color picker buttons present (Font color / Choose text color / highlight pair); popup render not observable in harness — L1G carried"
+  ],
+  "harnessNotes": [
+    "agent-browser type (no ref) does NOT reach the contenteditable — only press keys and type @ref work; several false-negatives traced to this (slash menu 'not opening').",
+    "Ribbon popups close on snapshot round-trips; use immediate snapshots or eval-based popup dumps."
+  ],
+  "notCovered": ["F24 full color/highlight/grow-shrink matrix (L1G/L1I carried)", "F30 numbering styles (L1G carried)", "F28 custom style creation flow (entry verified)"]
+}

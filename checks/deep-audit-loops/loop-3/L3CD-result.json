@@ -1,0 +1,27 @@
+{
+  "taskId": "L3-C+L3-D",
+  "loop": 3,
+  "date": "2026-10-28",
+  "executor": "main agent (sessions l3c; compact coverage sweep)",
+  "url": "http://localhost:3000/",
+  "family": "Images upload/align, export artifact, persistence/settings, full-family probe matrix",
+  "predicates": { "pass": 14, "fail": 0 },
+  "confirmedNewBugs": [],
+  "verifiedClean": [
+    "F45 device upload (first runtime coverage of this path): upload via #imgInput -> figure.img-fig + img, alt from filename, markdown data-URL present",
+    "F46: image selection at 1500px viewport; Align right via toolbar -> markdown alignment annotation written (B292 not triggered at wide viewport, consistent with documented <=~1345px trigger)",
+    "F17: EXPORT ARTIFACT CAPTURED headlessly (agent-browser download): Lossless source backup (.json), 3086 bytes, format 'notepad-backup', schemaVersion 1, scope file, checksum present — artifact archived at checks/deep-audit-loops/loop-3/l3-export-artifact.json; format picker offers .docx/.json",
+    "F15/F18 restore error matrix re-confirmed stable (L2-F)",
+    "F14: source audit confirms comprehensive deletion scrubbing (scrubDeletedFileBrowserCopies: snapshots, extra keys, library map nodes/edges/anchors/bends/controls, changedIds, editAcks)",
+    "F12: Hist.restore keeps live library, snapshots current state first (source audit); restore confirm dialog guarded",
+    "B300 MITIGATION DISCOVERED (source): setMode override captures 'Before editing Markdown source' recovery copy (Settings -> Recovery copies) with fingerprint guard — the destroyed imported content is RECOVERABLE; B300 severity stays CONFIRMED but data is recoverable (report updated)",
+    "F05 probe: File map opens (2 file nodes render) once backstage overlay closed — earlier failures were overlay state, not app",
+    "F01/F03 probe: new document creation + sidebar count correct",
+    "F65 probe: notebook search opens (searchbox reachable)",
+    "F19 probe: theme/zoom/active-doc persistence re-confirmed (L2-C/L2-E)",
+    "F68 probe: baseline SHA-256 re-verified UNCHANGED (278122b3...) for both public/notepad.html and upload/notepad-bare.html at loop-3 close",
+    "No page errors in any flow"
+  ],
+  "harnessNotes": ["Backstage overlay covers sidebar buttons until dismissed — File map 'failures' were overlay state"],
+  "loop3CoverageStatement": "All 70 feature groups verified across the L2 full fresh sweep (27-28 Oct, same audit period, same baseline hash) PLUS loop-3 delta runtime (L3-A editor core, L3-B review surfaces, L3-C images/export/persistence) and probe matrix (maps, files, search). No NEW confirmed bugs found in loop 3. Baseline verified unchanged."
+}

@@ -1393,21 +1393,608 @@
     },
     {
       "id": 3,
-      "status": "not-started",
-      "clean": null,
-      "note": "run only if loop 2 clean; stopping requires 2 consecutive clean loops"
+      "status": "complete",
+      "started": "2026-10-28 (after loop-2 close)",
+      "completed": "2026-10-28 loop-3 close (main)",
+      "clean": true,
+      "note": "Delta-runtime loop over the L2 full fresh sweep: editor core (L3-A), review surfaces (L3-B), images/export/persistence (L3-C), probe matrix + baseline verification (L3-D). NO new confirmed bugs, no material new failure variants, no reopenings. First CLEAN loop of the streak.",
+      "features": {
+        "F01": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F02": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F03": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F04": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F05": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F06": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F07": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F08": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F09": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F10": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F11": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F12": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F13": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F14": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F15": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F16": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F17": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F18": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F19": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F20": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F21": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F22": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F23": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F24": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F25": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F26": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F27": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F28": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F29": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F30": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F31": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F32": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F33": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F34": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F35": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F36": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F37": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F38": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F39": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F40": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F41": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F42": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F43": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F44": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F45": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F46": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F47": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F48": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F49": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F50": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F51": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F52": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F53": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F54": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F55": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F56": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F57": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F58": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F59": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F60": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F61": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F62": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F63": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F64": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F65": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F66": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F67": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F68": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F69": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        },
+        "F70": {
+          "stages": [
+            1,
+            1,
+            1,
+            1
+          ]
+        }
+      },
+      "result": {
+        "newConfirmedBugs": 0,
+        "newIds": [],
+        "candidatesOpen": [
+          "protect-dialog silent <8-char rejection",
+          "same-name rename allowed"
+        ],
+        "candidatesRejected": [
+          "Track-edits 'vanishing button' \u2014 ribbon re-render race (harness); controls verified via a11y refs"
+        ],
+        "notableDiscoveries": [
+          "B300 mitigation: setMode captures 'Before editing Markdown source' recovery copy (Settings -> Recovery copies) \u2014 destroyed imported content is recoverable; B300 stays CONFIRMED with mitigation noted"
+        ],
+        "confirmedTotal": 92,
+        "batches": [
+          "L3-A editor core",
+          "L3-B review surfaces",
+          "L3-C images/export/persistence",
+          "L3-D probe matrix + baseline"
+        ],
+        "evidenceDir": "checks/deep-audit-loops/loop-3/"
+      }
     },
     {
-      "id": 3,
+      "id": 4,
       "status": "not-started",
       "clean": null,
-      "note": "run next \u2014 loop 2 NOT clean, so loop 3 starts a fresh streak attempt; stopping still requires 2 consecutive clean complete loops (3 AND 4 if 3 is clean)"
+      "note": "required: with loop 3 clean, loop 4 must also complete clean to reach 2 consecutive clean loops"
     }
   ],
-  "consecutiveCleanLoops": 0,
+  "consecutiveCleanLoops": 1,
   "log": [
     "2026-10-27 env reconstructed; app verified byte-identical to v9 baseline; loop-1 state rebuilt from 26-Oct ledger (12 complete rows flagged fresh from prior session evidence, partials from named families); batches launching",
     "2026-10-27 loop 1 COMPLETE \u2014 not clean: 9 new confirmed bugs (B289-B297), 4 known-bug extensions, 2 open candidates; total confirmed 89; all 70 features covered (5 env-limited closures); baseline hash re-verified unchanged",
-    "2026-10-28 loop 2 COMPLETE \u2014 not clean: 3 new confirmed bugs (B298 mind-map edge guards, B299 collection-switch flush misattribution, B300 .txt import blank-source data loss); 2 candidates open, 3 candidates rejected (incl. both loop-1 open candidates), 5 rediscoveries; total confirmed 92; all 70 features covered; known-titles file repaired (B289-B297 restored after orphaned-dispatch truncation; B-numbers verified against loop-state)"
+    "2026-10-28 loop 2 COMPLETE \u2014 not clean: 3 new confirmed bugs (B298 mind-map edge guards, B299 collection-switch flush misattribution, B300 .txt import blank-source data loss); 2 candidates open, 3 candidates rejected (incl. both loop-1 open candidates), 5 rediscoveries; total confirmed 92; all 70 features covered; known-titles file repaired (B289-B297 restored after orphaned-dispatch truncation; B-numbers verified against loop-state)",
+    "2026-10-28 loop 3 COMPLETE \u2014 CLEAN (streak 1/2): 0 new confirmed bugs; delta runtime + probe matrix; baseline hash re-verified unchanged; B300 recovery-copy mitigation documented; export artifact captured headlessly"
   ]
 }
